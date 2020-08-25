@@ -1,0 +1,12 @@
+#
+.vscode/**
+.vs/**
+log/**
+
+#
+*.exe
+*.pyc
+
+#
+debug.log
+CCDL.spec
