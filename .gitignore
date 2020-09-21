@@ -4,3 +4,5 @@ src/ccdl.egg-info/
 dist/
 build/
 漫畫/
+chromedriver*
+*.exe
