@@ -12,7 +12,7 @@ from PIL import Image
 from selenium import webdriver
 from selenium.webdriver.support.wait import WebDriverWait
 
-from ..utils import ComicLinkInfo, ProgressBar, RqHeaders, draw_image, cc_mkdir
+from .utils import ComicLinkInfo, ProgressBar, RqHeaders, draw_image, cc_mkdir
 
 logger = logging.getLogger("comic-action")
 
