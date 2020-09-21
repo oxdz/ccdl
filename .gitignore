@@ -6,3 +6,4 @@ build/
 漫畫/
 chromedriver*
 *.exe
+log/
