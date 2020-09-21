@@ -7,3 +7,5 @@ build/
 chromedriver*
 *.exe
 log/
+myvenv/*
+*.spec

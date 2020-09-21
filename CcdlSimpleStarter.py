@@ -47,3 +47,4 @@ if __name__ == "__main__":
                 binb.downloader()
             except Exception as e:
                 logger.warning("下載失敗! " + str(e))
+                print("下載失敗! " + str(e))

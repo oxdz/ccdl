@@ -88,15 +88,22 @@ class Binb(object):
         match = re.search("cid=([0-9a-zA-Z_]+)", self._driver.current_url)
         if not match or match.groups()[0] != self._link_info.param[0][0]:
             self._driver.get(self._link_info.url)
-        try:
-            elemt = WebDriverWait(self._driver, WAIT_TIME, 0.5).until(
-                    lambda x: x.find_element_by_id(page_elem_id),
-                    message="無法定位元素 " + page_elem_id
-                )
-        except TimeoutException as e:
-            logger.error(str(e))
-            raise e
-        pageNum = elemt.get_attribute('innerText').split('/')
+        pageNum = []
+        count=5
+        while len(pageNum) != 2:
+            if count >0:
+                count -= 1
+            else:
+                raise TimeoutException("")
+            try:
+                elemt = WebDriverWait(self._driver, WAIT_TIME, 0.5).until(
+                        lambda x: x.find_element_by_id(page_elem_id),
+                        message="無法定位元素 " + page_elem_id
+                    )
+            except TimeoutException as e:
+                logger.error(str(e))
+                raise e
+            pageNum = elemt.get_attribute('innerText').split('/')
         pageNum[1] = int(pageNum[1])
         if (pageNum[0] != '-'):
             pageNum[0] = int(pageNum[0])
@@ -149,7 +156,7 @@ class Binb(object):
                 img3t1.paste(imgs[0], (0, 0))
                 img3t1.paste(imgs[1], (0, imgs[0].size[1] - ij[0]))
                 img3t1.paste(imgs[2], (0, imgs[0].size[1] + imgs[1].size[1] - ij[0] - ij[1]))
-                img3t1.save('{}/{}.jpeg'.format(file_path, i))
+                img3t1.save('./{}/target/{}.jpg'.format(file_path, i))
                 start_page += 1
                 progress_bar.show(start_page)
             ActionChains(self._driver).send_keys(Keys.LEFT).perform()
