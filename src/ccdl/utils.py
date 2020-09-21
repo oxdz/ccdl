@@ -1,29 +1,31 @@
+import base64
 import json
+import os
 import random
 import re
 import time
-import os
 
 import requests
-
+from requests import models
+from selenium import webdriver
 
 _site_reader = {
     # "domain": ["reader", RegEx, param1, param2, ...]
-    "r.binb.jp":                        ["binb", None, 1],
-    "www.cmoa.jp":                      ["binb", None, 1],
-    "booklive.jp":                      ["binb", None, 1],
-    "[0-9a-zA-Z_]+.takeshobo.co.jp":    ["binb", None, 0],
-    "www.comic-valkyrie.com":           ["binb", None, 0],
-    "futabanet.jp":                     ["binb", None, 0],
-    "comic-polaris.jp":                 ["binb", None, 0],
-    "www.shonengahosha.co.jp":          ["binb", None, 0],
+    "r.binb.jp":                        ["binb", "r.binb.jp/epm/([\w_]+)/", 1],
+    "www.cmoa.jp":                      ["binb", "www.cmoa.jp/bib/speedreader/speed.html\?cid=([\w-]+)", 1],
+    "booklive.jp":                      ["binb", "booklive.jp/bviewer/s/\?cid=([\w-]*)&", 1],
+    "takeshobo.co.jp":                  ["binb", "[\w-]+.takeshobo.co.jp/manga/([\w-]+)/_files/([0-9]+)/", 0],
+    "www.comic-valkyrie.com":           ["binb", "www.comic-valkyrie.com/samplebook/([\w-]*)/", 0],
+    "futabanet.jp":                     ["binb", "futabanet.jp/common/dld/zip/([\w-]*)/", 0],
+    "comic-polaris.jp":                 ["binb", "comic-polaris.jp/ptdata/([\w-]*)/([\w-]*)/", 0],
+    "www.shonengahosha.co.jp":          ["binb", "www.shonengahosha.co.jp/([\w-]*)/([\w-]*)/", 0],
 
-    "comic-action.com":                 ["comic_action", "episode/([0-9a-zA-Z_-]*)", ],
-    "kuragebunch.com":                  ["comic_action", "episode/([0-9a-zA-Z_-]*)", ],
-    "magcomi.com":                      ["comic_action", "episode/([0-9a-zA-Z_-]*)", ],
-    "shonenjumpplus.com":               ["comic_action", "episode/([0-9a-zA-Z_-]*)", ],
-    "pocket.shonenmagazine.com":        ["comic_action", "episode/([0-9a-zA-Z_-]*)", ],
-    "comic-days.com":                   ["comic_action", "episode/([0-9a-zA-Z_-]*)", ],
+    "comic-action.com":                 ["comic_action", "episode/([\w-]*)", ],
+    "kuragebunch.com":                  ["comic_action", "episode/([\w-]*)", ],
+    "magcomi.com":                      ["comic_action", "episode/([\w-]*)", ],
+    "shonenjumpplus.com":               ["comic_action", "episode/([\w-]*)", ],
+    "pocket.shonenmagazine.com":        ["comic_action", "episode/([\w-]*)", ],
+    "comic-days.com":                   ["comic_action", "episode/([\w-]*)", ],
 
     "viewer.comic-earthstar.jp":        ["comic_earthstar", None],
 
@@ -37,7 +39,9 @@ _site_reader = {
 
     "www.sunday-webry.com":             ["sunday_webry", None],
 
-    "urasunday.com":                    ["urasunday", None]
+    "urasunday.com":                    ["urasunday", None],
+
+    "ganma.jp":                         ["ganma", "ganma.jp/(?:([\w-]*)/([\w-]*)|([\w-]*))"]
 }
 
 
@@ -86,7 +90,10 @@ class ComicLinkInfo(object):
         if not match:
             return None
         match = match.groups()
-        return match[0] if match[0] else match[1]
+        match = match[0] if match[0] else match[1]
+        if "shonengahosha.co.jp" in match:
+            match = "shonengahosha.co.jp"
+        return match
 
     @property
     def reader(self):
@@ -136,24 +143,50 @@ def draw_image(img0, img_copy, src_x, src_y, swidth, sheight, x, y, width=None, 
         (x, y))
 
 
-def cc_mkdir(fpath):
+def cc_mkdir(fpath, model=0):
+    if model == 1:
+        if os.path.exists(fpath):
+            print('\n當前一話的文件夾{}存在，繼續運行數據將被覆蓋！'.format(fpath))
+            print('是否繼續運行？（y/n）')
+            yn = input()
+            return 0 if yn == 'y' or yn == 'yes' or yn == 'Y' else -1
+        else:
+            if not os.path.exists(fpath):
+                os.makedirs(fpath)
+            print('創建文件夾: ' + fpath)
+            return 0
     if os.path.exists(fpath+'/source') and os.path.exists(fpath+'/target'):
         print('\n當前一話的文件夾{}存在，繼續運行數據將被覆蓋，'.format(fpath))
         print('是否繼續運行？（y/n）')
         yn = input()
-        if yn == 'y' or yn == 'yes' or yn == 'Y':
-            return 0
-        else:
-            return -1
+        return 0 if yn == 'y' or yn == 'yes' or yn == 'Y' else -1
     else:
         if not os.path.exists(fpath + '/source'):
             os.makedirs(fpath + '/source')
         if not os.path.exists(fpath + '/target'):
             os.makedirs(fpath + '/target')
 
-        print('創建文件夾' + fpath)
+        print('創建文件夾: ' + fpath)
         return 0
 
+def get_blob_content(driver:webdriver.Chrome, uri):
+    """
+    获取浏览器中的blob对象的数据
+    """
+    result = driver.execute_async_script("""
+        var uri = arguments[0];
+        var callback = arguments[1];
+        var toBase64 = function(buffer){for(var r,n=new Uint8Array(buffer),t=n.length,a=new Uint8Array(4*Math.ceil(t/3)),i=new Uint8Array(64),o=0,c=0;64>c;++c)i[c]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".charCodeAt(c);for(c=0;t-t%3>c;c+=3,o+=4)r=n[c]<<16|n[c+1]<<8|n[c+2],a[o]=i[r>>18],a[o+1]=i[r>>12&63],a[o+2]=i[r>>6&63],a[o+3]=i[63&r];return t%3===1?(r=n[t-1],a[o]=i[r>>2],a[o+1]=i[r<<4&63],a[o+2]=61,a[o+3]=61):t%3===2&&(r=(n[t-2]<<8)+n[t-1],a[o]=i[r>>10],a[o+1]=i[r>>4&63],a[o+2]=i[r<<2&63],a[o+3]=61),new TextDecoder("ascii").decode(a)};
+        var xhr = new XMLHttpRequest();
+        xhr.responseType = 'arraybuffer';
+        xhr.onload = function(){ callback(toBase64(xhr.response)) };
+        xhr.onerror = function(){ callback(xhr.status) };
+        xhr.open('GET', uri);
+        xhr.send();
+        """, uri)
+    if type(result) == int:
+        raise Exception("Request failed with status %s" % result)
+    return base64.b64decode(result)
 class RqHeaders(dict):
     def __init__(self):
         super().__init__()
