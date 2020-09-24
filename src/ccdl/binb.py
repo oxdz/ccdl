@@ -89,10 +89,11 @@ class Binb(object):
         if not match or match.groups()[0] != self._link_info.param[0][0]:
             self._driver.get(self._link_info.url)
         pageNum = []
-        count=5
+        count=8
         while len(pageNum) != 2:
-            if count >0:
+            if count > 0:
                 count -= 1
+                time.sleep(0.35)
             else:
                 raise TimeoutException("")
             try:
@@ -156,7 +157,7 @@ class Binb(object):
                 img3t1.paste(imgs[0], (0, 0))
                 img3t1.paste(imgs[1], (0, imgs[0].size[1] - ij[0]))
                 img3t1.paste(imgs[2], (0, imgs[0].size[1] + imgs[1].size[1] - ij[0] - ij[1]))
-                img3t1.save('./{}/target/{}.jpg'.format(file_path, i))
+                img3t1.save('./{}/target/{}.jpg'.format(file_path, i), quality=100)
                 start_page += 1
                 progress_bar.show(start_page)
             ActionChains(self._driver).send_keys(Keys.LEFT).perform()
