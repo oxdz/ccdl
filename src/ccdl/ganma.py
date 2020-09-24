@@ -1,12 +1,35 @@
 import json
 import logging
+from concurrent.futures import ThreadPoolExecutor
+from operator import add
+from os import write
+from time import sleep, time
 
 import requests
 from selenium import webdriver
 
+from .utils import ComicLinkInfo, ProgressBar, RqHeaders, cc_mkdir
+
 logger = logging.getLogger(__name__)
 
-from .utils import ComicLinkInfo, RqHeaders
+
+class DownldGen(object):
+    def __init__(self, item):
+        self._item = item
+
+    @property
+    def file_path_g(self):
+        base_path = "./漫畫/" + \
+            "/".join((self._item["series"]["title"], self._item["title"]))
+        for x in self._item["page"]["files"]:
+            yield base_path + "/" + x
+
+    @property
+    def img_url_g(self):
+        base_url = self._item["page"]["baseUrl"]
+        token = self._item["page"]["token"]
+        for x in self._item["page"]["files"]:
+            yield base_url + x + token
 
 
 class GanmaRqHeaders(RqHeaders):
@@ -71,8 +94,6 @@ class Ganma(object):
         return mangainfo
 
     def login(self, mail, passwd):
-
-        # TODO
         if type(mail) != str or type(passwd) != str:
             logger.error("帳號（email）或密碼非法 type：{}，{}".format(
                 type(mail), type(passwd))),
@@ -117,6 +138,36 @@ class Ganma(object):
         else:
             return -1
 
+    @staticmethod
+    def downld_one(url, fpath):
+        rq = requests.get(url=url, headers=RqHeaders())
+        if rq.status_code != 200:
+            raise ValueError(url)
+        else:
+            with open(fpath, "wb") as fp:
+                fp.write(rq.content)
+        return 0
+
     def downloader(self):
-        pass
-        # rq = requests.get(url='', cookies=self._cookies, headers=)
+        manga_info = self.manga_info()
+
+        if self._param[1] and self._param[1] in manga_info["index_id"]:
+            indx = manga_info["index_id"].index(self._param[1])
+        else:
+            raise ValueError("当前一话不存在或需要登录".format())
+
+        dir = "./漫畫/" + \
+            manga_info["items"][indx]["series"]["title"] + \
+            "/" + manga_info["items"][indx]["title"]
+        cc_mkdir(dir, model=1)
+        progress_bar = ProgressBar(
+            len(manga_info["items"][indx]["page"]["files"]))
+
+        downld_gen = DownldGen(manga_info["items"][indx])
+
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            count = 0
+            for x in executor.map(Ganma.downld_one, downld_gen.img_url_g,
+                                  downld_gen.file_path_g):
+                count += 1
+                progress_bar.show(count)

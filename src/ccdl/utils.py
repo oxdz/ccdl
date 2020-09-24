@@ -9,6 +9,9 @@ import requests
 from requests import models
 from selenium import webdriver
 
+# TODO
+# from requests.exceptions import ConnectionError
+
 _site_reader = {
     # "domain": ["reader", RegEx, param1, param2, ...]
     "r.binb.jp":                        ["binb", "r.binb.jp/epm/([\w_]+)/", 1],
@@ -123,6 +126,7 @@ class ProgressBar(object):
         super().__init__()
         self._space = 50
         self._total = total
+
 
     def show(self, current_set: int):
         a = int((current_set / self._total) * self._space)
