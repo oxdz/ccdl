@@ -33,8 +33,9 @@ if __name__ == "__main__":
     driver = webdriver.Chrome(executable_path=executable_path)
     print("\n如需登入請提前在程式啟動的瀏覽器中登入！\n")
     print("Supported sites:\n")
-    print("    1. www.cmoa.jp/bib/speedreader/speed.html\?cid=([0-9a-zA-Z_]+)")
-    print("    2. ganma.jp/xx/xx-xx-xx-xx.../...")
+    print("    1. r.binb.jp/epm/([\w_]+)/")
+    print("    2. www.cmoa.jp/bib/speedreader/speed.html\?cid=([0-9a-zA-Z_]+)")
+    print("    3. ganma.jp/xx/xx-xx-xx-xx.../...")
     print("\n>>>>>>>>輸入exit退出<<<<<<<<\n")
     while True:
         url = input("url: ")
