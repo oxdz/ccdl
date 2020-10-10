@@ -138,9 +138,9 @@ class ProgressBar(object):
             print('')
 
 
-def draw_image(img0, img_copy, src_x, src_y, swidth, sheight, x, y, width=None, height=None):
-    img_copy.paste(
-        img0.crop
+def draw_image(img_source, img_target, src_x, src_y, swidth, sheight, x, y, width=None, height=None):
+    img_target.paste(
+        img_source.crop
         (
             (src_x, src_y, src_x + swidth, src_y + sheight),
         ),
@@ -148,6 +148,9 @@ def draw_image(img0, img_copy, src_x, src_y, swidth, sheight, x, y, width=None, 
 
 
 def cc_mkdir(fpath, model=0):
+    r"""
+    :param model: model = 0, include two subfolders of source and target; model = 1, not include.
+    """
     if model == 1:
         if os.path.exists(fpath):
             print('\n當前一話的文件夾{}存在，繼續運行數據將被覆蓋！'.format(fpath))

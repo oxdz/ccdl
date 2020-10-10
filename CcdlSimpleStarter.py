@@ -9,6 +9,7 @@ from ccdl import Binb, ComicLinkInfo
 from selenium import webdriver
 
 from ccdl import binb
+from ccdl.binb import Binb2
 from ccdl.ganma import Ganma
 
 if not os.path.exists("log"):
@@ -43,8 +44,8 @@ if __name__ == "__main__":
             driver.quit()
             sys.exit()
         link_info = ComicLinkInfo(url)
-        if link_info.site_name == "www.cmoa.jp":
-            reader = Binb(link_info, driver)
+        if link_info.site_name == "www.cmoa.jp" or link_info.site_name == "r.binb.jp":
+            reader = Binb2(link_info)
             try:
                 reader.downloader()
             except Exception as e:
