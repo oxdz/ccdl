@@ -5,12 +5,11 @@ import sys
 import time
 from os import read, system
 
-from ccdl import Binb, ComicLinkInfo
 from selenium import webdriver
 
-from ccdl import binb
-from ccdl.binb import Binb2
-from ccdl.ganma import Ganma
+from ccdl import ComicLinkInfo
+from ccdl import Binb2
+from ccdl import Ganma
 
 if not os.path.exists("log"):
     os.makedirs("log")

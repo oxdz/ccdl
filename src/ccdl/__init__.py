@@ -1,7 +1,7 @@
 from .comic_action import ComicAction
 from .ganma import Ganma
 from .utils import ComicLinkInfo
-from .binb import Binb
+from .binb import Binb, Binb2
 # from . import binb
 # from . import comic_earthstar
 # from . import comic_walker
@@ -12,5 +12,5 @@ from .binb import Binb
 
 
 __all__ = [
-    'ComicLinkInfo', 'ComicAction', 'Ganma', 'Binb'
+    'ComicLinkInfo', 'ComicAction', 'Ganma', 'Binb', 'Binb2'
 ]
