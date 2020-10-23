@@ -89,7 +89,8 @@ def getRandomString(t, i=None):
         e += n[math.floor(random.random() * r)]
     return e
 
-def get_cookies_thr_browser(url, driver:webdriver.Chrome):
+
+def get_cookies_thr_browser(url, driver: webdriver.Chrome):
     r"""
     :param url: comic url
     :param driver: webdriver.Chrome
@@ -104,6 +105,7 @@ def get_cookies_thr_browser(url, driver:webdriver.Chrome):
                 cookies.set(cookie["name"], cookie["value"])
             return cookies
     return None
+
 
 class DownldGenBinb2(object):
     def __init__(self, manga_info, link_info, base_path, cnt_p, cid, cntserver, ctbl, ptbl, content_data, u0, u1):
@@ -375,7 +377,7 @@ class Binb(object):
 
 
 class Binb2(object):
-    def __init__(self, link_info: ComicLinkInfo, driver:webdriver.Chrome):
+    def __init__(self, link_info: ComicLinkInfo, driver: webdriver.Chrome):
         super().__init__()
         self._link_info = link_info
         self._webdriver = driver
@@ -479,7 +481,8 @@ class Binb2(object):
             self._u0 = self._link_info.param[0][1]
             self._u1 = self._link_info.param[0][2]
             if self._u0 == "0":
-                self._cookies = get_cookies_thr_browser(self._url, self._webdriver)
+                self._cookies = get_cookies_thr_browser(
+                    self._url, self._webdriver)
 
         else:
             logger.error("cid not found, url:{}".format(self._link_info.url))
@@ -521,16 +524,13 @@ class Binb2(object):
         rq = requests.get(self.gen_GetCntnt_url(), cookies=self._cookies)
         if rq.status_code != 200:
             return -1
-        html_mange = rq.json()["ttx"]
-        page = etree.HTML(html_mange)
-        manga_info_node = page.find(".//t-nocase")
-        manga_info_list = list(zip(
-            manga_info_node.xpath(".//@id"),
-            manga_info_node.xpath(".//@src"),
-            manga_info_node.xpath(".//@orgwidth"),
-            manga_info_node.xpath(".//@orgheight")))
+        html_manga = rq.json()["ttx"]
+        manga_info = re.findall('<t-img.*?id="L[\d]+".*?>', html_manga)
+        page = etree.HTML(html_manga)
+        manga_info_list = [re.search(
+            'src="(.*?)".*orgwidth="([\d]+)".*orgheight="([\d]+)".*id="(L[\d]+)"', x).groups() for x in manga_info]
         self._manga_info = [
-            {"id": x[0], "src":x[1], "orgwidth":x[2], "orgheight":x[3]} for x in manga_info_list]
+            {"id": x[3], "src":x[0], "orgwidth":x[1], "orgheight":x[2]} for x in manga_info_list]
         return self._manga_info
 
     # step_3
