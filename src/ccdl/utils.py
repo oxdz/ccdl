@@ -13,9 +13,9 @@ from selenium import webdriver
 # from requests.exceptions import ConnectionError
 
 _site_reader = {
-    # "domain": ["reader", RegEx, param1, param2, ...]
+    # "domain": ["reader", RegExp, param1, param2, ...]
     "r.binb.jp":                        ["binb", "r.binb.jp/epm/([\w_]+)/", 1],
-    "www.cmoa.jp":                      ["binb", "www.cmoa.jp/bib/speedreader/speed.html\?cid=([\w-]+)", 1],
+    "www.cmoa.jp":                      ["binb", "www.cmoa.jp/bib/speedreader/speed.html\?cid=([\w-]+)&u0=(\d)&u1=(\d)", 1],
     "booklive.jp":                      ["binb", "booklive.jp/bviewer/s/\?cid=([\w-]*)&", 1],
     "takeshobo.co.jp":                  ["binb", "[\w-]+.takeshobo.co.jp/manga/([\w-]+)/_files/([0-9]+)/", 0],
     "www.comic-valkyrie.com":           ["binb", "www.comic-valkyrie.com/samplebook/([\w-]*)/", 0],
@@ -63,10 +63,12 @@ class SiteReaderLoad(object):
 
     @staticmethod
     def get_param(site_name):
+        r"""
+        return [RegExp, param1, param2,...]
+        """
         return _site_reader[site_name][1:]
 
-    # @staticmethod
-    # def get_reader_func_entry(reader):
+    # @staticmethod 
     #     return globals()[reader].get_image if reader in globals() else None
 
 
@@ -104,6 +106,9 @@ class ComicLinkInfo(object):
 
     @property
     def param(self):
+        r"""
+        return [param_regexp:list, param1, param2,...]
+        """
         param = SiteReaderLoad.get_param(self.site_name)
         if param and type(param) == list and param[0] and type(param[0]) == str:
             search = re.search(param[0], self._url)
@@ -194,6 +199,7 @@ def get_blob_content(driver:webdriver.Chrome, uri):
     if type(result) == int:
         raise Exception("Request failed with status %s" % result)
     return base64.b64decode(result)
+    
 class RqHeaders(dict):
     def __init__(self):
         super().__init__()

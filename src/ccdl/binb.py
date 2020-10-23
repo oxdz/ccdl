@@ -1,12 +1,15 @@
 import base64
+from copy import deepcopy
 import json
 import logging
 import math
 import random
 import re
+from re import L, purge
 import time
 from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
+from PIL.Image import NONE
 
 import numpy as np
 import requests
@@ -86,9 +89,24 @@ def getRandomString(t, i=None):
         e += n[math.floor(random.random() * r)]
     return e
 
+def get_cookies_thr_browser(url, driver:webdriver.Chrome):
+    r"""
+    :param url: comic url
+    :param driver: webdriver.Chrome
+    :return: dict or None
+    """
+    for hdl in driver.window_handles:
+        driver.switch_to_window(hdl)
+        if driver.current_url == url:
+            # return driver.get_cookies
+            cookies = requests.cookies.RequestsCookieJar()
+            for cookie in driver.get_cookies():
+                cookies.set(cookie["name"], cookie["value"])
+            return cookies
+    return None
 
 class DownldGenBinb2(object):
-    def __init__(self, manga_info, link_info, base_path, cnt_p, cid, cntserver, ctbl, ptbl):
+    def __init__(self, manga_info, link_info, base_path, cnt_p, cid, cntserver, ctbl, ptbl, content_data, u0, u1):
         self._manga_info = manga_info
         self._base_path = base_path
         self._link_info = link_info
@@ -97,14 +115,17 @@ class DownldGenBinb2(object):
         self._cid = cid
         self._ctbl = ctbl
         self._ptbl = ptbl
+        self._content_data = content_data
+        self._u0 = u0
+        self._u1 = u1
 
     @property
     def file_path_g(self):
         for x in self._manga_info:
             if self._link_info.site_name == "www.cmoa.jp":
-                yield self._base_path + "/{}.jpg".format(int(x["id"][1:]))
+                yield self._base_path + "/{}.png".format(int(x["id"][1:]))
             elif self._link_info.site_name == "r.binb.jp":
-                yield self._base_path + "/{}.jpg".format(int(x["id"][1:])+1)
+                yield self._base_path + "/{}.png".format(int(x["id"][1:])+1)
             else:
                 raise ValueError("")
 
@@ -112,9 +133,8 @@ class DownldGenBinb2(object):
     def img_url_g(self):
         for x in self._manga_info:
             if self._link_info.site_name == "www.cmoa.jp":
-                yield self._contents_server + "/sbcGetImg.php?cid={}&src={}&p={}&q=1&dmytime={}".format(
-                    self._cid, x["src"], self._cnt_p, int(time.time()*1000)
-                )
+                yield self._contents_server + "/sbcGetImg.php?cid={}&src={}&p={}&q=1&vm=1&dmytime={}&u0={}&u1={}".format(
+                    self._cid, x["src"].replace("/", "%2F"), self._cnt_p, self._content_data, self._u0, self._u1)
             elif self._link_info.site_name == "r.binb.jp":
                 yield "{}{}sbcGetImg.php?cid={}&src={}&p={}&q=1".format(
                     self._link_info._url, self._contents_server, self._cid, x["src"], self._cnt_p
@@ -327,7 +347,7 @@ class Binb(object):
                         img = Image.open(
                             BytesIO(get_blob_content(self._driver, blob_uri)))
                         img.save(
-                            file_path+'/source/{}-{}.jpg'.format(i, j), quality=100)
+                            file_path+'/source/{}-{}.png'.format(i, j))
                         imgs.append(img)
                     except Exception as e:
                         logger.error(str(e))
@@ -348,34 +368,34 @@ class Binb(object):
                 img3t1.paste(imgs[2], (0, imgs[0].size[1] +
                                        imgs[1].size[1] - ij[0] - ij[1]))
                 img3t1.save(
-                    './{}/target/{}.jpg'.format(file_path, i), quality=100)
+                    './{}/target/{}.png'.format(file_path, i))
                 start_page += 1
                 progress_bar.show(start_page)
             ActionChains(self._driver).send_keys(Keys.LEFT).perform()
-        print("下載完成!")
 
 
 class Binb2(object):
-    def __init__(self, link_info: ComicLinkInfo):
+    def __init__(self, link_info: ComicLinkInfo, driver:webdriver.Chrome):
         super().__init__()
         self._link_info = link_info
+        self._webdriver = driver
         self._url = link_info.url
         self._header = RqHeaders()
 
     def gen_cntntInfo_url(self, **kwargs):
         if self._link_info.site_name == "www.cmoa.jp":
-            return "https://www.cmoa.jp/bib/sws/bibGetCntntInfo.php?cid={}&dmytime={}&k={}&u0=1&u1=0".format(
-                self._cid, int(time.time()*1000), self._rq_k
-            )
+            return "https://www.cmoa.jp/bib/sws/bibGetCntntInfo.php?cid={}&dmytime={}&k={}&u0={}&u1={}".format(
+                self._cid, int(time.time()*1000), self._rq_k, self._u0, self._u1)
         elif self._link_info.site_name == "r.binb.jp":
             return "{}swsapi/bibGetCntntInfo?cid={}&dmytime={}&k={}".format(
                 self._link_info.url, self._cid, int(time.time()*1000), self._rq_k)
 
     def gen_GetCntnt_url(self, **kwargs):
         if self._link_info.site_name == "www.cmoa.jp":
-            return "https://free-binb-cmoa.sslcs.cdngc.net/sbc/sbcGetCntnt.php?cid={}&p={}&vm=2&dmytime={}&u0=1&u1=0".format(
-                self._cid, self._cnt_p, int(time.time())
-            )
+            # print("https://binb-cmoa.sslcs.cdngc.net/sbc/sbcGetCntnt.php?cid={}&p={}&vm=1&dmytime={}&u0=0&u1=0".format(
+            #     self._cid, self._cnt_p, self._content_date))
+            return "{}/sbcGetCntnt.php?cid={}&p={}&vm=1&dmytime={}&u0={}&u1={}".format(
+                self._contents_server, self._cid, self._cnt_p, self._content_date, self._u0, self._u1)
         elif self._link_info.site_name == "r.binb.jp":
             return self._link_info.url + "{}sbcGetCntnt.php?cid={}&p={}&dmytime={}".format(
                 self._contents_server, self._cid, self._cnt_p, int(time.time()*1000))
@@ -383,8 +403,7 @@ class Binb2(object):
     def gen_image_url(self, img_src, **kwargs):
         if self._link_info.site_name == "www.cmoa.jp":
             return self._contents_server + "/sbcGetImg.php?cid={}&src={}&p={}&q=1&dmytime={}".format(
-                self._cid, img_src, self._cnt_p, int(time.time()*1000)
-            )
+                self._cid, img_src, self._cnt_p, self._content_date)
         elif self._link_info.site_name == "r.binb.jp":
             return "{}{}sbcGetImg.php?cid={}&src={}&p={}&q=1".format(
                 self._url, self._contents_server, self._cid, img_src, self._cnt_p
@@ -443,21 +462,31 @@ class Binb2(object):
         :return: cid, rq.cookies, k
         """
         rq = requests.get(self._link_info.url)
+        self._u0 = None
+        self._u1 = None
         if rq.status_code != 200:
             e_str = "status_code:{} url:{}".format(
                 rq.status_code, self._link_info.url)
             logging.error(e_str)
             raise ValueError(e_str)
+
+        self._cookies = rq.cookies
+
         if self._link_info.site_name == "r.binb.jp":
             cid = re.search("data-ptbinb-cid=\"(.*?)\"", rq.text).groups()[0]
         elif self._link_info.site_name == "www.cmoa.jp":
             cid = self._link_info.param[0][0]
+            self._u0 = self._link_info.param[0][1]
+            self._u1 = self._link_info.param[0][2]
+            if self._u0 == "0":
+                self._cookies = get_cookies_thr_browser(self._url, self._webdriver)
+
         else:
             logger.error("cid not found, url:{}".format(self._link_info.url))
             raise ValueError("cid not found")
         self._cid = cid
-        self._cookies = rq.cookies
-        return cid, rq.cookies, self.genK()
+
+        return cid, self._cookies, self.genK()
 
     # step 2_1
     def bibGetCntntInfo(self):
@@ -479,6 +508,10 @@ class Binb2(object):
         self._ptbl = cntntinfo["items"][0]["ptbl"]
         self._ctbl = cntntinfo["items"][0]["ctbl"]
         self._cnt_p = cntntinfo["items"][0]["p"]
+        if "ContentDate" in cntntinfo["items"][0]:
+            self._content_date = cntntinfo["items"][0]["ContentDate"]
+        else:
+            self._content_date = None
         self._contents_server = cntntinfo["items"][0]["ContentsServer"]
         self._ptbl = self.CntntInfoDecode(self._cid, self._rq_k, self._ptbl)
         self._ctbl = self.CntntInfoDecode(self._cid, self._rq_k, self._ctbl)
@@ -508,11 +541,12 @@ class Binb2(object):
             raise ValueError("error:down_one:" + url)
         img = Image.open(BytesIO(rq.content))
         coords = ImageDescrambleCoords(img.width, img.height, hs[0], hs[1])
+        img_target = deepcopy(img)
         img_target = Image.new(img.mode, (coords["width"], coords["height"]))
         for y in coords["transfers"][0]["coords"]:
             draw_image(img, img_target, y["xsrc"], y["ysrc"],
                        y["width"], y["height"], y["xdest"], y["ydest"])
-        img_target.save(fpath, quality=95)
+        img_target.save(fpath)
         return 0
 
     def downloader(self):
@@ -525,10 +559,11 @@ class Binb2(object):
         else:
             base_path = "./漫畫/" + self._manga_title if self._manga_title else self._manga_subtitle
 
-        cc_mkdir(base_path, model=1)
+        if cc_mkdir(base_path, model=1) != 0:
+            return -1
         progressBar = ProgressBar(len(self._manga_info))
         downGen = DownldGenBinb2(self._manga_info, self._link_info, base_path, self._cnt_p,
-                                 self._cid, self._contents_server, self._ctbl, self._ptbl)
+                                 self._cid, self._contents_server, self._ctbl, self._ptbl, self._content_date, self._u0, self._u1)
         count = 0
         progressBar.show(count)
         with ThreadPoolExecutor(max_workers=4) as executor:

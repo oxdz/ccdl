@@ -29,11 +29,17 @@ else:
     raise ValueError("os")
 
 if __name__ == "__main__":
-    driver = webdriver.Chrome(executable_path=executable_path)
-    print("\n如需登入請提前在程式啟動的瀏覽器中登入！\n")
+    driver = None
+    is_exist = os.path.exists(executable_path)
+    if is_exist:
+        print("\n（序號前帶*）如需登入請提前在程式啟動的瀏覽器中登入，並加載目標url（任意標籤頁）！\n")
+        driver = webdriver.Chrome(executable_path=executable_path)
+    else:
+        print("由於未在程式所在目錄發現chromedriver，部分基於selenium採集的站點（序號前帶*）將無法進行。")
+        print("您可於 http://npm.taobao.org/mirrors/chromedriver/ 下載")  
     print("Supported sites:\n")
     print("    1. r.binb.jp/epm/([\w_]+)/")
-    print("    2. www.cmoa.jp/bib/speedreader/speed.html\?cid=([0-9a-zA-Z_]+)")
+    print("   *2. www.cmoa.jp/bib/speedreader/speed.html\?cid=([0-9a-zA-Z_]+)")
     print("    3. ganma.jp/xx/xx-xx-xx-xx.../...")
     print("\n>>>>>>>>輸入exit退出<<<<<<<<\n")
     while True:
@@ -45,7 +51,7 @@ if __name__ == "__main__":
             sys.exit()
         link_info = ComicLinkInfo(url)
         if link_info.site_name == "www.cmoa.jp" or link_info.site_name == "r.binb.jp":
-            reader = Binb2(link_info)
+            reader = Binb2(link_info, driver)
             try:
                 reader.downloader()
             except Exception as e:
