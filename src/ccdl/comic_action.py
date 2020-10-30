@@ -2,9 +2,7 @@ import copy
 import json
 import logging
 import math
-import os
-import re
-import time
+from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 
 import requests
@@ -12,7 +10,7 @@ from PIL import Image
 from selenium import webdriver
 from selenium.webdriver.support.wait import WebDriverWait
 
-from .utils import ComicLinkInfo, ProgressBar, RqHeaders, draw_image, cc_mkdir
+from .utils import ComicLinkInfo, ProgressBar, RqHeaders, cc_mkdir, draw_image
 
 logger = logging.getLogger("comic-action")
 
@@ -30,7 +28,7 @@ class proc_img_co:
         self.cell_height = math.floor(
             self.height / (self.DIVIDE_NUM * self.MULTIPLE)) * self.MULTIPLE
 
-    def n21(self, img0):
+    def n21(self, img0) -> Image.Image:
         img_copy = copy.deepcopy(img0)
         for n in range(self.DIVIDE_NUM * self.DIVIDE_NUM):
             src_x = n % self.DIVIDE_NUM * self.cell_width
@@ -45,69 +43,85 @@ class proc_img_co:
 
 
 class ComicAction(object):
-    def __init__(self):
+    def __init__(self, linkinfo: ComicLinkInfo, driver: webdriver.Chrome):
         super().__init__()
+        self._linkinfo = linkinfo
+        self._driver = driver
 
-    def downloader(self, link_info: ComicLinkInfo, driver: webdriver.Chrome):
-        try:
-            # https://[domain: comic-action.com ...]/episode/13933686331648942300
-            driver.get(link_info.url)
+    @staticmethod
+    def get_comic_json(driver):
+        r"""
+        """
+        comic_json = {
+            "title": None,
+            "subtitle": None,
+            "pages": [],
+        }
 
-            series_title = WebDriverWait(driver, WAIT_TIME, 0.5).until(
-                lambda x: x.find_element_by_class_name("series-header-title"),
-                message="解析漫畫名失敗").text
+        elem = WebDriverWait(driver, WAIT_TIME, 0.5).until(
+            lambda x: x.find_element_by_id("episode-json"),
+            message="無法定位元素 episode-json" + ", 獲取json對象數據失敗")
 
-            episode_title = WebDriverWait(driver, WAIT_TIME, 0.5).until(
-                lambda x: x.find_element_by_class_name("episode-header-title"),
-                message="解析當前一話標題失敗").text
+        json_dataValue = elem.get_attribute("data-value")
+        json_dataValue = json.loads(json_dataValue)
 
-            episode_date = WebDriverWait(driver, WAIT_TIME, 0.5).until(
-                lambda x: x.find_element_by_class_name('episode-header-date'),
-                message="解析當前一話日期失敗").text
+        comic_json["subtitle"] = json_dataValue["readableProduct"]["title"].replace("?", "？")
+        comic_json["title"] = json_dataValue["readableProduct"]["series"]["title"].replace("?", "？")
+        for page in json_dataValue["readableProduct"]["pageStructure"]["pages"]:
+            if "src" in page:
+                comic_json["pages"].append(page)
+        return comic_json
 
-            file_path = "./漫畫/" + \
-                '/'.join([series_title, episode_title + ' ' + episode_date])
-            if cc_mkdir(file_path) != 0:
-                print("下載取消！")
-                return 0
-            elem = WebDriverWait(driver, WAIT_TIME, 0.5).until(
-                lambda x: x.find_element_by_id("episode-json"),
-                message="無法定位元素 episode-json" + ", 獲取json對象數據失敗")
-            json_dataValue = elem.get_attribute("data-value")
-            pages = json.loads(
-                json_dataValue)['readableProduct']['pageStructure']['pages']
+    @staticmethod
+    def gen_url(comic_json: dict):
+        for x in comic_json["pages"]:
+            yield x["src"]
 
-            page_count = 1
-            total_pages = 0
-            for i in range(len(pages)):
-                if 'src' in pages[i]:
-                    total_pages += 1
-            show_bar = ProgressBar(total_pages)
-            for i in range(len(pages)):
-                if 'src' not in pages[i]:
-                    continue
-                content = requests.get(pages[i]['src'],
-                                       headers=RqHeaders()).content
-                img0 = Image.open(BytesIO(content))
-                img0.save(file_path + "/source/{}.jpg".format(page_count),
-                          quality=100)
-                proc = proc_img_co(img0.width, img0.height)
-                proc.n21(img0=img0).save(file_path +
-                                         "/target/{}.jpg".format(page_count),
-                                         quality=100)
-                show_bar.show(page_count)
-                page_count = page_count + 1
-                if "contentEnd" in pages[i]:
-                    print('下載完成！\n')
-                    break
-        except Exception as e:
-            logger.error(e)
-            print(e)
-            print("下載失敗!")
-            return -1
+    @staticmethod
+    def gen_fpth(comic_json: dict):
+        bpth = "./漫畫/" + \
+            "/".join((comic_json["title"], comic_json["subtitle"]))
+        count = 0
+        for x in range(len(comic_json["pages"])):
+            count += 1
+            yield [bpth, "{}.png".format(count)]
+
+    @staticmethod
+    def downld_one(url, fpth, cookies=None):
+        r"""
+        :fpth: [basepath, fname]
+        """
+        rq = requests.get(url, headers=RqHeaders())
+        if rq.status_code != 200:
+            raise ValueError(url)
+        content = rq.content
+        img0 = Image.open(BytesIO(content))
+
+        # 源图像
+        img0.save(fpth[0] + "/source/" + fpth[1])
+
+        # 复原
+        proc = proc_img_co(img0.width, img0.height)
+        proc.n21(img0=img0).save(fpth[0] + "/target/" + fpth[1])
+
+    def downloader(self):
+        # https://<domain: comic-action.com ...>/episode/13933686331648942300
+        self._driver.get(self._linkinfo.url)
+        comic_json = ComicAction.get_comic_json(self._driver)
+        total_pages = len(comic_json["pages"])
+        show_bar = ProgressBar(total_pages)
+        cc_mkdir("./漫畫/" + \
+            "/".join((comic_json["title"], comic_json["subtitle"])))
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            count = 0
+            for x in executor.map(ComicAction.downld_one,
+                                  ComicAction.gen_url(comic_json),
+                                  ComicAction.gen_fpth(comic_json)):
+                count += 1
+                show_bar.show(count)
 
 
-if __name__ == "__main__":
-    url = "https://comic-action.com/episode/13933686331648942300"
-    driver = webdriver.Chrome()
-    ComicAction().downloader(driver, ComicLinkInfo(url))
+# if __name__ == "__main__":
+#     url = "https://comic-action.com/episode/13933686331648942300"
+#     driver = webdriver.Chrome()
+#     ComicAction().downloader(driver, ComicLinkInfo(url))

@@ -13,6 +13,8 @@ Supported sites:
   + ~~`comic-polaris.jp`~~
   + ~~`www.shonengahosha.co.jp`~~  
 
++ comic_action:
+  + **`comic-action.com`**
 
 + ganma:
   + **`ganma.jp`**
