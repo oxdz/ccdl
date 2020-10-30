@@ -125,7 +125,7 @@ class DownldGenBinb2(object):
     def file_path_g(self):
         for x in self._manga_info:
             if self._link_info.site_name == "www.cmoa.jp":
-                yield self._base_path + "/{}.png".format(int(x["id"][1:]))
+                yield self._base_path + "/{}.png".format(int(x["id"][1:])+1)
             elif self._link_info.site_name == "r.binb.jp":
                 yield self._base_path + "/{}.png".format(int(x["id"][1:])+1)
             else:
@@ -501,13 +501,24 @@ class Binb2(object):
             return -1
         cntntinfo = rq.json()
         self._manga_title = cntntinfo["items"][0]["Title"]
-        if self._manga_title == "":
+
+        if not self._manga_title:
             self._manga_title = None
+        else:
+            # Windows 路径 非法字符
+            self._manga_title = re.sub("[\|\*\<\>\"\\\/\:]", "_", self._manga_title)
+            self._manga_title = self._manga_title.replace('?', '？')
+        
         self._manga_subtitle = cntntinfo["items"][0]["SubTitle"]
-        if self._manga_subtitle == "":
+        if not self._manga_subtitle:
             self._manga_subtitle = None
+        else:
+            self._manga_subtitle = re.sub("[\|\*\<\>\"\\\/\:]", "_", self._manga_subtitle)
+            self._manga_subtitle = self._manga_subtitle.replace('?', '？')
+
         if not (self._manga_subtitle or self._manga_title):
             raise ValueError("")
+
         self._ptbl = cntntinfo["items"][0]["ptbl"]
         self._ctbl = cntntinfo["items"][0]["ctbl"]
         self._cnt_p = cntntinfo["items"][0]["p"]
