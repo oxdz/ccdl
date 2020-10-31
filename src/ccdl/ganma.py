@@ -172,7 +172,7 @@ class Ganma(object):
                              manga_info["items"][indx]["afterwordImage"]["url"])
                 raise ValueError(manga_info["items"]
                                  [indx]["afterwordImage"]["url"])
-            with open(dir + "/afterword_image.jpg", "wb") as fp:
+            with open(dir + "/afterword.jpg", "wb") as fp:
                 fp.write(rq.content)
             print("Get the afterword image!")
         else:

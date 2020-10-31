@@ -28,6 +28,7 @@ else:
 if __name__ == "__main__":
     driver = None
     is_exist = os.path.exists(executable_path)
+    print("源碼: https://github.com/vircoys/ccdl")
     if is_exist:
         print("\n（序號含*）如需登入請提前在程式啟動的瀏覽器中登入，(**)並加載目標url（任意標籤頁）！\n")
         driver = webdriver.Chrome(executable_path=executable_path)
@@ -38,7 +39,7 @@ if __name__ == "__main__":
     print("   *1. r.binb.jp/epm/([\w_]+)/")
     print("  **2. www.cmoa.jp/bib/speedreader/speed.html\?cid=([\w-]+)&u0=(\d)&u1=(\d)")
     print("    3. ganma.jp/xx/xx-xx-xx-xx.../...")
-    print("   *4. comic-action.com/episode/\d+")
+    print("   *4. comic-action.com/episode/([\w-]*)")
     print("\n>>>>>>>>輸入exit退出<<<<<<<<\n")
     while True:
         url = input("url: ")
