@@ -6,6 +6,7 @@ from os import write
 from time import sleep, time
 
 import requests
+from requests.api import get
 from selenium import webdriver
 
 from .utils import ComicLinkInfo, ProgressBar, RqHeaders, cc_mkdir
@@ -163,6 +164,19 @@ class Ganma(object):
         progress_bar = ProgressBar(
             len(manga_info["items"][indx]["page"]["files"]))
 
+        if manga_info["items"][indx]["afterwordImage"]["url"]:
+            rq = requests.get(
+                url=manga_info["items"][indx]["afterwordImage"]["url"], headers=RqHeaders())
+            if rq.status_code != 200:
+                logger.error("Error, afterword image: " +
+                             manga_info["items"][indx]["afterwordImage"]["url"])
+                raise ValueError(manga_info["items"]
+                                 [indx]["afterwordImage"]["url"])
+            with open(dir + "/afterword_image.jpg", "wb") as fp:
+                fp.write(rq.content)
+            print("Get the afterword image!")
+        else:
+            print("No afterword image found!")
         downld_gen = DownldGen(manga_info["items"][indx])
 
         with ThreadPoolExecutor(max_workers=8) as executor:
