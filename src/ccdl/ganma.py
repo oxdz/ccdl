@@ -161,10 +161,21 @@ class Ganma(object):
             manga_info["items"][indx]["series"]["title"] + \
             "/" + manga_info["items"][indx]["title"]
         cc_mkdir(dir, model=1)
+
         progress_bar = ProgressBar(
             len(manga_info["items"][indx]["page"]["files"]))
 
+        downld_gen = DownldGen(manga_info["items"][indx])
+
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            count = 0
+            for x in executor.map(Ganma.downld_one, downld_gen.img_url_g,
+                                  downld_gen.file_path_g):
+                count += 1
+                progress_bar.show(count)
+
         if manga_info["items"][indx]["afterwordImage"]["url"]:
+            print("下載後記圖片！", end=" ")
             rq = requests.get(
                 url=manga_info["items"][indx]["afterwordImage"]["url"], headers=RqHeaders())
             if rq.status_code != 200:
@@ -174,14 +185,6 @@ class Ganma(object):
                                  [indx]["afterwordImage"]["url"])
             with open(dir + "/afterword.jpg", "wb") as fp:
                 fp.write(rq.content)
-            print("Get the afterword image!")
+            print("成功！")
         else:
             print("No afterword image found!")
-        downld_gen = DownldGen(manga_info["items"][indx])
-
-        with ThreadPoolExecutor(max_workers=8) as executor:
-            count = 0
-            for x in executor.map(Ganma.downld_one, downld_gen.img_url_g,
-                                  downld_gen.file_path_g):
-                count += 1
-                progress_bar.show(count)
