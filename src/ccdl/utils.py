@@ -24,11 +24,17 @@ _site_reader = {
     "www.shonengahosha.co.jp":          ["binb", "www.shonengahosha.co.jp/([\w-]*)/([\w-]*)/", 0],
 
     "comic-action.com":                 ["comic_action", "episode/([\w-]*)", ],
+    "comic-days.com":                   ["comic_action", "episode/([\w-]*)", ],
+    "comic-gardo.com":                  ["comic_action", "episode/([\w-]*)", ],
+    "comic-zenon.com":                  ["comic_action", "episode/([\w-]*)", ],
+    "comicborder.com":                  ["comic_action", "episode/([\w-]*)", ],
     "kuragebunch.com":                  ["comic_action", "episode/([\w-]*)", ],
     "magcomi.com":                      ["comic_action", "episode/([\w-]*)", ],
-    "shonenjumpplus.com":               ["comic_action", "episode/([\w-]*)", ],
     "pocket.shonenmagazine.com":        ["comic_action", "episode/([\w-]*)", ],
-    "comic-days.com":                   ["comic_action", "episode/([\w-]*)", ],
+    "shonenjumpplus.com":               ["comic_action", "episode/([\w-]*)", ],
+    "shonenmagazine.com":               ["comic_action", "episode/([\w-]*)", ],
+    "tonarinoyj.jp":                    ["comic_action", "episode/([\w-]*)", ],
+    "viewer.heros-web.com":             ["comic_action", "episode/([\w-]*)", ],
 
     "viewer.comic-earthstar.jp":        ["comic_earthstar", None],
 
