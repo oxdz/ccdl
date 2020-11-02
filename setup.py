@@ -1,11 +1,11 @@
 import setuptools
 
-with open("./src/README.md", "r") as fh:
+with open("./README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="ccdl", 
-    version="0.1.3",
+    version="0.1.4",
     author="vircoys",
     author_email="vircoys@gmail.com",
     description="Online comic downloader",
