@@ -25,7 +25,6 @@ Supported sites:
   + **`magcomi.com`**
   + **`pocket.shonenmagazine.com`**
   + **`shonenjumpplus.com`**
-  + **`shonenmagazine.com`**
   + **`tonarinoyj.jp`**
   + **`viewer.heros-web.com`**
 
@@ -81,8 +80,6 @@ reader.downloader()
 
 If chromedriver exists: For sites with \* before the serial number, if necessary, login in the browser that opens automatically before you enter the URL. If it is \*\*, you also need to load (you can do this in any TAB) the URL in this browser.  
 
-
-
 ```sh
 $ python CcdlSimpleStarter.py
 
@@ -97,18 +94,17 @@ Supported sites:
 
     3. ganma.jp/xx/xx-xx-xx-xx.../...
 
-   *4. comic-action.com/episode/([\w-]*)
+    4. comic-action.com/episode/([\w-]*)
    *5. comic-days.com/episode/([\w-]*)
    *6. comic-gardo.com/episode/([\w-]*)
-   *7. comic-zenon.com/episode/([\w-]*)
-   *8. comicborder.com/episode/([\w-]*)
-   *9. kuragebunch.com/episode/([\w-]*)
-  *10. magcomi.com/episode/([\w-]*)
-  *11. pocket.shonenmagazine.com/episode/([\w-]*)
+    7. comic-zenon.com/episode/([\w-]*)
+    8. comicborder.com/episode/([\w-]*)
+    9. kuragebunch.com/episode/([\w-]*)
+   10. magcomi.com/episode/([\w-]*)
+   11. pocket.shonenmagazine.com/episode/([\w-]*)
   *12. shonenjumpplus.com/episode/([\w-]*)
-  *13. shonenmagazine.com/episode/([\w-]*)
-  *14. tonarinoyj.jp/episode/([\w-]*)
-  *15. viewer.heros-web.com/episode/([\w-]*)
+  *13. tonarinoyj.jp/episode/([\w-]*)
+   14. viewer.heros-web.com/episode/([\w-]*)
 
 
 >>>>>>>>輸入exit退出<<<<<<<<

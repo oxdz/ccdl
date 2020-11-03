@@ -23,7 +23,6 @@ Supported sites:
   + **`magcomi.com`**
   + **`pocket.shonenmagazine.com`**
   + **`shonenjumpplus.com`**
-  + **`shonenmagazine.com`**
   + **`tonarinoyj.jp`**
   + **`viewer.heros-web.com`**
 

@@ -49,7 +49,7 @@ class ComicAction(object):
         self._driver = driver
 
     @staticmethod
-    def get_comic_json(driver):
+    def get_comic_json(linkinfo: ComicLinkInfo, driver = None):
         r"""
         """
         comic_json = {
@@ -57,14 +57,21 @@ class ComicAction(object):
             "subtitle": None,
             "pages": [],
         }
+        if linkinfo.param[1] == 1 and driver:
+            driver.get(linkinfo.url)
+            elem = WebDriverWait(driver, WAIT_TIME, 0.5).until(
+                lambda x: x.find_element_by_id("episode-json"),
+                message="無法定位元素 episode-json" + ", 獲取json對象數據失敗")
 
-        elem = WebDriverWait(driver, WAIT_TIME, 0.5).until(
-            lambda x: x.find_element_by_id("episode-json"),
-            message="無法定位元素 episode-json" + ", 獲取json對象數據失敗")
-
-        json_dataValue = elem.get_attribute("data-value")
-        json_dataValue = json.loads(json_dataValue)
-
+            json_dataValue = elem.get_attribute("data-value")
+            json_dataValue = json.loads(json_dataValue)
+        elif linkinfo.param[1] == 0:
+            rq = requests.get(linkinfo.url+".json", headers = RqHeaders())
+            if rq.status_code != 200:
+                raise ValueError(linkinfo.url+".json")
+            json_dataValue = rq.json()
+        else:
+            raise ValueError("linkinfo.param[1] not 1 or 0, :"+linkinfo.site_name)
         comic_json["subtitle"] = json_dataValue["readableProduct"]["title"].replace("?", "？")
         comic_json["title"] = json_dataValue["readableProduct"]["series"]["title"].replace("?", "？")
         for page in json_dataValue["readableProduct"]["pageStructure"]["pages"]:
@@ -106,8 +113,7 @@ class ComicAction(object):
 
     def downloader(self):
         # https://<domain: comic-action.com ...>/episode/13933686331648942300
-        self._driver.get(self._linkinfo.url)
-        comic_json = ComicAction.get_comic_json(self._driver)
+        comic_json = ComicAction.get_comic_json(self._linkinfo, self._driver)
         total_pages = len(comic_json["pages"])
         show_bar = ProgressBar(total_pages)
         cc_mkdir("./漫畫/" + \
