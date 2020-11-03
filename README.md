@@ -101,9 +101,9 @@ Supported sites:
     8. comicborder.com/episode/([\w-]*)
     9. kuragebunch.com/episode/([\w-]*)
    10. magcomi.com/episode/([\w-]*)
-   11. pocket.shonenmagazine.com/episode/([\w-]*)
+  *11. pocket.shonenmagazine.com/episode/([\w-]*)
   *12. shonenjumpplus.com/episode/([\w-]*)
-  *13. tonarinoyj.jp/episode/([\w-]*)
+   13. tonarinoyj.jp/episode/([\w-]*)
    14. viewer.heros-web.com/episode/([\w-]*)
 
 
