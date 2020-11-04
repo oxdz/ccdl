@@ -26,5 +26,8 @@ Supported sites:
   + **`tonarinoyj.jp`**
   + **`viewer.heros-web.com`**
 
++ comic_earthstar
+  + **`viewer.comic-earthstar.jp`**
+
 + ganma:
   + **`ganma.jp`**

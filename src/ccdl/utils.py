@@ -14,7 +14,7 @@ from selenium import webdriver
 
 _site_reader = {
     # "domain": ["reader", RegExp, param1, param2, ...]
-    "r.binb.jp":                        ["binb", "r.binb.jp/epm/([\w_]+)/", 1],
+    "r.binb.jp":                        ["binb", "r.binb.jp/epm/([\w-]+)/", 1],
     "www.cmoa.jp":                      ["binb", "www.cmoa.jp/bib/speedreader/speed.html\?cid=([\w-]+)&u0=(\d)&u1=(\d)", 1],
     "booklive.jp":                      ["binb", "booklive.jp/bviewer/s/\?cid=([\w-]*)&", 1],
     "takeshobo.co.jp":                  ["binb", "[\w-]+.takeshobo.co.jp/manga/([\w-]+)/_files/([0-9]+)/", 0],
@@ -35,7 +35,7 @@ _site_reader = {
     "tonarinoyj.jp":                    ["comic_action", "episode/([\w-]*)", 0],
     "viewer.heros-web.com":             ["comic_action", "episode/([\w-]*)", 0],
 
-    "viewer.comic-earthstar.jp":        ["comic_earthstar", None],
+    "viewer.comic-earthstar.jp":        ["comic_earthstar", "cid=([\w-]*)"],
 
     "comic-walker.com":                 ["comic_walker", None],
 

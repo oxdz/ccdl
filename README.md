@@ -28,6 +28,9 @@ Supported sites:
   + **`tonarinoyj.jp`**
   + **`viewer.heros-web.com`**
 
++ comic_earthstar
+  + **`viewer.comic-earthstar.jp`**
+
 + ganma:
   + **`ganma.jp`**
 
@@ -106,6 +109,7 @@ Supported sites:
    13. tonarinoyj.jp/episode/([\w-]*)
    14. viewer.heros-web.com/episode/([\w-]*)
 
+   15. viewer.comic-earthstar.jp/viewer.html?cid=([\w-]*)
 
 >>>>>>>>輸入exit退出<<<<<<<<
 

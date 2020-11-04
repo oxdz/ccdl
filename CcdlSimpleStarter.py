@@ -6,7 +6,7 @@ import time
 
 from selenium import webdriver
 
-from ccdl import Binb2, ComicAction, ComicLinkInfo, Ganma
+from ccdl import Binb2, ComicAction, ComicEarthstar, ComicLinkInfo, Ganma
 
 if not os.path.exists("log"):
     os.makedirs("log")
@@ -55,6 +55,7 @@ if __name__ == "__main__":
     print("   13. tonarinoyj.jp/episode/([\w-]*)")
     print("   14. viewer.heros-web.com/episode/([\w-]*)")
     print()
+    print("   15. viewer.comic-earthstar.jp/viewer.html?cid=([\w-]*)")
     print("\n>>>>>>>>輸入exit退出<<<<<<<<\n")
     
     while True:
@@ -74,6 +75,8 @@ if __name__ == "__main__":
             reader = Ganma(link_info, None)
         elif link_info.reader == "comic_action":
             reader = ComicAction(link_info, driver)
+        elif link_info.reader == "comic_earthstar":
+            reader = ComicEarthstar(link_info, driver)
         else:
             print("not supported")
             sys.exit()
@@ -83,3 +86,4 @@ if __name__ == "__main__":
         except Exception as e:
             logger.warning("下載失敗! " + str(e))
             print("下載失敗! " + str(e))
+            raise e
