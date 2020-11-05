@@ -37,7 +37,7 @@ _site_reader = {
 
     "viewer.comic-earthstar.jp":        ["comic_earthstar", "cid=([\w-]*)"],
 
-    "comic-walker.com":                 ["comic_walker", None],
+    "comic-walker.com":                 ["comic_walker", 'cid=([\w-]*)'],
 
     "viewer.ganganonline.com":          ["ganganonline", None],
 

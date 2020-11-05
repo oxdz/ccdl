@@ -6,7 +6,8 @@ import time
 
 from selenium import webdriver
 
-from ccdl import Binb2, ComicAction, ComicEarthstar, ComicLinkInfo, Ganma
+from ccdl import (Binb2, ComicAction, ComicEarthstar, ComicLinkInfo,
+                  ComicWalker, Ganma)
 
 if not os.path.exists("log"):
     os.makedirs("log")
@@ -37,7 +38,7 @@ if __name__ == "__main__":
         print("您可於 http://npm.taobao.org/mirrors/chromedriver/ 下載\n")
     
     print("Supported sites:\n")
-   
+
     print("    1. r.binb.jp/epm/([\w_]+)/")
     print("  **2. www.cmoa.jp/bib/speedreader/speed.html\?cid=([\w-]+)&u0=(\d)&u1=(\d)")
     print()
@@ -56,15 +57,18 @@ if __name__ == "__main__":
     print("   14. viewer.heros-web.com/episode/([\w-]*)")
     print()
     print("   15. viewer.comic-earthstar.jp/viewer.html?cid=([\w-]*)")
+    print()
+    print("   16. https://comic-walker.com/viewer/?...&cid=([\w-]*)")
     print("\n>>>>>>>>輸入exit退出<<<<<<<<\n")
-    
+
     while True:
         url = input("url: ")
 
         if url == 'exit':
             print('Bye~')
             time.sleep(0.5)
-            driver.quit()
+            if driver:
+                driver.quit()
             sys.exit()
 
         link_info = ComicLinkInfo(url)
@@ -77,6 +81,8 @@ if __name__ == "__main__":
             reader = ComicAction(link_info, driver)
         elif link_info.reader == "comic_earthstar":
             reader = ComicEarthstar(link_info, driver)
+        elif link_info.reader == "comic_walker":
+            reader = ComicWalker(link_info, None)
         else:
             print("not supported")
             sys.exit()
@@ -86,4 +92,3 @@ if __name__ == "__main__":
         except Exception as e:
             logger.warning("下載失敗! " + str(e))
             print("下載失敗! " + str(e))
-            raise e

@@ -31,6 +31,9 @@ Supported sites:
 + comic_earthstar
   + **`viewer.comic-earthstar.jp`**
 
++ comic_walker
+  + **`comic-walker.com`**
+
 + ganma:
   + **`ganma.jp`**
 
