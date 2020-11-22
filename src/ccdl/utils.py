@@ -79,12 +79,9 @@ class SiteReaderLoad(object):
 
     @staticmethod
     def register(reader_name):
-        def decorator(func):
-            @wraps(func)
-            def wrapper(*args, **kwargs):
-                return func(*args, **kwargs)
-            SiteReaderLoad.__reader_reg[reader_name] = func
-            return wrapper
+        def decorator(reader_cls):
+            SiteReaderLoad.__reader_reg[reader_name] = reader_cls
+            return reader_cls
         return decorator
     
     @staticmethod
