@@ -4,6 +4,7 @@ import os
 import random
 import re
 import time
+from functools import singledispatch, wraps
 
 import requests
 from requests import models
@@ -17,11 +18,11 @@ _site_reader = {
     "r.binb.jp":                        ["binb", "r.binb.jp/epm/([\w-]+)/", 1],
     "www.cmoa.jp":                      ["binb", "www.cmoa.jp/bib/speedreader/speed.html\?cid=([\w-]+)&u0=(\d)&u1=(\d)", 1],
     "booklive.jp":                      ["binb", "booklive.jp/bviewer/s/\?cid=([\w-]*)&", 1],
-    "takeshobo.co.jp":                  ["binb", "[\w-]+.takeshobo.co.jp/manga/([\w-]+)/_files/([0-9]+)/", 0],
-    "www.comic-valkyrie.com":           ["binb", "www.comic-valkyrie.com/samplebook/([\w-]*)/", 0],
-    "futabanet.jp":                     ["binb", "futabanet.jp/common/dld/zip/([\w-]*)/", 0],
-    "comic-polaris.jp":                 ["binb", "comic-polaris.jp/ptdata/([\w-]*)/([\w-]*)/", 0],
-    "www.shonengahosha.co.jp":          ["binb", "www.shonengahosha.co.jp/([\w-]*)/([\w-]*)/", 0],
+    # "takeshobo.co.jp":                  ["binb", "[\w-]+.takeshobo.co.jp/manga/([\w-]+)/_files/([0-9]+)/", 0],
+    # "www.comic-valkyrie.com":           ["binb", "www.comic-valkyrie.com/samplebook/([\w-]*)/", 0],
+    # "futabanet.jp":                     ["binb", "futabanet.jp/common/dld/zip/([\w-]*)/", 0],
+    # "comic-polaris.jp":                 ["binb", "comic-polaris.jp/ptdata/([\w-]*)/([\w-]*)/", 0],
+    # "www.shonengahosha.co.jp":          ["binb", "www.shonengahosha.co.jp/([\w-]*)/([\w-]*)/", 0],
 
     "comic-action.com":                 ["comic_action", "episode/([\w-]*)", 0],
     "comic-days.com":                   ["comic_action", "episode/([\w-]*)", 1],
@@ -54,6 +55,9 @@ _site_reader = {
 
 
 class SiteReaderLoad(object):
+
+    __reader_reg = {}
+
     @staticmethod
     def readers():
         return [_site_reader[x][0] for x in _site_reader]
@@ -63,7 +67,7 @@ class SiteReaderLoad(object):
         return [x for x in _site_reader]
 
     @staticmethod
-    def get_reader(site_name):
+    def reader_name(site_name):
         return _site_reader[site_name][0] if site_name in _site_reader else None
 
     @staticmethod
@@ -73,8 +77,22 @@ class SiteReaderLoad(object):
         """
         return _site_reader[site_name][1:]
 
-    # @staticmethod 
-    #     return globals()[reader].get_image if reader in globals() else None
+    @staticmethod
+    def register(reader_name):
+        def decorator(func):
+            # @wraps(func)
+            def wrapper(*args, **kwargs):
+                func(*args, **kwargs)
+            SiteReaderLoad.__reader_reg[reader_name] = func
+            return wrapper
+        return decorator
+    
+    @staticmethod
+    def reader_cls(reader_name):
+        if reader_name in SiteReaderLoad.__reader_reg:
+            return SiteReaderLoad.__reader_reg[reader_name]
+        else:
+            return None
 
 
 class ComicLinkInfo(object):
@@ -106,8 +124,8 @@ class ComicLinkInfo(object):
         return match
 
     @property
-    def reader(self):
-        return SiteReaderLoad.get_reader(self.site_name)
+    def reader_name(self):
+        return SiteReaderLoad.reader_name(self.site_name)
 
     @property
     def param(self):
@@ -122,8 +140,8 @@ class ComicLinkInfo(object):
         return param
 
     # @property
-    # def func_entry(self):
-    #     return SiteReaderLoad.get_reader_func_entry(self.reader)
+    # def Reader(self):
+    #     return SiteReaderLoad.reader_cls(self.reader_name)
 
 
 class ProgressBar(object):

@@ -9,7 +9,7 @@ import requests
 from requests.api import get
 from selenium import webdriver
 
-from .utils import ComicLinkInfo, ProgressBar, RqHeaders, cc_mkdir
+from .utils import ComicLinkInfo, ProgressBar, RqHeaders, cc_mkdir, SiteReaderLoad
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +54,7 @@ class GanmaRqHeaders(RqHeaders):
         return self
 
 
+@SiteReaderLoad.register("ganma")
 class Ganma(object):
     def __init__(self, link_info: ComicLinkInfo, driver=None):
         super().__init__()
@@ -169,7 +170,7 @@ class Ganma(object):
 
         with ThreadPoolExecutor(max_workers=8) as executor:
             count = 0
-            for x in executor.map(Ganma.downld_one, downld_gen.img_url_g,
+            for x in executor.map(self.downld_one, downld_gen.img_url_g,
                                   downld_gen.file_path_g):
                 count += 1
                 progress_bar.show(count)

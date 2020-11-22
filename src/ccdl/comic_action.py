@@ -10,7 +10,7 @@ from PIL import Image
 from selenium import webdriver
 from selenium.webdriver.support.wait import WebDriverWait
 
-from .utils import ComicLinkInfo, ProgressBar, RqHeaders, cc_mkdir, draw_image
+from .utils import ComicLinkInfo, ProgressBar, RqHeaders, SiteReaderLoad, cc_mkdir, draw_image
 
 logger = logging.getLogger("comic-action")
 
@@ -42,6 +42,7 @@ class proc_img_co:
         return img_copy
 
 
+@SiteReaderLoad.register('comic_action')
 class ComicAction(object):
     def __init__(self, linkinfo: ComicLinkInfo, driver: webdriver.Chrome):
         super().__init__()
@@ -113,16 +114,16 @@ class ComicAction(object):
 
     def downloader(self):
         # https://<domain: comic-action.com ...>/episode/13933686331648942300
-        comic_json = ComicAction.get_comic_json(self._linkinfo, self._driver)
+        comic_json = self.get_comic_json(self._linkinfo, self._driver)
         total_pages = len(comic_json["pages"])
         show_bar = ProgressBar(total_pages)
         cc_mkdir("./漫畫/" + \
             "/".join((comic_json["title"], comic_json["subtitle"])))
         with ThreadPoolExecutor(max_workers=4) as executor:
             count = 0
-            for x in executor.map(ComicAction.downld_one,
-                                  ComicAction.gen_url(comic_json),
-                                  ComicAction.gen_fpth(comic_json)):
+            for x in executor.map(self.downld_one,
+                                  self.gen_url(comic_json),
+                                  self.gen_fpth(comic_json)):
                 count += 1
                 show_bar.show(count)
 

@@ -8,6 +8,7 @@ from selenium import webdriver
 
 from ccdl import (Binb2, ComicAction, ComicEarthstar, ComicLinkInfo,
                   ComicWalker, Ganma)
+from ccdl.utils import SiteReaderLoad
 
 if not os.path.exists("log"):
     os.makedirs("log")
@@ -58,7 +59,7 @@ if __name__ == "__main__":
     print()
     print("   15. viewer.comic-earthstar.jp/viewer.html?cid=([\w-]*)")
     print()
-    print("   16. https://comic-walker.com/viewer/?...&cid=([\w-]*)")
+    print("   16. comic-walker.com/viewer/?...&cid=([\w-]*)")
     print("\n>>>>>>>>輸入exit退出<<<<<<<<\n")
 
     while True:
@@ -73,16 +74,9 @@ if __name__ == "__main__":
 
         link_info = ComicLinkInfo(url)
 
-        if link_info.site_name == "www.cmoa.jp" or link_info.site_name == "r.binb.jp":
-            reader = Binb2(link_info, driver)
-        elif link_info.site_name == "ganma.jp":
-            reader = Ganma(link_info, None)
-        elif link_info.reader == "comic_action":
-            reader = ComicAction(link_info, driver)
-        elif link_info.reader == "comic_earthstar":
-            reader = ComicEarthstar(link_info, driver)
-        elif link_info.reader == "comic_walker":
-            reader = ComicWalker(link_info, None)
+        reader_cls = SiteReaderLoad.reader_cls(link_info.reader_name)
+        if reader_cls:
+            reader = reader_cls(link_info, driver)
         else:
             print("not supported")
             sys.exit()

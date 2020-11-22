@@ -22,7 +22,7 @@ from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 
-from .utils import (ComicLinkInfo, ProgressBar, RqHeaders, cc_mkdir,
+from .utils import (ComicLinkInfo, ProgressBar, RqHeaders, SiteReaderLoad, cc_mkdir,
                     draw_image, get_blob_content)
 
 logger = logging.getLogger(__name__)
@@ -280,7 +280,7 @@ class ImageDescrambleCoords(dict):
         # t n p
         return {"t": n, "n": r, "p": e}
 
-
+# @SiteReaderLoad.register('binb')
 class Binb(object):
     def __init__(self, link_info: ComicLinkInfo, driver: webdriver.Chrome):
         super().__init__()
@@ -376,6 +376,7 @@ class Binb(object):
             ActionChains(self._driver).send_keys(Keys.LEFT).perform()
 
 
+@SiteReaderLoad.register('binb')
 class Binb2(object):
     def __init__(self, link_info: ComicLinkInfo, driver: webdriver.Chrome):
         super().__init__()
@@ -578,6 +579,6 @@ class Binb2(object):
         count = 0
         progressBar.show(count)
         with ThreadPoolExecutor(max_workers=4) as executor:
-            for x in executor.map(Binb2.downld_one, downGen.img_url_g, downGen.file_path_g, downGen.coords, [self._cookies for x in range(len(self._manga_info))]):
+            for x in executor.map(self.downld_one, downGen.img_url_g, downGen.file_path_g, downGen.coords, [self._cookies for x in range(len(self._manga_info))]):
                 count += 1
                 progressBar.show(count)
