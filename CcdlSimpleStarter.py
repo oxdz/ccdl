@@ -79,7 +79,7 @@ if __name__ == "__main__":
             reader = reader_cls(link_info, driver)
         else:
             print("not supported")
-            sys.exit()
+            continue
 
         try:
             reader.downloader()

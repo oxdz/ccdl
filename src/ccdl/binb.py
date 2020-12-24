@@ -5,11 +5,9 @@ import logging
 import math
 import random
 import re
-from re import L, purge
 import time
 from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
-from PIL.Image import NONE
 
 import numpy as np
 import requests
@@ -31,15 +29,45 @@ logger = logging.getLogger(__name__)
 WAIT_TIME = 90
 
 
-def edge_connection_offset(img_np):
-    ij = []
-    for x in range(len(img_np) - 1):
-        cnt = []
-        h = img_np[x].shape[0]
-        for y in range(10):
-            cnt.append(sum(abs(img_np[x][h - 1] - img_np[x + 1][y])))
-        ij.append(cnt.index(max(cnt)) + 1)
-    return ij
+def edge_connection_offset(imgs_split_3_pages):
+    """
+    :param imgs_split_3_pages: [[img0_0, img0_1, img_0_2], ...]
+    :return: (offset_1, offset_2)
+    :rtype: tuple
+    """
+    def calculate_similarity(a, b):
+        count = 0
+        img_xor = np.logical_xor(a, b)
+        for z in img_xor:
+            for x in z:
+                if not x:
+                    count += 1
+                else:
+                    count -= 1
+        return count / img_xor.size
+    ij = [[], []]
+    for page in imgs_split_3_pages:
+        for x in range(2):
+            img_ = []
+            for offset in range(3, 6):
+                img_.append(np.array(page[x].crop(
+                    (0, page[x].height - offset, page[x].width, page[x].height - offset + 3)).convert('1')))
+            b = np.array(page[x+1].crop((0, 0, page[1].width, 3)).convert('1'))
+            score = [(i+3, calculate_similarity(img_[i], b))
+                     for i in range(len(img_))]
+            score.sort(key=lambda x: x[1], reverse=True)
+            ij[x].append(score[0][0])
+
+    offset = [None, None]
+    for i in range(2):
+        max_count = 0
+        offset_1 = None
+        for x in list(set(ij[i])):
+            if max_count < ij[i].count(x):
+                max_count = ij[i].count(x)
+                offset[i] = x
+
+    return tuple(offset)
 
 
 def gen_file_path(link_info: ComicLinkInfo, driver: webdriver.Chrome):
@@ -61,22 +89,22 @@ def gen_file_path(link_info: ComicLinkInfo, driver: webdriver.Chrome):
             raise ValueError("Unusual cid!")
 
     elif link_info.site_name == "r.binb.jp":
-        pass
+        return 'binb/{}'.format(int(time.time()*1000))
 
     elif link_info.site_name == "booklive.jp":
-        pass
+        return 'booklive/{}'.format(int(time.time()*1000))
 
     elif link_info.site_name == "www.comic-valkyrie.com":
-        pass
+        return 'comic-valkyrie/{}'.format(int(time.time()*1000))
 
     elif link_info.site_name == "futabanet.jp":
-        pass
+        return 'futabanet/{}'.format(int(time.time()*1000))
 
     elif link_info.site_name == "comic-polaris.jp":
-        pass
+        return 'comic-polaris/{}'.format(int(time.time()*1000))
 
     elif link_info.site_name == "www.shonengahosha.co.jp":
-        pass
+        return 'shonengahosha/{}'.format(int(time.time()*1000))
     # elif domain == "":
     #     pass
 
@@ -280,7 +308,8 @@ class ImageDescrambleCoords(dict):
         # t n p
         return {"t": n, "n": r, "p": e}
 
-# @SiteReaderLoad.register('binb')
+
+@SiteReaderLoad.register("binb")
 class Binb(object):
     def __init__(self, link_info: ComicLinkInfo, driver: webdriver.Chrome):
         super().__init__()
@@ -330,6 +359,7 @@ class Binb(object):
         progress_bar = ProgressBar(self.page_number()[1])
         start_page = 0
         reader_flag = self._link_info.param[1]
+        imgs_split_3_pages = []
         while(start_page < self.page_number()[1]):
             for i in range(self.page_number()[0], start_page, -1):
                 imgs = []
@@ -354,29 +384,24 @@ class Binb(object):
                     except Exception as e:
                         logger.error(str(e))
                         raise e
-                imgs_np = []
-                for x in range(len(imgs)):
-                    imgs_np.append(np.array(imgs[x].convert('1')).astype(int))
-                ij = edge_connection_offset(imgs_np)
-                w = 0
-                h = 0
-                for x in imgs:
-                    w += x.size[0]
-                    h += x.size[1]
-                w = int(w / 3)
-                img3t1 = Image.new('RGB', (w, h - 12))
-                img3t1.paste(imgs[0], (0, 0))
-                img3t1.paste(imgs[1], (0, imgs[0].size[1] - ij[0]))
-                img3t1.paste(imgs[2], (0, imgs[0].size[1] +
-                                       imgs[1].size[1] - ij[0] - ij[1]))
-                img3t1.save(
-                    './{}/target/{}.png'.format(file_path, i))
                 start_page += 1
+                imgs_split_3_pages.append(imgs)
                 progress_bar.show(start_page)
             ActionChains(self._driver).send_keys(Keys.LEFT).perform()
+        i, j = edge_connection_offset(imgs_split_3_pages)
+        count = 0
+        print("開始渲染圖片...")
+        for x in imgs_split_3_pages:
+            count += 1
+            img_new = Image.new(
+                'RGB', (x[0].width, (x[0].height + x[1].height + x[2].height - i - j)))
+            img_new.paste(x[0], (0, 0))
+            img_new.paste(x[1], (0, x[0].height - i))
+            img_new.paste(x[2], (0, x[0].height - i + x[1].height - j))
+            img_new.save(file_path+'/target/{}.png'.format(count))
+        print("完成!")
 
-
-@SiteReaderLoad.register('binb')
+@SiteReaderLoad.register('binb2')
 class Binb2(object):
     def __init__(self, link_info: ComicLinkInfo, driver: webdriver.Chrome):
         super().__init__()
@@ -507,14 +532,16 @@ class Binb2(object):
             self._manga_title = None
         else:
             # Windows 路径 非法字符
-            self._manga_title = re.sub("[\|\*\<\>\"\\\/\:]", "_", self._manga_title)
+            self._manga_title = re.sub(
+                "[\|\*\<\>\"\\\/\:]", "_", self._manga_title)
             self._manga_title = self._manga_title.replace('?', '？')
-        
+
         self._manga_subtitle = cntntinfo["items"][0]["SubTitle"]
         if not self._manga_subtitle:
             self._manga_subtitle = None
         else:
-            self._manga_subtitle = re.sub("[\|\*\<\>\"\\\/\:]", "_", self._manga_subtitle)
+            self._manga_subtitle = re.sub(
+                "[\|\*\<\>\"\\\/\:]", "_", self._manga_subtitle)
             self._manga_subtitle = self._manga_subtitle.replace('?', '？')
 
         if not (self._manga_subtitle or self._manga_title):
