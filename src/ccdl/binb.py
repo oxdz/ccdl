@@ -385,9 +385,13 @@ class Binb(object):
                         logger.error(str(e))
                         raise e
                 start_page += 1
-                imgs_split_3_pages.append(imgs)
+                imgs_split_3_pages.append((i, imgs))
                 progress_bar.show(start_page)
             ActionChains(self._driver).send_keys(Keys.LEFT).perform()
+        imgs_split_3_pages = dict(imgs_split_3_pages)
+        imgs_split_3_pages = list(zip(imgs_split_3_pages.keys(), imgs_split_3_pages.values()))
+        imgs_split_3_pages.sort(key = lambda x: x[0])
+        imgs_split_3_pages = [x[1] for x in imgs_split_3_pages]
         i, j = edge_connection_offset(imgs_split_3_pages)
         count = 0
         print("開始渲染圖片...")
