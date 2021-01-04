@@ -29,46 +29,106 @@ logger = logging.getLogger(__name__)
 WAIT_TIME = 90
 
 
-def edge_connection_offset(imgs_split_3_pages):
+class N21(object):
     """
-    :param imgs_split_3_pages: [[img0_0, img0_1, img_0_2], ...]
-    :return: (offset_1, offset_2)
-    :rtype: tuple
+    docstring
     """
-    def calculate_similarity(a, b):
-        count = 0
-        img_xor = np.logical_xor(a, b)
-        for z in img_xor:
-            for x in z:
-                if not x:
-                    count += 1
-                else:
-                    count -= 1
-        return count / img_xor.size
-    ij = [[], []]
-    for page in imgs_split_3_pages:
-        for x in range(2):
-            img_ = []
-            for offset in range(3, 6):
-                img_.append(np.array(page[x].crop(
-                    (0, page[x].height - offset, page[x].width, page[x].height - offset + 3)).convert('1')))
-            b = np.array(page[x+1].crop((0, 0, page[1].width, 3)).convert('1'))
-            score = [(i+3, calculate_similarity(img_[i], b))
-                     for i in range(len(img_))]
-            score.sort(key=lambda x: x[1], reverse=True)
-            ij[x].append(score[0][0])
 
-    offset = [None, None]
-    for i in range(2):
-        max_count = 0
-        offset_1 = None
-        for x in list(set(ij[i])):
-            if max_count < ij[i].count(x):
-                max_count = ij[i].count(x)
-                offset[i] = x
+    def __init__(self, dirpath) -> None:
+        super().__init__()
+        if dirpath[:-1] in ('\\', '/'):
+            self._dirpath = dirpath
+        else:
+            self._dirpath = dirpath + '/'
+        try:
+            os.makedirs(self._dirpath + 'target/')
+        except Exception:
+            pass
 
-    return tuple(offset)
+    def load_imgs(self, dirpath) -> dict:
+        """
+        :returns: i
+        """
+        ...
+        # fl = os.listdir(dirpath)
+        # fl = [x for x in fl if not os.path.isdir(dirpath + x)]
+        # if len(fl) < 1:
+        #     raise ValueError('No image found :{}'.format(dirpath))
+        # fmt = fl[0].split('.')[-1]
+        # img_dict = {}
+        # for fpath in fl:
+        #     f_re = [int(x)-1 for x in fpath[:-(len(fmt)+1)].split("-")]
+        #     if f_re[0] not in img_dict:
+        #         img_dict[f_re[0]] = [None for x in range(3)]
+        #     img_dict[f_re[0]][f_re[1]] = Image.open(
+        #         dirpath+fpath).convert('1')
+        # for x in iter(img_dict.keys()):
+        #     if None in img_dict[x]:
+        #         print("page{}")
+        # return img_dict
 
+    def edge_connection_offset(self, imgs_split_3_pages):
+        """
+        :param imgs_split_3_pages: [[img0_0, img0_1, img_0_2], ...]
+        :return: (offset_1, offset_2)
+        :rtype: tuple
+        """
+        def calculate_similarity(a, b):
+            count = 0
+            img_xor = np.logical_xor(a, b)
+            for z in img_xor:
+                for x in z:
+                    if not x:
+                        count += 1
+                    else:
+                        count -= 1
+            return count / img_xor.size
+
+        ij = [[], []]
+        for page in imgs_split_3_pages:
+            for x in range(2):
+                img_ = []
+                for offset in range(3, 18):
+                    img_.append(np.array(page[x].crop(
+                        (0, page[x].height - offset, page[x].width, page[x].height - offset + 3)).convert('1')))
+                b = np.array(page[x+1].crop((0, 0, page[1].width, 3)).convert('1'))
+                score = [(i+3, calculate_similarity(img_[i], b))
+                         for i in range(len(img_))]
+                score.sort(key=lambda x: x[1], reverse=True)
+                ij[x].append(score[0][0])
+
+        offset = [None, None]
+        for i in range(2):
+            max_count = 0
+            offset_1 = None
+            for x in list(set(ij[i])):
+                if max_count < ij[i].count(x):
+                    max_count = ij[i].count(x)
+                    offset[i] = x
+
+        return tuple(offset)
+
+    def crop_paste(self, img_chunks, i, j):
+        """
+        :param img_chunks: [img_c0, img_c1, img0_c2],
+        :returns: An ~PIL.Image.Image object.
+        """
+
+        img_new = Image.new('RGB', (img_chunks[0].width, (
+            img_chunks[0].height + img_chunks[1].height + img_chunks[2].height - i - j)))
+        img_new.paste(img_chunks[0], (0, 0))
+        img_new.paste(img_chunks[1], (0, img_chunks[0].height - i))
+        img_new.paste(
+            img_chunks[2], (0, img_chunks[0].height - i + img_chunks[1].height - j))
+        return img_new
+        # img_new.save(file_path+'/target/{}.png'.format(count))
+        # print("完成!")
+
+    def run(self, imgs, index):
+        # imgs_dict = self.load_imgs(self._dirpath + "source/")
+        img_new = self.crop_paste(
+            imgs, *self.edge_connection_offset([imgs]))
+        img_new.save(self._dirpath + 'target/{}.png'.format(index))
 
 def gen_file_path(link_info: ComicLinkInfo, driver: webdriver.Chrome):
     if link_info.site_name == "www.cmoa.jp":
@@ -322,8 +382,6 @@ class Binb(object):
         """
         page_elem_id = 'menu_slidercaption'
         match = re.search("cid=([0-9a-zA-Z_]+)", self._driver.current_url)
-        if not match or match.groups()[0] != self._link_info.param[0][0]:
-            self._driver.get(self._link_info.url)
         pageNum = []
         count = 8
         while len(pageNum) != 2:
@@ -350,20 +408,21 @@ class Binb(object):
 
     def downloader(self):
         # self._driver.get(self._link_info.url)
+        self._driver.get(self._link_info.url)
         self.page_number()
         file_path = "./漫畫/" + gen_file_path(self._link_info, self._driver)
         if cc_mkdir(file_path) != 0:
             return -1
+        n21 = N21(file_path)
         while(self.page_number()[0] > 1):
             ActionChains(self._driver).send_keys(Keys.RIGHT).perform()
         progress_bar = ProgressBar(self.page_number()[1])
         start_page = 0
         reader_flag = self._link_info.param[1]
-        imgs_split_3_pages = []
         while(start_page < self.page_number()[1]):
             for i in range(self.page_number()[0], start_page, -1):
                 imgs = []
-                for j in range(1, 3 + 1):
+                for j in range(1, 4):
                     try:
                         blob_url = WebDriverWait(self._driver, WAIT_TIME, 0.5).until(
                             lambda x: x.find_element_by_xpath(
@@ -384,26 +443,11 @@ class Binb(object):
                     except Exception as e:
                         logger.error(str(e))
                         raise e
+                n21.run(imgs, i)
                 start_page += 1
-                imgs_split_3_pages.append((i, imgs))
                 progress_bar.show(start_page)
             ActionChains(self._driver).send_keys(Keys.LEFT).perform()
-        imgs_split_3_pages = dict(imgs_split_3_pages)
-        imgs_split_3_pages = list(zip(imgs_split_3_pages.keys(), imgs_split_3_pages.values()))
-        imgs_split_3_pages.sort(key = lambda x: x[0])
-        imgs_split_3_pages = [x[1] for x in imgs_split_3_pages]
-        i, j = edge_connection_offset(imgs_split_3_pages)
-        count = 0
-        print("開始渲染圖片...")
-        for x in imgs_split_3_pages:
-            count += 1
-            img_new = Image.new(
-                'RGB', (x[0].width, (x[0].height + x[1].height + x[2].height - i - j)))
-            img_new.paste(x[0], (0, 0))
-            img_new.paste(x[1], (0, x[0].height - i))
-            img_new.paste(x[2], (0, x[0].height - i + x[1].height - j))
-            img_new.save(file_path+'/target/{}.png'.format(count))
-        print("完成!")
+
 
 @SiteReaderLoad.register('binb2')
 class Binb2(object):
