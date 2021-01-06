@@ -2,11 +2,9 @@
 
 This is a package for downloading online comics.
 
-> The old version has been moved to branch m.v1.6 !
-
 Supported sites:  
 
-+ binb:  
++ binb **`*`** :  
   + **`r.binb.jp`**  
   + **`www.cmoa.jp`**  
   + **`booklive.jp`**  
@@ -15,27 +13,30 @@ Supported sites:
   + **`comic-polaris.jp`**  
   + **`www.shonengahosha.co.jp`**  
 
-+ comic_action:
-  + **`comic-action.com`**
-  + **`comic-days.com`**
-  + **`comic-gardo.com`**
-  + **`comic-zenon.com`**
-  + **`comicborder.com`**
-  + **`kuragebunch.com`**
-  + **`magcomi.com`**
-  + **`pocket.shonenmagazine.com`**
-  + **`shonenjumpplus.com`**
-  + **`tonarinoyj.jp`**
-  + **`viewer.heros-web.com`**
++ comic_action:  
+  + **`comic-action.com`**  
+  + **`comic-days.com *`**  
+  + **`comic-gardo.com *`**  
+  + **`comic-zenon.com`**  
+  + **`comicborder.com`**  
+  + **`kuragebunch.com`**  
+  + **`magcomi.com`**  
+  + **`pocket.shonenmagazine.com *`**  
+  + **`shonenjumpplus.com *`**  
+  + **`tonarinoyj.jp`**  
+  + **`viewer.heros-web.com`**  
 
-+ comic_earthstar
-  + **`viewer.comic-earthstar.jp`**
++ comic_earthstar:  
+  + **`viewer.comic-earthstar.jp`**  
 
-+ comic_walker
-  + **`comic-walker.com`**
++ comic_walker:  
+  + **`comic-walker.com`**  
 
 + ganma:
-  + **`ganma.jp`**
+  + **`ganma.jp`**  
+
++ urasunday:  
+  + **`urasunday.com`**  
 
 ## Install
 
@@ -76,6 +77,16 @@ driver = webdriver.Chrome(executable_path='./chromedriver')
 link_info = ComicLinkInfo(url)
 
 reader = ComicAction(link_info, driver)
+# or
+"""
+Reader = SiteReaderLoad.reader_cls(link_info.reader_name)
+if Reader:
+  reader = Reader(link_info, driver)
+else:
+  print("not supported")
+  return -1
+"""
+
 reader.downloader()
 ```
 
@@ -84,35 +95,15 @@ reader.downloader()
 > Windows users can download the executable and double-click to run it.  
 > The search path for chromedriver is the directory where the application resides.
 
-If chromedriver exists: For sites with \* before the serial number, if necessary, login in the browser that opens automatically before you enter the URL. If it is \*\*, you also need to load (you can do this in any TAB) the URL in this browser.  
+If chromedriver exists: For sites with \*, if necessary, login in the browser that opens automatically before you enter the URL.You also need to load (you can do this in any TAB) the URL in this browser.  
 
 ```sh
 $ python CcdlSimpleStarter.py
 
 源碼: https://github.com/vircoys/ccdl
 
-（序號含*）如需登入請提前在程式啟動的瀏覽器中登入，(**)並加載目標url（任意標籤頁）！
+如需登入（含*）請提前在程式啟動的瀏覽器中登入並加載目標url（任意標籤頁）！
 
-Supported sites:
-
-   *1. r.binb.jp/epm/([\w_]+)/
-  **2. www.cmoa.jp/bib/speedreader/speed.html\?cid=([\w-]+)&u0=(\d)&u1=(\d)
-
-    3. ganma.jp/xx/xx-xx-xx-xx.../...
-
-    4. comic-action.com/episode/([\w-]*)
-   *5. comic-days.com/episode/([\w-]*)
-   *6. comic-gardo.com/episode/([\w-]*)
-    7. comic-zenon.com/episode/([\w-]*)
-    8. comicborder.com/episode/([\w-]*)
-    9. kuragebunch.com/episode/([\w-]*)
-   10. magcomi.com/episode/([\w-]*)
-  *11. pocket.shonenmagazine.com/episode/([\w-]*)
-  *12. shonenjumpplus.com/episode/([\w-]*)
-   13. tonarinoyj.jp/episode/([\w-]*)
-   14. viewer.heros-web.com/episode/([\w-]*)
-
-   15. viewer.comic-earthstar.jp/viewer.html?cid=([\w-]*)
 
 >>>>>>>>輸入exit退出<<<<<<<<
 

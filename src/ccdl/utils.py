@@ -40,13 +40,13 @@ _site_reader = {
 
     "comic-walker.com":                 ["comic_walker", 'cid=([\w-]*)'],
 
-    "viewer.ganganonline.com":          ["ganganonline", None],
+    # "viewer.ganganonline.com":          ["ganganonline", None],
 
-    "www.manga-doa.com":                ["manga_doa", None],
+    # "www.manga-doa.com":                ["manga_doa", None],
 
-    "www.sukima.me":                    ["sukima", None],
+    # "www.sukima.me":                    ["sukima", None],
 
-    "www.sunday-webry.com":             ["sunday_webry", None],
+    # "www.sunday-webry.com":             ["sunday_webry", None],
 
     "urasunday.com":                    ["urasunday", None],
 
