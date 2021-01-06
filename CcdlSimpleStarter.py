@@ -32,34 +32,12 @@ if __name__ == "__main__":
     is_exist = os.path.exists(executable_path)
     print("\n源碼: https://github.com/vircoys/ccdl")
     if is_exist:
-        print("\n（序號含*）如需登入請提前在程式啟動的瀏覽器中登入，(**)並加載目標url（任意標籤頁）！\n")
+        print("\n如需登入（含*）請提前在程式啟動的瀏覽器中登入，並加載目標url（任意標籤頁）！\n")
         driver = webdriver.Chrome(executable_path=executable_path)
     else:
-        print("\n由於未在程式所在目錄發現chromedriver，部分基於selenium採集的站點（序號含*）將無法進行。")
+        print("\n由於未在程式所在目錄發現chromedriver，部分基於selenium採集的站點將無法進行。")
         print("您可於 http://npm.taobao.org/mirrors/chromedriver/ 下載\n")
-    
-    print("Supported sites:\n")
 
-    print("    1. r.binb.jp/epm/([\w_]+)/")
-    print("  **2. www.cmoa.jp/bib/speedreader/speed.html\?cid=([\w-]+)&u0=(\d)&u1=(\d)")
-    print()
-    print("    3. ganma.jp/xx/xx-xx-xx-xx.../...")
-    print()
-    print("    4. comic-action.com/episode/([\w-]*)")
-    print("   *5. comic-days.com/episode/([\w-]*)")
-    print("   *6. comic-gardo.com/episode/([\w-]*)")
-    print("    7. comic-zenon.com/episode/([\w-]*)")
-    print("    8. comicborder.com/episode/([\w-]*)")
-    print("    9. kuragebunch.com/episode/([\w-]*)")
-    print("   10. magcomi.com/episode/([\w-]*)")
-    print("  *11. pocket.shonenmagazine.com/episode/([\w-]*)")
-    print("  *12. shonenjumpplus.com/episode/([\w-]*)")
-    print("   13. tonarinoyj.jp/episode/([\w-]*)")
-    print("   14. viewer.heros-web.com/episode/([\w-]*)")
-    print()
-    print("   15. viewer.comic-earthstar.jp/viewer.html?cid=([\w-]*)")
-    print()
-    print("   16. comic-walker.com/viewer/?...&cid=([\w-]*)")
     print("\n>>>>>>>>輸入exit退出<<<<<<<<\n")
 
     while True:
@@ -74,9 +52,9 @@ if __name__ == "__main__":
 
         link_info = ComicLinkInfo(url)
 
-        reader_cls = SiteReaderLoad.reader_cls(link_info.reader_name)
-        if reader_cls:
-            reader = reader_cls(link_info, driver)
+        Reader = SiteReaderLoad.reader_cls(link_info.reader_name)
+        if Reader:
+            reader = Reader(link_info, driver)
         else:
             print("not supported")
             continue
