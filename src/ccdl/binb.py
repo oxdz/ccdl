@@ -154,6 +154,9 @@ def gen_file_path(link_info: ComicLinkInfo, driver: webdriver.Chrome):
     elif link_info.site_name == "booklive.jp":
         return 'booklive/{}'.format(int(time.time()*1000))
 
+    elif link_info.site_name == "takeshobo.co.jp":
+        return 'takeshobo/{}'.format(int(time.time()*1000))
+
     elif link_info.site_name == "www.comic-valkyrie.com":
         return 'comic-valkyrie/{}'.format(int(time.time()*1000))
 

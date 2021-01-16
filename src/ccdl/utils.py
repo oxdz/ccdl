@@ -116,8 +116,8 @@ class ComicLinkInfo(object):
             return None
         match = match.groups()
         match = match[0] if match[0] else match[1]
-        if "shonengahosha.co.jp" in match:
-            match = "shonengahosha.co.jp"
+        if "takeshobo.co.jp" in match:
+            match = "takeshobo.co.jp"
         return match
 
     @property
