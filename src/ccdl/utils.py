@@ -18,7 +18,7 @@ _site_reader = {
     "r.binb.jp":                        ["binb2", "r.binb.jp/epm/([\w-]+)/", 1],
     "www.cmoa.jp":                      ["binb2", "www.cmoa.jp/bib/speedreader/speed.html\?cid=([\w-]+)&u0=(\d)&u1=(\d)", 1],
     "booklive.jp":                      ["binb", "booklive.jp/bviewer/s/\?cid=([\w-]*)&", 1],
-    "takeshobo.co.jp":                  ["binb", "[\w-]+.takeshobo.co.jp/manga/([\w-]+)/_files/([0-9]+)/", 0],
+    "takeshobo.co.jp":                  ["binb", "[\w-]+.takeshobo.co.jp/manga/([\w-]+)/_files/([\w-]+)/", 0],
     "www.comic-valkyrie.com":           ["binb", "www.comic-valkyrie.com/samplebook/([\w-]*)/", 0],
     "futabanet.jp":                     ["binb", "futabanet.jp/common/dld/zip/([\w-]*)/", 0],
     "comic-polaris.jp":                 ["binb", "comic-polaris.jp/ptdata/([\w-]*)/([\w-]*)/", 0],
