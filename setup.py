@@ -5,7 +5,7 @@ with open("./src/README.md", "r") as fh:
 
 setuptools.setup(
     name="ccdl", 
-    version="0.1.11_dev",
+    version="0.1.11",
     author="vircoys",
     author_email="vircoys@gmail.com",
     description="Online comic downloader",
@@ -16,10 +16,17 @@ setuptools.setup(
     package_dir={'': 'src'},
     packages=setuptools.find_packages(where='src'),
     classifiers=[
-        "Topic :: Multimedia :: Graphics",
         "Programming Language :: Python :: 3",
         "License :: Public Domain",
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
+    install_requires=[
+        "lxml",
+        "numpy",
+        "Pillow",
+        "requests",
+        "selenium",
+        "pyexecjs"
+    ]
 )

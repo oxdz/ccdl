@@ -8,6 +8,7 @@ Supported sites:
   + **`r.binb.jp`**  
   + **`www.cmoa.jp`**  
   + **`booklive.jp`**  
+  + **`takeshobo.co.jp`**
   + **`www.comic-valkyrie.com`**  
   + **`futabanet.jp`**  
   + **`comic-polaris.jp`**  

@@ -7,5 +7,6 @@ build/
 chromedriver*
 *.exe
 log/
-myvenv/*
+venv/*
 *.spec
+venv/bin/easy_install-3.7
