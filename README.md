@@ -13,6 +13,7 @@ Supported sites:
   + **`futabanet.jp`**  
   + **`comic-polaris.jp`**  
   + **`www.shonengahosha.co.jp`**  
+  + **`r-cbs.mangafactory.jp`**  
 
 + comic_action:  
   + **`comic-action.com`**  

@@ -91,7 +91,8 @@ class N21(object):
                 for offset in range(3, 18):
                     img_.append(np.array(page[x].crop(
                         (0, page[x].height - offset, page[x].width, page[x].height - offset + 3)).convert('1')))
-                b = np.array(page[x+1].crop((0, 0, page[1].width, 3)).convert('1'))
+                b = np.array(
+                    page[x+1].crop((0, 0, page[1].width, 3)).convert('1'))
                 score = [(i+3, calculate_similarity(img_[i], b))
                          for i in range(len(img_))]
                 score.sort(key=lambda x: x[1], reverse=True)
@@ -129,6 +130,7 @@ class N21(object):
         img_new = self.crop_paste(
             imgs, *self.edge_connection_offset([imgs]))
         img_new.save(self._dirpath + 'target/{}.png'.format(index))
+
 
 def gen_file_path(link_info: ComicLinkInfo, driver: webdriver.Chrome):
     if link_info.site_name == "www.cmoa.jp":
@@ -168,6 +170,9 @@ def gen_file_path(link_info: ComicLinkInfo, driver: webdriver.Chrome):
 
     elif link_info.site_name == "www.shonengahosha.co.jp":
         return 'shonengahosha/{}'.format(int(time.time()*1000))
+
+    elif link_info.site_name == "r-cbs.mangafactory.jp":
+        return 'mangafactory/{}'.format(int(time.time()*1000))
     # elif domain == "":
     #     pass
 
@@ -384,9 +389,8 @@ class Binb(object):
         return [current_page_numb:int, total_numb:int]
         """
         page_elem_id = 'menu_slidercaption'
-        match = re.search("cid=([0-9a-zA-Z_]+)", self._driver.current_url)
         pageNum = []
-        count = 8
+        count = 25
         while len(pageNum) != 2:
             if count > 0:
                 count -= 1
@@ -412,7 +416,10 @@ class Binb(object):
     def downloader(self):
         # self._driver.get(self._link_info.url)
         self._driver.get(self._link_info.url)
-        self.page_number()
+        WebDriverWait(self._driver, WAIT_TIME, 0.5).until(
+            lambda x: x.find_element_by_id('content'),
+            message="漫画加载超时"
+        )
         file_path = "./漫畫/" + gen_file_path(self._link_info, self._driver)
         if cc_mkdir(file_path) != 0:
             return -1

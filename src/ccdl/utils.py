@@ -23,6 +23,7 @@ _site_reader = {
     "futabanet.jp":                     ["binb", "futabanet.jp/common/dld/zip/([\w-]*)/", 0],
     "comic-polaris.jp":                 ["binb", "comic-polaris.jp/ptdata/([\w-]*)/([\w-]*)/", 0],
     "www.shonengahosha.co.jp":          ["binb", "www.shonengahosha.co.jp/([\w-]*)/([\w-]*)/", 0],
+    "r-cbs.mangafactory.jp":            ['binb', '', 1],
 
     "comic-action.com":                 ["comic_action", "episode/([\w-]*)", 0],
     "comic-days.com":                   ["comic_action", "episode/([\w-]*)", 1],
