@@ -390,11 +390,11 @@ class Binb(object):
         """
         page_elem_id = 'menu_slidercaption'
         pageNum = []
-        count = 25
+        count = 180
         while len(pageNum) != 2:
             if count > 0:
                 count -= 1
-                time.sleep(0.35)
+                time.sleep(0.5)
             else:
                 raise TimeoutException("")
             try:
