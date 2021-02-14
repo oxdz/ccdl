@@ -3,6 +3,7 @@ import os
 import platform
 import sys
 import time
+import traceback
 
 from selenium import webdriver
 
@@ -62,5 +63,5 @@ if __name__ == "__main__":
         try:
             reader.downloader()
         except Exception as e:
-            logger.warning("下載失敗! " + str(e))
-            print("下載失敗! " + str(e))
+            logger.error(traceback.format_exc())
+            print("下載失敗! \n" + traceback.format_exc()) 
