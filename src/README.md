@@ -14,6 +14,7 @@ Supported sites:
   + **`comic-polaris.jp`**  
   + **`www.shonengahosha.co.jp`**  
   + **`r-cbs.mangafactory.jp`**  
+  + **`comic-meteor.jp`**  
 
 + comic_action:  
   + **`comic-action.com`**  

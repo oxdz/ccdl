@@ -173,6 +173,10 @@ def gen_file_path(link_info: ComicLinkInfo, driver: webdriver.Chrome):
 
     elif link_info.site_name == "r-cbs.mangafactory.jp":
         return 'mangafactory/{}'.format(int(time.time()*1000))
+
+    elif link_info.site_name == "comic-meteor.jp":
+        return 'comic-meteor/{}'.format(int(time.time()*1000))
+
     # elif domain == "":
     #     pass
 
