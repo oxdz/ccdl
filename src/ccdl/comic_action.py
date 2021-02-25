@@ -10,7 +10,7 @@ from PIL import Image
 from selenium import webdriver
 from selenium.webdriver.support.wait import WebDriverWait
 
-from .utils import ComicLinkInfo, ProgressBar, RqHeaders, SiteReaderLoad, cc_mkdir, draw_image
+from .utils import ComicLinkInfo, ComicReader, ProgressBar, RqHeaders, SiteReaderLoader, cc_mkdir, draw_image
 
 logger = logging.getLogger("comic-action")
 
@@ -42,8 +42,8 @@ class proc_img_co:
         return img_copy
 
 
-@SiteReaderLoad.register('comic_action')
-class ComicAction(object):
+@SiteReaderLoader.register('comic_action')
+class ComicAction(ComicReader):
     def __init__(self, linkinfo: ComicLinkInfo, driver: webdriver.Chrome):
         super().__init__()
         self._linkinfo = linkinfo

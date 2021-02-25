@@ -9,7 +9,7 @@ from selenium import webdriver
 
 from ccdl import (Binb2, ComicAction, ComicEarthstar, ComicLinkInfo,
                   ComicWalker, Ganma)
-from ccdl.utils import SiteReaderLoad
+from ccdl.utils import SiteReaderLoader
 
 if not os.path.exists("log"):
     os.makedirs("log")
@@ -53,15 +53,15 @@ if __name__ == "__main__":
 
         link_info = ComicLinkInfo(url)
 
-        Reader = SiteReaderLoad.reader_cls(link_info.reader_name)
-        if Reader:
-            reader = Reader(link_info, driver)
+        reader = SiteReaderLoader(link_info, driver)
+        if reader is not None:
+            try:
+                reader.downloader()
+            except Exception as e:
+                logger.error(traceback.format_exc())
+                print("下載失敗! \n" + traceback.format_exc()) 
         else:
             print("not supported")
             continue
 
-        try:
-            reader.downloader()
-        except Exception as e:
-            logger.error(traceback.format_exc())
-            print("下載失敗! \n" + traceback.format_exc()) 
+

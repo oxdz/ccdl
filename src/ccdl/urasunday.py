@@ -6,14 +6,14 @@ from concurrent.futures import ThreadPoolExecutor
 import requests
 from requests.models import Response
 
-from .utils import (ComicLinkInfo, ProgressBar, RqHeaders, SiteReaderLoad,
+from .utils import (ComicLinkInfo, ComicReader, ProgressBar, RqHeaders, SiteReaderLoader,
                     cc_mkdir)
 
 logger = logging.getLogger(__name__)
 
 
-@SiteReaderLoad.register("urasunday")
-class Urasunday(object):
+@SiteReaderLoader.register("urasunday")
+class Urasunday(ComicReader):
     def __init__(self, linkinfo: ComicLinkInfo, driver=None) -> None:
         super().__init__()
         self._linkinfo = linkinfo

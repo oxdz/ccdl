@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import requests
 
-from .utils import ComicLinkInfo, ProgressBar, RqHeaders, SiteReaderLoad, cc_mkdir
+from .utils import ComicLinkInfo, ComicReader, ProgressBar, RqHeaders, SiteReaderLoader, cc_mkdir
 
 logger = logging.getLogger(__name__)
 
@@ -33,8 +33,8 @@ def write2jpg(img_, fpath):
         for x in img_:
             fp.write((x).to_bytes(length=1, byteorder='big'))
 
-@SiteReaderLoad.register('comic_walker')
-class ComicWalker(object):
+@SiteReaderLoader.register('comic_walker')
+class ComicWalker(ComicReader):
     def __init__(self, link_info: ComicLinkInfo, driver=None):
         super().__init__()
         self._link_info = link_info

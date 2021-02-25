@@ -11,7 +11,7 @@ import execjs
 import requests
 from PIL import Image
 
-from .utils import ComicLinkInfo, ProgressBar, RqHeaders, SiteReaderLoad, cc_mkdir, draw_image
+from .utils import ComicLinkInfo, ComicReader, ProgressBar, RqHeaders, SiteReaderLoader, cc_mkdir, draw_image
 
 logger = logging.getLogger(__name__)
 
@@ -147,8 +147,8 @@ class DownldGen(object):
             yield [self._base_url, x['file'], '/0.jpeg']
     
 
-@SiteReaderLoad.register('comic_earthstar')
-class ComicEarthstar(object):
+@SiteReaderLoader.register('comic_earthstar')
+class ComicEarthstar(ComicReader):
     def __init__(self, link_info: ComicLinkInfo, driver = None):
         super().__init__()
         self._link_info = link_info

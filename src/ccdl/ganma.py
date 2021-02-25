@@ -9,7 +9,7 @@ import requests
 from requests.api import get
 from selenium import webdriver
 
-from .utils import ComicLinkInfo, ProgressBar, RqHeaders, cc_mkdir, SiteReaderLoad
+from .utils import ComicLinkInfo, ComicReader, ProgressBar, RqHeaders, cc_mkdir, SiteReaderLoader
 
 logger = logging.getLogger(__name__)
 
@@ -54,8 +54,8 @@ class GanmaRqHeaders(RqHeaders):
         return self
 
 
-@SiteReaderLoad.register("ganma")
-class Ganma(object):
+@SiteReaderLoader.register("ganma")
+class Ganma(ComicReader):
     def __init__(self, link_info: ComicLinkInfo, driver=None):
         super().__init__()
         self._link_info = link_info

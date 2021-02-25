@@ -1,5 +1,4 @@
 import base64
-from copy import deepcopy
 import json
 import logging
 import math
@@ -7,6 +6,7 @@ import random
 import re
 import time
 from concurrent.futures import ThreadPoolExecutor
+from copy import deepcopy
 from io import BytesIO
 
 import numpy as np
@@ -20,8 +20,8 @@ from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 
-from .utils import (ComicLinkInfo, ProgressBar, RqHeaders, SiteReaderLoad, cc_mkdir,
-                    draw_image, get_blob_content)
+from .utils import (ComicLinkInfo, ComicReader, ProgressBar, RqHeaders, SiteReaderLoader,
+                    cc_mkdir, draw_image, get_blob_content, win_char_replace)
 
 logger = logging.getLogger(__name__)
 
@@ -381,8 +381,8 @@ class ImageDescrambleCoords(dict):
         return {"t": n, "n": r, "p": e}
 
 
-@SiteReaderLoad.register("binb")
-class Binb(object):
+@SiteReaderLoader.register("binb")
+class Binb(ComicReader):
     def __init__(self, link_info: ComicLinkInfo, driver: webdriver.Chrome):
         super().__init__()
         self._link_info = link_info
@@ -463,8 +463,8 @@ class Binb(object):
             ActionChains(self._driver).send_keys(Keys.LEFT).perform()
 
 
-@SiteReaderLoad.register('binb2')
-class Binb2(object):
+@SiteReaderLoader.register('binb2')
+class Binb2(ComicReader):
     def __init__(self, link_info: ComicLinkInfo, driver: webdriver.Chrome):
         super().__init__()
         self._link_info = link_info
@@ -594,17 +594,13 @@ class Binb2(object):
             self._manga_title = None
         else:
             # Windows 路径 非法字符
-            self._manga_title = re.sub(
-                "[\|\*\<\>\"\\\/\:]", "_", self._manga_title)
-            self._manga_title = self._manga_title.replace('?', '？')
+            self._manga_title = win_char_replace(self._manga_title)
 
         self._manga_subtitle = cntntinfo["items"][0]["SubTitle"]
         if not self._manga_subtitle:
             self._manga_subtitle = None
         else:
-            self._manga_subtitle = re.sub(
-                "[\|\*\<\>\"\\\/\:]", "_", self._manga_subtitle)
-            self._manga_subtitle = self._manga_subtitle.replace('?', '？')
+            self._manga_subtitle = win_char_replace(self._manga_subtitle)
 
         if not (self._manga_subtitle or self._manga_title):
             raise ValueError("")

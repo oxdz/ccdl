@@ -1,17 +1,10 @@
 import base64
-import json
 import os
-import random
 import re
-import time
-from functools import singledispatch, wraps
+from abc import ABCMeta, abstractmethod
+from typing import Iterable
 
-import requests
-from requests import models
 from selenium import webdriver
-
-# TODO
-# from requests.exceptions import ConnectionError
 
 _site_reader = {
     # "domain": ["reader", RegExp, param1, param2, ...]
@@ -52,55 +45,25 @@ _site_reader = {
 
     "urasunday.com":                    ["urasunday", None],
 
-    "ganma.jp":                         ["ganma", "ganma.jp/(?:([\w-]*)/([\w-]*)|([\w-]*))"]
+    "ganma.jp":                         ["ganma", "ganma.jp/(?:([\w-]*)/([\w-]*)|([\w-]*))"],
+
+    "yanmaga.jp":                       ['yanmaga', None]
 }
 
 
-class SiteReaderLoad(object):
-
-    __reader_reg = {}
-
-    @staticmethod
-    def readers():
-        return [_site_reader[x][0] for x in _site_reader]
-
-    @staticmethod
-    def sites():
-        return [x for x in _site_reader]
-
-    @staticmethod
-    def reader_name(site_name):
-        return _site_reader[site_name][0] if site_name in _site_reader else None
-
-    @staticmethod
-    def get_param(site_name):
-        r"""
-        return [RegExp, param1, param2,...]
-        """
-        return _site_reader[site_name][1:]
-
-    @staticmethod
-    def register(reader_name):
-        def decorator(reader_cls):
-            SiteReaderLoad.__reader_reg[reader_name] = reader_cls
-            return reader_cls
-        return decorator
-    
-    @staticmethod
-    def reader_cls(reader_name):
-        if reader_name in SiteReaderLoad.__reader_reg:
-            return SiteReaderLoad.__reader_reg[reader_name]
-        else:
-            return None
+class ComicReader(metaclass=ABCMeta):
+    @abstractmethod
+    def downloader(self):
+        ...
 
 
 class ComicLinkInfo(object):
     def __init__(self, url):
         super().__init__()
         self._url = url
-        self._site_name = None
-        self._reader = None
-        self._reader_func_entry = None
+        self.site_name = self._site_name()
+        self.reader_name = self._reader_name()
+        self.param = self._param()
 
     @property
     def url(self):
@@ -109,9 +72,11 @@ class ComicLinkInfo(object):
     @url.setter
     def url(self, url):
         self._url = url
+        self.site_name = self._site_name()
+        self.reader_name = self._reader_name()
+        self.param = self._param()
 
-    @property
-    def site_name(self):
+    def _site_name(self):
         match = re.search('//(?:(.*?)/|(.*))', self._url)
         # match = re.search('[a-zA-Z]*//(?:.*\.(.*)|(.*))\..*?/', self._url)
         if not match:
@@ -122,25 +87,66 @@ class ComicLinkInfo(object):
             match = "takeshobo.co.jp"
         return match
 
-    @property
-    def reader_name(self):
-        return SiteReaderLoad.reader_name(self.site_name)
+    def _reader_name(self):
+        return SiteReaderLoader.reader_name(self.site_name)
 
-    @property
-    def param(self):
-        r"""
+    def _param(self):
+        """
         return [param_regexp:list, param1, param2,...]
         """
-        param = SiteReaderLoad.get_param(self.site_name)
+        param = _site_reader[self.site_name][1:]    # param: [RegExp, p1, p2, ..., pn]
         if param and type(param) == list and param[0] and type(param[0]) == str:
             search = re.search(param[0], self._url)
             if search:
                 param[0] = [x for x in search.groups()]
+        # param: [[p01, ...], p1, p2, ..., pn]
         return param
 
-    # @property
-    # def Reader(self):
-    #     return SiteReaderLoad.reader_cls(self.reader_name)
+
+class SiteReaderLoader(object):
+
+    global _site_reader
+    __reader_reg = {}
+
+    def __new__(cls, linkinfo, driver=None) -> ComicReader:
+        reader = cls.__reader_reg.get(linkinfo.reader_name)
+        if reader is None:
+            return None
+        else:
+            return reader(linkinfo, driver)
+
+    @classmethod
+    def readers(cls):
+        return [_site_reader[x][0] for x in _site_reader]
+
+    @classmethod
+    def sites(cls):
+        return [x for x in _site_reader]
+
+    @classmethod
+    def reader_name(cls, site_name):
+        return _site_reader[site_name][0] if site_name in _site_reader else None
+
+    @classmethod
+    def get_param(cls, site_name):
+        r"""
+        return [RegExp, param1, param2,...]
+        """
+        return _site_reader[site_name][1:]
+
+    @classmethod
+    def register(cls, reader_name):
+        def decorator(reader_cls):
+            cls.__reader_reg[reader_name] = reader_cls
+            return reader_cls
+        return decorator
+
+    @classmethod
+    def reader_cls(cls, reader_name):
+        if reader_name in cls.__reader_reg:
+            return cls.__reader_reg[reader_name]
+        else:
+            return None
 
 
 class ProgressBar(object):
@@ -153,9 +159,11 @@ class ProgressBar(object):
         super().__init__()
         self._space = 50
         self._total = total
+        self._cset = 0
 
-
-    def show(self, current_set: int):
+    def show(self, current_set: int = None):
+        self._cset += 1
+        current_set = current_set if current_set else self._cset
         a = int((current_set / self._total) * self._space)
         b = self._space - a
         text = "\r|{}{}| {:>3s}% ({:>} of {:>})".format(
@@ -163,6 +171,18 @@ class ProgressBar(object):
         print(text, end='')
         if a == self._space:
             print('')
+
+
+class RqHeaders(dict):
+    def __init__(self, mapping=None):
+        mapping = mapping if isinstance(mapping, Iterable) else {}
+        super().__init__(mapping)
+        self.__setitem__(
+            'User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36')
+
+    def random_ua(self):
+        # self.__setitem__('User-Agent', )
+        pass
 
 
 def draw_image(img_source, img_target, src_x, src_y, swidth, sheight, x, y, width=None, height=None):
@@ -203,7 +223,8 @@ def cc_mkdir(fpath, model=0):
         print('創建文件夾: ' + fpath)
         return 0
 
-def get_blob_content(driver:webdriver.Chrome, uri):
+
+def get_blob_content(driver: webdriver.Chrome, uri):
     """
     获取浏览器中的blob对象的数据
     """
@@ -221,13 +242,8 @@ def get_blob_content(driver:webdriver.Chrome, uri):
     if type(result) == int:
         raise Exception("Request failed with status %s" % result)
     return base64.b64decode(result)
-    
-class RqHeaders(dict):
-    def __init__(self):
-        super().__init__()
-        self.__setitem__(
-            'User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36')
 
-    def random_ua(self):
-        # self.__setitem__('User-Agent', )
-        pass
+
+def win_char_replace(s: str):
+    s = re.sub("[\|\*\<\>\"\\\/\:]", "_", s).replace('?', '？')
+    return s
