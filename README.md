@@ -41,6 +41,9 @@ Supported sites:
 + urasunday:  
   + **`urasunday.com`**  
 
++ yanmaga:
+  + **`yanmaga.jp`**  
+
 ## Install
 
 For some sites, you'll need a version of [chromedriver](http://npm.taobao.org/mirrors/chromedriver/) that matches the version of Chrome you've installed.
@@ -82,12 +85,8 @@ link_info = ComicLinkInfo(url)
 reader = ComicAction(link_info, driver)
 # or
 """
-Reader = SiteReaderLoad.reader_cls(link_info.reader_name)
-if Reader:
-  reader = Reader(link_info, driver)
-else:
-  print("not supported")
-  return -1
+reader = SiteReaderLoader(link_info, driver)
+reader.downloader() if reader else print("不支持的網站")
 """
 
 reader.downloader()

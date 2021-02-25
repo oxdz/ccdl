@@ -5,7 +5,7 @@ with open("./src/README.md", "r") as fh:
 
 setuptools.setup(
     name="ccdl", 
-    version="0.1.11",
+    version="0.1.12",
     author="vircoys",
     author_email="vircoys@gmail.com",
     description="Online comic downloader",
@@ -27,6 +27,7 @@ setuptools.setup(
         "Pillow",
         "requests",
         "selenium",
-        "pyexecjs"
+        "pyexecjs",
+        "aiohttp"
     ]
 )

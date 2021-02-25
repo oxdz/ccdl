@@ -40,3 +40,6 @@ Supported sites:
 
 + urasunday:  
   + **`urasunday.com`**  
+
++ yanmaga:
+  + **`yanmaga.jp`**  
