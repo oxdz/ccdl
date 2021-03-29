@@ -34,7 +34,20 @@ if __name__ == "__main__":
     print("\n源碼: https://github.com/vircoys/ccdl")
     if is_exist:
         print("\n如需登入（含*）請提前在程式啟動的瀏覽器中登入，並加載目標url（任意標籤頁）！\n")
-        driver = webdriver.Chrome(executable_path=executable_path)
+        try:
+            driver = webdriver.Chrome(executable_path=executable_path)
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            print("Chrome啟動失敗! 請檢查Chrome與chromedriver版本\n" + traceback.format_exc())
+            driver = None
+            if input("Do you want to continue? （y/n）") in ('y','Y','YES'):
+                pass
+            else:
+                time.sleep(0.8)
+                print("Bye~")
+                time.sleep(0.8)
+
+                sys.exit()
     else:
         print("\n由於未在程式所在目錄發現chromedriver，部分基於selenium採集的站點將無法進行。")
         print("您可於 http://npm.taobao.org/mirrors/chromedriver/ 下載\n")
