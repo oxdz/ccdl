@@ -3,7 +3,8 @@ import os
 import re
 from abc import ABCMeta, abstractmethod
 from typing import Iterable
-
+import asyncio
+from aiohttp import ClientSession
 from selenium import webdriver
 
 _site_reader = {
@@ -17,7 +18,7 @@ _site_reader = {
     "comic-polaris.jp":                 ["binb", "comic-polaris.jp/ptdata/([\w-]*)/([\w-]*)/", 0],
     "www.shonengahosha.co.jp":          ["binb", "www.shonengahosha.co.jp/([\w-]*)/([\w-]*)/", 0],
     "r-cbs.mangafactory.jp":            ['binb', '', 1],
-    "comic-meteor.jp":                  ['binb', '', 0],
+    "comic-meteor.jp":                  ['binb3', '', 0],
 
     "comic-action.com":                 ["comic_action", "episode/([\w-]*)", 0],
     "comic-days.com":                   ["comic_action", "episode/([\w-]*)", 1],
@@ -247,3 +248,57 @@ def get_blob_content(driver: webdriver.Chrome, uri):
 def win_char_replace(s: str):
     s = re.sub("[\|\*\<\>\"\\\/\:]", "_", s).replace('?', '？')
     return s
+
+
+def url_join(*args):
+    args = list(args)
+    l = len(args)
+    for i in range(l):
+        args[i] = args[i][1:] if args[i][0] == '/' else args[i]
+        args[i] = args[i] + '/' if args[i][-1] != '/' and i != l-1 else args[i]
+    return "".join(args)
+
+
+def downld_url(url: list, headers=None, cookies=None, bar=None):
+    """
+    :param url: url list
+    :param headers:  (list, tuple) for each || dict for all
+    :param cookies:  (list, tuple) for each || dict for all
+    :param bar: ProgressBar object 
+    :returns: [bstr if success else None, ...]
+    """
+    async def _dld(index, url, *, max_retries=3, headers=None, cookies=None):
+        nonlocal bar
+        async with ClientSession(headers=headers, cookies=cookies) as session:
+            for t in range(max_retries):
+                async with session.get(url=url) as response:
+                    try:
+                        r = (index, await response.content.read())
+                        break
+                    except Exception as e:
+                        print(e)
+                        r = (index, None)
+            bar.show() if bar else None
+            return r
+
+    fs = []
+    for x in range(len(url)):
+        fs.append(asyncio.ensure_future(
+            _dld(x, url[x],
+                 headers=headers[x] if isinstance(
+                     headers, (list, tuple)) else headers,
+                 cookies=cookies[x] if isinstance(
+                     cookies, (list, tuple)) else cookies)))
+
+    loop = asyncio.get_event_loop()
+    done, pedding = loop.run_until_complete(asyncio.wait(fs))
+
+    r_dict = {}
+    for d in done:
+        r_t = d.result()
+        if isinstance(r_t, tuple):
+            r_dict[r_t[0]] = r_t[1]
+    result = []
+    for i in range(len(url)):
+        result.append(r_dict.get(i))
+    return result
