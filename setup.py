@@ -11,7 +11,7 @@ setuptools.setup(
     description="Online comic downloader",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/vircoys/ccdl",
+    url="https://github.com/oxdz/ccdl",
     license="unlicense",
     package_dir={'': 'src'},
     packages=setuptools.find_packages(where='src'),
