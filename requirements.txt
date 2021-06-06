@@ -4,3 +4,4 @@ Pillow
 requests
 selenium
 pyexecjs
+aiohttp
