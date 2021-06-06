@@ -25,13 +25,14 @@ if 'Linux' in platform.platform().split('-'):
 elif 'Windows' in platform.platform().split('-'):
     executable_path = './chromedriver.exe'
 else:
-    logger.error("platform not win or linux")
-    raise ValueError("os")
+    logger.error("platform not win or linux, may fail")
+    executable_path = './chromedriver'
+    # raise ValueError("os")
 
 if __name__ == "__main__":
     driver = None
     is_exist = os.path.exists(executable_path)
-    print("\n源碼: https://github.com/vircoys/ccdl")
+    print("\n源碼: https://github.com/oxdz/ccdl")
     if is_exist:
         print("\n如需登入（含*）請提前在程式啟動的瀏覽器中登入，並加載目標url（任意標籤頁）！\n")
         try:
@@ -39,6 +40,8 @@ if __name__ == "__main__":
         except Exception as e:
             logger.error(traceback.format_exc())
             print("Chrome啟動失敗! 請檢查Chrome與chromedriver版本\n" + traceback.format_exc())
+            print("您可於 http://npm.taobao.org/mirrors/chromedriver/ 下載\n")
+
             driver = None
             if input("Do you want to continue? （y/n）") in ('y','Y','YES'):
                 pass
