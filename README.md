@@ -115,6 +115,31 @@ url: https://comic-action.com/episode/13933686331709379523
 url:
 ```  
 
+## Build executable
+
+If you want to build the smallest executable file, please use the virtual environment to build
+
+```sh
+# create venv
+python -m venv ./venv
+
+# active venv
+./venv/Scripts/activate 
+
+# upgrade wheel, setuptools
+./venv/Scripts/pip install --upgrade setuptools wheel
+
+# install ccdl 
+./venv/Scripts/python ./setup.py install
+
+# install  pyinstaller
+./venv/Scripts/pip install pyinstaller
+
+# build executable
+# If there is an error that the file top_level.txt does not exist, create a new one
+./venv/Scripts/pyinstaller -F ./CcdlSimpleStarter.py 
+```
+
 ## LICENSE
 
 [Unlicense License](https://github.com/vircoys/ccdl/blob/master/LICENSE)
