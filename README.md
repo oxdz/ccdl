@@ -121,23 +121,23 @@ If you want to build the smallest executable file, please use the virtual enviro
 
 ```sh
 # create venv
-python -m venv ./venv
+$ python -m venv ./venv
 
 # active venv
-./venv/Scripts/activate 
+$ ./venv/Scripts/activate 
 
 # upgrade wheel, setuptools
-./venv/Scripts/pip install --upgrade setuptools wheel
+$ ./venv/Scripts/pip install --upgrade setuptools wheel
 
 # install ccdl 
-./venv/Scripts/python ./setup.py install
+$ ./venv/Scripts/python ./setup.py install
 
 # install  pyinstaller
-./venv/Scripts/pip install pyinstaller
+$ ./venv/Scripts/pip install pyinstaller
 
 # build executable
 # If there is an error that the file top_level.txt does not exist, create a new one
-./venv/Scripts/pyinstaller -F ./CcdlSimpleStarter.py 
+$ ./venv/Scripts/pyinstaller -F ./CcdlSimpleStarter.py 
 ```
 
 ## LICENSE
