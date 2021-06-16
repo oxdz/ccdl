@@ -49,7 +49,7 @@ Supported sites:
 For some sites, you'll need a version of [chromedriver](http://npm.taobao.org/mirrors/chromedriver/) that matches the version of Chrome you've installed.
 
 ```sh
-  $ git clone git@github.com:vircoys/ccdl.git
+  $ git clone git@github.com:oxdz/ccdl.git
 
   $ cd ./ccdl
   
