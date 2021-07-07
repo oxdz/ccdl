@@ -25,6 +25,7 @@ _site_reader = {
     "comic-gardo.com":                  ["comic_action", "episode/([\w-]*)", 1],
     "comic-zenon.com":                  ["comic_action", "episode/([\w-]*)", 0],
     "comicborder.com":                  ["comic_action", "episode/([\w-]*)", 0],
+    "comicbushi-web.com":               ["comic_action", "episode/([\w-]*)", 1],
     "kuragebunch.com":                  ["comic_action", "episode/([\w-]*)", 0],
     "magcomi.com":                      ["comic_action", "episode/([\w-]*)", 0],
     "pocket.shonenmagazine.com":        ["comic_action", "episode/([\w-]*)", 1],

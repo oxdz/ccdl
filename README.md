@@ -22,6 +22,7 @@ Supported sites:
   + **`comic-gardo.com *`**  
   + **`comic-zenon.com`**  
   + **`comicborder.com`**  
+  + **`comicbushi-web.com`**
   + **`kuragebunch.com`**  
   + **`magcomi.com`**  
   + **`pocket.shonenmagazine.com *`**  
