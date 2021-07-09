@@ -103,7 +103,7 @@ If chromedriver exists: For sites with \*, if necessary, login in the browser th
 ```sh
 $ python CcdlSimpleStarter.py
 
-源碼: https://github.com/vircoys/ccdl
+源碼: https://github.com/oxdz/ccdl
 
 如需登入（含*）請提前在程式啟動的瀏覽器中登入並加載目標url（任意標籤頁）！
 
@@ -143,4 +143,4 @@ $ ./venv/Scripts/pyinstaller -F ./CcdlSimpleStarter.py
 
 ## LICENSE
 
-[Unlicense License](https://github.com/vircoys/ccdl/blob/master/LICENSE)
+[Unlicense License](https://github.com/oxdz/ccdl/blob/master/LICENSE)
