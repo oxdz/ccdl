@@ -51,14 +51,15 @@ class ComicWalker(ComicReader):
 
     def downloader(self):
         comic_cid = self._link_info.param[0][0]
-        rq = requests.get(self._link_info.url, headers=RqHeaders())
+        comic_info_url = 'https://comicwalker-api.nicomanga.jp/api/v1/comicwalker/episodes/' + \
+            comic_cid
+        rq = requests.get(comic_info_url, headers=RqHeaders())
         if rq.status_code != 200:
-            raise ValueError(self._link_info.url)
-        comic_info = json.loads(
-            re.search("<script>\sdataLayer[\s\S]*?(\[.*\])[\s\S]*?</script>", rq.text).group(1))[0]
+            raise ValueError(comic_info_url)
+        comic_info = rq.json()
         base_fpath = "./漫畫/" + \
-            "/".join([comic_info["content_title"],
-                      comic_info["episode_title"]])
+            "/".join([comic_info["data"]["extra"]["content"]["title"],
+                      comic_info["data"]["result"]["title"]])
         # https://comicwalker-api.nicomanga.jp/api/v1/comicwalker/
         # https://ssl.seiga.nicovideo.jp/api/v1/comicwalker/episodes/
         url_json_comic = 'https://comicwalker-api.nicomanga.jp/api/v1/comicwalker/episodes/' + \

@@ -5,8 +5,9 @@ from .ganma import Ganma
 from .utils import ComicLinkInfo
 from .binb import Binb
 from .binb_v016452 import Binb2
+from .binb_v016301 import Binb3
 from .urasunday import Urasunday
 from .yanmaga import Yanmaga
 __all__ = [
-    'ComicLinkInfo', 'ComicAction', 'ComicEarthstar', 'ComicWalker', 'Ganma', 'Binb', 'Binb2', 'Urasunday', 'Yanmaga'
+    'ComicLinkInfo', 'ComicAction', 'ComicEarthstar', 'ComicWalker', 'Ganma', 'Binb', 'Binb2', "Binb3", 'Urasunday', 'Yanmaga'
 ]

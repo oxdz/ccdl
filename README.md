@@ -22,6 +22,7 @@ Supported sites:
   + **`comic-gardo.com *`**  
   + **`comic-zenon.com`**  
   + **`comicborder.com`**  
+  + **`comicbushi-web.com`**
   + **`kuragebunch.com`**  
   + **`magcomi.com`**  
   + **`pocket.shonenmagazine.com *`**  
@@ -49,7 +50,7 @@ Supported sites:
 For some sites, you'll need a version of [chromedriver](http://npm.taobao.org/mirrors/chromedriver/) that matches the version of Chrome you've installed.
 
 ```sh
-  $ git clone git@github.com:vircoys/ccdl.git
+  $ git clone git@github.com:oxdz/ccdl.git
 
   $ cd ./ccdl
   
@@ -102,7 +103,7 @@ If chromedriver exists: For sites with \*, if necessary, login in the browser th
 ```sh
 $ python CcdlSimpleStarter.py
 
-源碼: https://github.com/vircoys/ccdl
+源碼: https://github.com/oxdz/ccdl
 
 如需登入（含*）請提前在程式啟動的瀏覽器中登入並加載目標url（任意標籤頁）！
 
@@ -115,6 +116,31 @@ url: https://comic-action.com/episode/13933686331709379523
 url:
 ```  
 
+## Build executable
+
+If you want to build the smallest executable file, please use the virtual environment to build
+
+```sh
+# create venv
+$ python -m venv ./venv
+
+# active venv
+$ ./venv/Scripts/activate 
+
+# upgrade wheel, setuptools
+$ ./venv/Scripts/pip install --upgrade setuptools wheel
+
+# install ccdl 
+$ ./venv/Scripts/python ./setup.py install
+
+# install  pyinstaller
+$ ./venv/Scripts/pip install pyinstaller
+
+# build executable
+# If there is an error that the file top_level.txt does not exist, create a new one
+$ ./venv/Scripts/pyinstaller -F ./CcdlSimpleStarter.py 
+```
+
 ## LICENSE
 
-[Unlicense License](https://github.com/vircoys/ccdl/blob/master/LICENSE)
+[Unlicense License](https://github.com/oxdz/ccdl/blob/master/LICENSE)
