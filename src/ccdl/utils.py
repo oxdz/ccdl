@@ -247,7 +247,7 @@ def get_blob_content(driver: webdriver.Chrome, uri):
 
 
 def win_char_replace(s: str):
-    s = re.sub("[\|\*\<\>\"\\\/\:]", "_", s).replace('?', '？')
+    s = re.sub("[\|\*\<\>\"\\\/\:]", "_", s).replace('?', '？').replace(" ", "")
     return s
 
 

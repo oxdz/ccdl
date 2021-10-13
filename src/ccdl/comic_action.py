@@ -88,7 +88,7 @@ class ComicAction(ComicReader):
     @staticmethod
     def gen_fpth(comic_json: dict):
         bpth = "./漫畫/" + \
-            "/".join((comic_json["title"], comic_json["subtitle"]))
+            "/".join((win_char_replace(comic_json["title"]), win_char_replace(comic_json["subtitle"])))
         count = 0
         for x in range(len(comic_json["pages"])):
             count += 1
@@ -115,10 +115,11 @@ class ComicAction(ComicReader):
     def downloader(self):
         # https://<domain: comic-action.com ...>/episode/13933686331648942300
         comic_json = self.get_comic_json(self._linkinfo, self._driver)
+        comic_json["title"]
         total_pages = len(comic_json["pages"])
         show_bar = ProgressBar(total_pages)
         cc_mkdir("./漫畫/" + \
-            "/".join((comic_json["title"], comic_json["subtitle"])))
+            "/".join((win_char_replace(comic_json["title"]), win_char_replace(comic_json["subtitle"]))))
         with ThreadPoolExecutor(max_workers=4) as executor:
             count = 0
             for x in executor.map(self.downld_one,
