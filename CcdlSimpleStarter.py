@@ -6,6 +6,7 @@ import time
 import traceback
 
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 
 from ccdl import (Binb2, ComicAction, ComicEarthstar, ComicLinkInfo,
                   ComicWalker, Ganma)
@@ -17,14 +18,18 @@ if not os.path.exists("log"):
 log_file_path = "log/{}.log".format(time.strftime("%Y-%m-%d"))
 fh = logging.FileHandler(filename=log_file_path, encoding="UTF-8")
 logging.basicConfig(
-    handlers=[fh], format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    level=logging.INFO,
+    handlers=[fh],
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("CCDL")
+
 if 'Linux' in platform.platform().split('-'):
     executable_path = './chromedriver'
 elif 'Windows' in platform.platform().split('-'):
     executable_path = './chromedriver.exe'
     proxy_server = get_windwos_proxy()
     if proxy_server:
+        logger.info("Proxy Server Address (Enabled): {}".format(proxy_server))
         RqProxy.set_proxy(proxy_server, proxy_server)
     del proxy_server
 else:
@@ -32,7 +37,8 @@ else:
     executable_path = './chromedriver'
     # raise ValueError("os")
 chrome_options = webdriver.ChromeOptions()
-chrome_options.add_experimental_option("excludeSwitches", ["enable-automation", "enable-logging"])
+chrome_options.add_experimental_option("excludeSwitches",
+                                       ["enable-automation", "enable-logging"])
 
 if __name__ == "__main__":
     driver = None
@@ -41,14 +47,16 @@ if __name__ == "__main__":
     if is_exist:
         print("\n如需登入（含*）請提前在程式啟動的瀏覽器中登入，並加載目標url（任意標籤頁）！\n")
         try:
-            driver = webdriver.Chrome(executable_path=executable_path, options=chrome_options)
+            driver = webdriver.Chrome(options=chrome_options,
+                                      service=Service(executable_path))
         except Exception as e:
             logger.error(traceback.format_exc())
-            print("Chrome啟動失敗! 請檢查Chrome與chromedriver版本\n" + traceback.format_exc())
+            print("Chrome啟動失敗! 請檢查Chrome與chromedriver版本\n" +
+                  traceback.format_exc())
             print("您可於 http://npm.taobao.org/mirrors/chromedriver/ 下載\n")
 
             driver = None
-            if input("Do you want to continue? （y/n）") in ('y','Y','YES'):
+            if input("Do you want to continue? （y/n）") in ('y', 'Y', 'YES'):
                 pass
             else:
                 time.sleep(0.8)
@@ -80,7 +88,7 @@ if __name__ == "__main__":
                 reader.downloader()
             except Exception as e:
                 logger.error(traceback.format_exc())
-                print("下載失敗! \n" + traceback.format_exc()) 
+                print("下載失敗! \n" + traceback.format_exc())
         else:
             print("not supported")
             continue

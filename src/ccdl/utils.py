@@ -12,23 +12,21 @@ from selenium import webdriver
 def get_windwos_proxy():
     sub_key = "SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings"
     key  = winreg.OpenKey(winreg.HKEY_CURRENT_USER, sub_key, 0, winreg.KEY_QUERY_VALUE)
-
-    proxy_server =  winreg.QueryValueEx(key, "ProxyServer")
-    if len(proxy_server) >= 2:
-        return proxy_server[0]
-    else:
-        return None 
+    if winreg.QueryValueEx(key, "ProxyEnable")[0] != 0:
+        return winreg.QueryValueEx(key, "ProxyServer")[0]
 
 class RqProxy(object):
     __proxies = None
     @classmethod
     def set_proxy(cls, http_proxy:str, https_proxy:str):
         cls.__proxies = {}
-        cls.__proxies["http"] = "http://{}".format(http_proxy)
-        cls.__proxies["https"] = "http://{}".format(https_proxy)
+        if http_proxy:
+            cls.__proxies["http"] = "http://{}".format(http_proxy)
+        if https_proxy:
+            cls.__proxies["https"] = "http://{}".format(https_proxy)
     @classmethod
     def get_proxy(cls)->dict:
-        return cls.__proxies.copy() if cls.__proxies != None else None 
+        return cls.__proxies.copy() if cls.__proxies else None 
 
 _site_reader = {
     # "domain": ["reader", RegExp, param1, param2, ...]
