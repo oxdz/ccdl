@@ -24,7 +24,8 @@ if 'Linux' in platform.platform().split('-'):
 elif 'Windows' in platform.platform().split('-'):
     executable_path = './chromedriver.exe'
     proxy_server = get_windwos_proxy()
-    RqProxy.set_proxy(proxy_server, proxy_server)
+    if proxy_server:
+        RqProxy.set_proxy(proxy_server, proxy_server)
     del proxy_server
 else:
     logger.error("platform not win or linux, may failed")
