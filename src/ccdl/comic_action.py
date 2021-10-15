@@ -4,13 +4,14 @@ import logging
 import math
 from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
+from time import sleep, time
 
 import requests
 from PIL import Image
 from selenium import webdriver
 from selenium.webdriver.support.wait import WebDriverWait
 
-from .utils import ComicLinkInfo, ComicReader, ProgressBar, RqHeaders, SiteReaderLoader, cc_mkdir, draw_image, win_char_replace
+from .utils import ComicLinkInfo, ComicReader, ProgressBar, RqHeaders, RqProxy, SiteReaderLoader, cc_mkdir, draw_image, win_char_replace
 
 logger = logging.getLogger("comic-action")
 
@@ -67,7 +68,7 @@ class ComicAction(ComicReader):
             json_dataValue = elem.get_attribute("data-value")
             json_dataValue = json.loads(json_dataValue)
         elif linkinfo.param[1] == 0:
-            rq = requests.get(linkinfo.url+".json", headers = RqHeaders())
+            rq = requests.get(linkinfo.url+".json", headers = RqHeaders(), proxies=RqProxy.get_proxy())
             if rq.status_code != 200:
                 raise ValueError(linkinfo.url+".json")
             json_dataValue = rq.json()
@@ -99,7 +100,7 @@ class ComicAction(ComicReader):
         r"""
         :fpth: [basepath, fname]
         """
-        rq = requests.get(url, headers=RqHeaders())
+        rq = requests.get(url, headers=RqHeaders(), proxies=RqProxy.get_proxy())
         if rq.status_code != 200:
             raise ValueError(url)
         content = rq.content
@@ -117,9 +118,9 @@ class ComicAction(ComicReader):
         comic_json = self.get_comic_json(self._linkinfo, self._driver)
         comic_json["title"]
         total_pages = len(comic_json["pages"])
-        show_bar = ProgressBar(total_pages)
         cc_mkdir("./漫畫/" + \
             "/".join((win_char_replace(comic_json["title"]), win_char_replace(comic_json["subtitle"]))))
+        show_bar = ProgressBar(total_pages)
         with ThreadPoolExecutor(max_workers=4) as executor:
             count = 0
             for x in executor.map(self.downld_one,

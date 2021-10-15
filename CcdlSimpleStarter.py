@@ -9,7 +9,7 @@ from selenium import webdriver
 
 from ccdl import (Binb2, ComicAction, ComicEarthstar, ComicLinkInfo,
                   ComicWalker, Ganma)
-from ccdl.utils import SiteReaderLoader
+from ccdl.utils import RqProxy, SiteReaderLoader, get_windwos_proxy
 
 if not os.path.exists("log"):
     os.makedirs("log")
@@ -19,15 +19,19 @@ fh = logging.FileHandler(filename=log_file_path, encoding="UTF-8")
 logging.basicConfig(
     handlers=[fh], format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("CCDL")
-
 if 'Linux' in platform.platform().split('-'):
     executable_path = './chromedriver'
 elif 'Windows' in platform.platform().split('-'):
     executable_path = './chromedriver.exe'
+    proxy_server = get_windwos_proxy()
+    RqProxy.set_proxy(proxy_server, proxy_server)
+    del proxy_server
 else:
-    logger.error("platform not win or linux, may fail")
+    logger.error("platform not win or linux, may failed")
     executable_path = './chromedriver'
     # raise ValueError("os")
+chrome_options = webdriver.ChromeOptions()
+chrome_options.add_experimental_option("excludeSwitches", ["enable-automation", "enable-logging"])
 
 if __name__ == "__main__":
     driver = None
@@ -36,7 +40,7 @@ if __name__ == "__main__":
     if is_exist:
         print("\n如需登入（含*）請提前在程式啟動的瀏覽器中登入，並加載目標url（任意標籤頁）！\n")
         try:
-            driver = webdriver.Chrome(executable_path=executable_path)
+            driver = webdriver.Chrome(executable_path=executable_path, options=chrome_options)
         except Exception as e:
             logger.error(traceback.format_exc())
             print("Chrome啟動失敗! 請檢查Chrome與chromedriver版本\n" + traceback.format_exc())

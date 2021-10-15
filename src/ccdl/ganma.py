@@ -9,7 +9,7 @@ import requests
 from requests.api import get
 from selenium import webdriver
 
-from .utils import ComicLinkInfo, ComicReader, ProgressBar, RqHeaders, cc_mkdir, SiteReaderLoader
+from .utils import ComicLinkInfo, ComicReader, ProgressBar, RqHeaders, RqProxy, cc_mkdir, SiteReaderLoader
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +74,7 @@ class Ganma(ComicReader):
         rq = requests.get(url='https://ganma.jp/api/2.0/magazines/' +
                           self._manga_alias,
                           headers=self._headers.asmangainfo(),
-                          cookies=self._cookies)
+                          cookies=self._cookies, proxies=RqProxy.get_proxy())
         if rq.status_code != 200:
             logger.warning(str(rq.status_code) + ' ' + rq.text)
             return -1
@@ -106,7 +106,7 @@ class Ganma(ComicReader):
                                "password": passwd,
                                "mail": mail
                            },
-                           headers=self._headers)
+                           headers=self._headers, proxies=RqProxy.get_proxy())
 
         try:
             resp = rq.json()
@@ -133,7 +133,7 @@ class Ganma(ComicReader):
     def logout(self):
         rq = requests.delete(url="https://ganma.jp/api/1.0/session",
                              headers=self._headers.aslogout(),
-                             cookies=self._cookies)
+                             cookies=self._cookies, proxies=RqProxy.get_proxy())
         self._cookies = None
         if rq.status_code == 200:
             return 0
@@ -142,7 +142,7 @@ class Ganma(ComicReader):
 
     @staticmethod
     def downld_one(url, fpath):
-        rq = requests.get(url=url, headers=RqHeaders())
+        rq = requests.get(url=url, headers=RqHeaders(), proxies=RqProxy.get_proxy())
         if rq.status_code != 200:
             raise ValueError(url)
         else:
@@ -178,7 +178,7 @@ class Ganma(ComicReader):
         if manga_info["items"][indx]["afterwordImage"]["url"]:
             print("下載後記圖片！", end=" ")
             rq = requests.get(
-                url=manga_info["items"][indx]["afterwordImage"]["url"], headers=RqHeaders())
+                url=manga_info["items"][indx]["afterwordImage"]["url"], headers=RqHeaders(), proxies=RqProxy.get_proxy())
             if rq.status_code != 200:
                 logger.error("Error, afterword image: " +
                              manga_info["items"][indx]["afterwordImage"]["url"])

@@ -4,8 +4,31 @@ import re
 from abc import ABCMeta, abstractmethod
 from typing import Iterable
 import asyncio
+import winreg
 from aiohttp import ClientSession
+
 from selenium import webdriver
+
+def get_windwos_proxy():
+    sub_key = "SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings"
+    key  = winreg.OpenKey(winreg.HKEY_CURRENT_USER, sub_key, 0, winreg.KEY_QUERY_VALUE)
+
+    proxy_server =  winreg.QueryValueEx(key, "ProxyServer")
+    if len(proxy_server) >= 2:
+        return proxy_server[0]
+    else:
+        return None 
+
+class RqProxy(object):
+    __proxies = None
+    @classmethod
+    def set_proxy(cls, http_proxy:str, https_proxy:str):
+        cls.__proxies = {}
+        cls.__proxies["http"] = "http://{}".format(http_proxy)
+        cls.__proxies["https"] = "http://{}".format(https_proxy)
+    @classmethod
+    def get_proxy(cls)->dict:
+        return cls.__proxies.copy() if cls.__proxies != None else None 
 
 _site_reader = {
     # "domain": ["reader", RegExp, param1, param2, ...]
@@ -202,7 +225,7 @@ def cc_mkdir(fpath, model=0):
     """
     if model == 1:
         if os.path.exists(fpath):
-            print('\n當前一話的文件夾{}存在，繼續運行數據將被覆蓋！'.format(fpath))
+            print('\n當前一話的文件夾 "{}" 存在，繼續運行數據將被覆蓋！'.format(fpath))
             print('是否繼續運行？（y/n）')
             yn = input()
             return 0 if yn == 'y' or yn == 'yes' or yn == 'Y' else -1
@@ -212,7 +235,7 @@ def cc_mkdir(fpath, model=0):
             print('創建文件夾: ' + fpath)
             return 0
     if os.path.exists(fpath+'/source') and os.path.exists(fpath+'/target'):
-        print('\n當前一話的文件夾{}存在，繼續運行數據將被覆蓋，'.format(fpath))
+        print('\n當前一話的文件夾 "{}" 存在，繼續運行數據將被覆蓋，'.format(fpath))
         print('是否繼續運行？（y/n）')
         yn = input()
         return 0 if yn == 'y' or yn == 'yes' or yn == 'Y' else -1

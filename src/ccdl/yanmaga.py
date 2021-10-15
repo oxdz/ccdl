@@ -10,7 +10,7 @@ from aiohttp.client import ClientSession
 from PIL import Image
 from requests.api import request
 
-from .utils import (ComicLinkInfo, ComicReader, ProgressBar, RqHeaders,
+from .utils import (ComicLinkInfo, ComicReader, ProgressBar, RqHeaders, RqProxy,
                     SiteReaderLoader, cc_mkdir, draw_image)
 
 API_URL_ComicInfo = 'https://api2-yanmaga.comici.jp/book/Info?comici-viewer-id={}'
@@ -34,7 +34,7 @@ class Yanmaga(ComicReader):
         :returns: view_id
         """
         if re.match('https://yanmaga.jp/comics/(.+?)/[\w]+', url):
-            resp = requests.get(url, headers=RqHeaders())
+            resp = requests.get(url, headers=RqHeaders(), proxies=RqProxy.get_proxy())
             comici_vid = re.search(
                 "comici-viewer-id='([\w]+)'", resp.text).groups()[0]
         else:
@@ -47,7 +47,7 @@ class Yanmaga(ComicReader):
         :returns: title
         """
         rq = requests.get(url=API_URL_ComicInfo.format(
-            view_id), headers=headers)
+            view_id), headers=headers, proxies=RqProxy.get_proxy())
         return rq.json().get('result').get('title')
 
     def get_episode_info(self, view_id):
@@ -61,7 +61,7 @@ class Yanmaga(ComicReader):
         }
         """
         rq = requests.get(url=API_URL_EpisodeInfo.format(
-            view_id), headers=headers)
+            view_id), headers=headers, proxies=RqProxy.get_proxy())
         result = rq.json().get('result')
         epinfo = {}
         for r in result:
@@ -73,7 +73,7 @@ class Yanmaga(ComicReader):
 
     def get_content_info(self, view_id, page_to: int, page_from=0):
         rq = requests.get(API_URL_ContentsInfo.format(
-            view_id, page_from, page_to), headers=headers)
+            view_id, page_from, page_to), headers=headers, proxies=RqProxy.get_proxy())
         result = rq.json().get('result')
 
         urls = []

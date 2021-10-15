@@ -1,6 +1,7 @@
 lxml
 numpy
 Pillow
+urllib3
 requests
 selenium
 pyexecjs
