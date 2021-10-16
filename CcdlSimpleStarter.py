@@ -48,7 +48,7 @@ if __name__ == "__main__":
         print("\n如需登入（含*）請提前在程式啟動的瀏覽器中登入，並加載目標url（任意標籤頁）！\n")
         try:
             driver = webdriver.Chrome(options=chrome_options,
-                                      service=Service(executable_path))
+                                      executable_path=executable_path)
         except Exception as e:
             logger.error(traceback.format_exc())
             print("Chrome啟動失敗! 請檢查Chrome與chromedriver版本\n" +
@@ -80,8 +80,13 @@ if __name__ == "__main__":
                 driver.quit()
             sys.exit()
 
-        link_info = ComicLinkInfo(url)
-
+        try:
+            link_info = ComicLinkInfo(url)
+        except Exception as e:
+            logger.error("url: {}".format(url))
+            logging.error(e)
+            print("unsupported url: '{}'".format(url))
+            continue
         reader = SiteReaderLoader(link_info, driver)
         if reader is not None:
             try:

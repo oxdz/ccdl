@@ -4,29 +4,39 @@ import re
 from abc import ABCMeta, abstractmethod
 from typing import Iterable
 import asyncio
-import winreg
 from aiohttp import ClientSession
 
 from selenium import webdriver
 
-def get_windwos_proxy():
-    sub_key = "SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings"
-    key  = winreg.OpenKey(winreg.HKEY_CURRENT_USER, sub_key, 0, winreg.KEY_QUERY_VALUE)
-    if winreg.QueryValueEx(key, "ProxyEnable")[0] != 0:
-        return winreg.QueryValueEx(key, "ProxyServer")[0]
+try:
+    import winreg
+
+    def get_windwos_proxy():
+        sub_key = "SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings"
+        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER,
+                             sub_key, 0, winreg.KEY_QUERY_VALUE)
+        if winreg.QueryValueEx(key, "ProxyEnable")[0] != 0:
+            return winreg.QueryValueEx(key, "ProxyServer")[0]
+except:
+    def get_windwos_proxy():
+        return ""
+
 
 class RqProxy(object):
     __proxies = None
+
     @classmethod
-    def set_proxy(cls, http_proxy:str, https_proxy:str):
+    def set_proxy(cls, http_proxy: str, https_proxy: str):
         cls.__proxies = {}
         if http_proxy:
             cls.__proxies["http"] = "http://{}".format(http_proxy)
         if https_proxy:
             cls.__proxies["https"] = "http://{}".format(https_proxy)
+
     @classmethod
-    def get_proxy(cls)->dict:
-        return cls.__proxies.copy() if cls.__proxies else None 
+    def get_proxy(cls) -> dict:
+        return cls.__proxies.copy() if cls.__proxies else None
+
 
 _site_reader = {
     # "domain": ["reader", RegExp, param1, param2, ...]
