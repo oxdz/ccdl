@@ -39,6 +39,9 @@ Supported sites:
 + ganma:
   + **`ganma.jp`**  
 
++ sunday-webry:
+  + **`sunday-webry.com`**
+
 + urasunday:  
   + **`urasunday.com`**  
 

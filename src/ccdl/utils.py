@@ -74,7 +74,7 @@ _site_reader = {
 
     # "www.sukima.me":                    ["sukima", None],
 
-    # "www.sunday-webry.com":             ["sunday_webry", None],
+    "www.sunday-webry.com":             ["sunday_webry", None],
 
     "urasunday.com":                    ["urasunday", None],
 
@@ -194,6 +194,10 @@ class ProgressBar(object):
         self._total = total
         self._cset = 0
 
+    def reset(self):
+        self._cset = 0
+
+
     def show(self, current_set: int = None):
         self._cset += 1
         current_set = current_set if current_set else self._cset
@@ -227,7 +231,7 @@ def draw_image(img_source, img_target, src_x, src_y, swidth, sheight, x, y, widt
         (x, y))
 
 
-def cc_mkdir(fpath, model=0):
+def cc_mkdir(fpath, model=0) -> int:
     r"""
     :param model: model = 0, include two subfolders of source and target; model = 1, not include.
     """
