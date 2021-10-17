@@ -10,6 +10,8 @@ from .binb_v016301 import Binb3
 from .urasunday import Urasunday
 from .yanmaga import Yanmaga
 from .sunday_webry import SundayWebry
+from .ganganonline import Ganganonline
+
 __all__ = [
-    'ComicLinkInfo', 'ComicAction', 'ComicEarthstar', 'ComicWalker', 'Ganma', 'Binb', 'Binb2', "Binb3", 'SundayWebry', 'Urasunday', 'Yanmaga'
+    'ComicLinkInfo', 'ComicAction', 'ComicEarthstar', 'ComicWalker', 'Ganganonline', 'Ganma', 'Binb', 'Binb2', "Binb3", 'SundayWebry', 'Urasunday', 'Yanmaga'
 ]

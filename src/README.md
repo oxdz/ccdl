@@ -36,10 +36,13 @@ Supported sites:
 + comic_walker:  
   + **`comic-walker.com`**  
 
++ ganganonline:
+  + **`www.ganganonline.com`**
+
 + ganma:
   + **`ganma.jp`**  
 
-+ sunday-webry:
++ sunday-webry **`*`**:
   + **`sunday-webry.com`**
 
 + urasunday:  

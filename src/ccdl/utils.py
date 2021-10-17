@@ -1,11 +1,14 @@
+import asyncio
 import base64
+from io import BytesIO
+from logging import NOTSET
 import os
 import re
 from abc import ABCMeta, abstractmethod
 from typing import Iterable
-import asyncio
-from aiohttp import ClientSession
 
+from aiohttp import ClientSession
+from PIL import Image
 from selenium import webdriver
 
 try:
@@ -68,7 +71,7 @@ _site_reader = {
 
     "comic-walker.com":                 ["comic_walker", 'cid=([\w-]*)'],
 
-    # "viewer.ganganonline.com":          ["ganganonline", None],
+    "www.ganganonline.com":          ["ganganonline", None],
 
     # "www.manga-doa.com":                ["manga_doa", None],
 
@@ -196,7 +199,6 @@ class ProgressBar(object):
 
     def reset(self):
         self._cset = 0
-
 
     def show(self, current_set: int = None):
         self._cset += 1
@@ -338,3 +340,30 @@ def downld_url(url: list, headers=None, cookies=None, bar=None):
     for i in range(len(url)):
         result.append(r_dict.get(i))
     return result
+
+
+def write2file(file_path: str, img, page_num, file_ext: str, file_ext_dst: str = None, bar: ProgressBar = None):
+    '''
+    :param img: bytes or []bytes
+    :param page_num: total page if isinstance(img, list)t else current
+    :param file_ext: jpg | png | webp ...
+    '''
+    if isinstance(img, bytes):
+        p = os.path.join(file_path, str(page_num) + '.' + file_ext)
+        with open(p, 'wb') as fp:
+            fp.write(img)
+        return 0
+    elif isinstance(img, list):
+        pnum = 1
+        for img_ in img:
+            p = os.path.join(file_path, str(pnum) + '.')
+            if file_ext_dst:
+                Image.open(BytesIO(img_)).save(p+file_ext_dst)
+            else:
+                with open(p+file_ext, 'wb') as fp:
+                    fp.write(img_)
+            bar.show(pnum)
+            pnum += 1
+        return 0
+    else:
+        return -1

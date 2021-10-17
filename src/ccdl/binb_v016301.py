@@ -31,7 +31,6 @@ class Binb3(ComicReader):
         self.rq.mount(prefix='http://', adapter=http_adapter)
         if RqProxy.get_proxy() != None and len(RqProxy.get_proxy()) > 0:
             self.rq.proxies=RqProxy.get_proxy()
-        self.rq.me
         self._headers = {"referer": self._link_info.url}
 
     def image_coords(self, ptinfo):
