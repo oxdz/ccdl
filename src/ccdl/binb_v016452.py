@@ -14,7 +14,7 @@ from PIL import Image
 from selenium import webdriver
 
 
-from .utils import (ComicLinkInfo, ComicReader, ProgressBar, RqHeaders, SiteReaderLoader,
+from .utils import (ComicLinkInfo, ComicReader, ProgressBar, RqHeaders, RqProxy, SiteReaderLoader,
                     cc_mkdir, draw_image, win_char_replace)
 
 logger = logging.getLogger(__name__)
@@ -311,7 +311,7 @@ class Binb2(ComicReader):
         r"""
         :return: cid, rq.cookies, k
         """
-        rq = requests.get(self._link_info.url)
+        rq = requests.get(self._link_info.url, proxies=RqProxy.get_proxy())
         self._u0 = None
         self._u1 = None
         if rq.status_code != 200:
@@ -344,7 +344,7 @@ class Binb2(ComicReader):
         r"""
 
         """
-        rq = requests.get(self.gen_cntntInfo_url(), cookies=self._cookies)
+        rq = requests.get(self.gen_cntntInfo_url(), cookies=self._cookies, proxies=RqProxy.get_proxy())
         if rq.status_code != 200:
             return -1
         cntntinfo = rq.json()
@@ -378,7 +378,7 @@ class Binb2(ComicReader):
 
     # step 2_2
     def sbcGetCntnt(self,):
-        rq = requests.get(self.gen_GetCntnt_url(), cookies=self._cookies)
+        rq = requests.get(self.gen_GetCntnt_url(), cookies=self._cookies, proxies=RqProxy.get_proxy())
         if rq.status_code != 200:
             return -1
         html_manga = rq.json()["ttx"]
@@ -393,7 +393,7 @@ class Binb2(ComicReader):
     # step_3
     @staticmethod
     def downld_one(url, fpath, hs, cookies):
-        rq = requests.get(url=url, cookies=cookies, headers=RqHeaders())
+        rq = requests.get(url=url, cookies=cookies, headers=RqHeaders(), proxies=RqProxy.get_proxy())
         if rq.status_code != 200:
             raise ValueError("error:down_one:" + url)
         img = Image.open(BytesIO(rq.content))

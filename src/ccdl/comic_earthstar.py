@@ -11,7 +11,7 @@ import execjs
 import requests
 from PIL import Image
 
-from .utils import ComicLinkInfo, ComicReader, ProgressBar, RqHeaders, SiteReaderLoader, cc_mkdir, draw_image
+from .utils import ComicLinkInfo, ComicReader, ProgressBar, RqHeaders, RqProxy, SiteReaderLoader, cc_mkdir, draw_image
 
 logger = logging.getLogger(__name__)
 
@@ -156,7 +156,7 @@ class ComicEarthstar(ComicReader):
     
     @staticmethod
     def downld_one(url: list, fpath: list):
-        rq = requests.get("".join(url))
+        rq = requests.get("".join(url), proxies=RqProxy.get_proxy())
         if rq.status_code != 200:
             raise ValueError("".join(url))
         img = Image.open(BytesIO(rq.content))
@@ -172,14 +172,14 @@ class ComicEarthstar(ComicReader):
         cid = self._link_info.param[0][0]
 
         comic_info = requests.get(headers=RqHeaders(),
-                                    url='https://api.comic-earthstar.jp/c.php?cid='+cid).json()
+                                    url='https://api.comic-earthstar.jp/c.php?cid='+cid, proxies=RqProxy.get_proxy()).json()
         base_file_path = './漫畫/' + re.search(
                 'https://storage.comic-earthstar.jp/data/([0-9a-zA-Z]*)/[0-9a-zA-Z_-]*/', comic_info['url']).group(1) + "/"+ comic_info["cti"]
         if cc_mkdir(base_file_path) != 0:
             return -1
         configuration = requests.get(
             headers=RqHeaders(), url=comic_info['url'] + 'configuration_pack.json')
-        show_bar = ProgressBar(len(configuration.json()['configuration']['contents']))
+        show_bar = ProgressBar(len(configuration.json()['configuration']['contents']), proxies=RqProxy.get_proxy())
         downldGen = DownldGen(configuration.json()['configuration']['contents'], base_file_path, comic_info['url'])
         with ThreadPoolExecutor(max_workers=4) as executor:
             count = 0

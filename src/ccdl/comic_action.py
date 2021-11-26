@@ -4,13 +4,16 @@ import logging
 import math
 from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
+from time import sleep, time
 
 import requests
 from PIL import Image
+import traceback
 from selenium import webdriver
+from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.support.wait import WebDriverWait
 
-from .utils import ComicLinkInfo, ComicReader, ProgressBar, RqHeaders, SiteReaderLoader, cc_mkdir, draw_image
+from .utils import ComicLinkInfo, ComicReader, ProgressBar, RqHeaders, RqProxy, SiteReaderLoader, cc_mkdir, draw_image, win_char_replace
 
 logger = logging.getLogger("comic-action")
 
@@ -50,7 +53,7 @@ class ComicAction(ComicReader):
         self._driver = driver
 
     @staticmethod
-    def get_comic_json(linkinfo: ComicLinkInfo, driver = None):
+    def get_comic_json(linkinfo: ComicLinkInfo, driver:WebDriver = None):
         r"""
         """
         comic_json = {
@@ -63,16 +66,20 @@ class ComicAction(ComicReader):
             elem = WebDriverWait(driver, WAIT_TIME, 0.5).until(
                 lambda x: x.find_element_by_id("episode-json"),
                 message="無法定位元素 episode-json" + ", 獲取json對象數據失敗")
-
-            json_dataValue = elem.get_attribute("data-value")
-            json_dataValue = json.loads(json_dataValue)
+            try:
+                json_dataValue = elem.get_attribute("data-value")
+                json_dataValue = json.loads(json_dataValue)
+            except Exception as e:
+                logger.error(traceback.format_exc())
+                logger.error(elem)
+                raise e
         elif linkinfo.param[1] == 0:
-            rq = requests.get(linkinfo.url+".json", headers = RqHeaders())
+            rq = requests.get(linkinfo.url+".json", headers = RqHeaders(), proxies=RqProxy.get_proxy())
             if rq.status_code != 200:
                 raise ValueError(linkinfo.url+".json")
             json_dataValue = rq.json()
         else:
-            raise ValueError("linkinfo.param[1] not 1 or 0, :"+linkinfo.site_name)
+            raise ValueError("linkinfo.param[1] not 1 or 0, or without driver:"+linkinfo.site_name)
         comic_json["subtitle"] = json_dataValue["readableProduct"]["title"].replace("?", "？")
         comic_json["title"] = json_dataValue["readableProduct"]["series"]["title"].replace("?", "？")
         for page in json_dataValue["readableProduct"]["pageStructure"]["pages"]:
@@ -88,7 +95,7 @@ class ComicAction(ComicReader):
     @staticmethod
     def gen_fpth(comic_json: dict):
         bpth = "./漫畫/" + \
-            "/".join((comic_json["title"], comic_json["subtitle"]))
+            "/".join((win_char_replace(comic_json["title"]), win_char_replace(comic_json["subtitle"])))
         count = 0
         for x in range(len(comic_json["pages"])):
             count += 1
@@ -99,7 +106,7 @@ class ComicAction(ComicReader):
         r"""
         :fpth: [basepath, fname]
         """
-        rq = requests.get(url, headers=RqHeaders())
+        rq = requests.get(url, headers=RqHeaders(), proxies=RqProxy.get_proxy())
         if rq.status_code != 200:
             raise ValueError(url)
         content = rq.content
@@ -115,10 +122,11 @@ class ComicAction(ComicReader):
     def downloader(self):
         # https://<domain: comic-action.com ...>/episode/13933686331648942300
         comic_json = self.get_comic_json(self._linkinfo, self._driver)
+        comic_json["title"]
         total_pages = len(comic_json["pages"])
-        show_bar = ProgressBar(total_pages)
         cc_mkdir("./漫畫/" + \
-            "/".join((comic_json["title"], comic_json["subtitle"])))
+            "/".join((win_char_replace(comic_json["title"]), win_char_replace(comic_json["subtitle"]))))
+        show_bar = ProgressBar(total_pages)
         with ThreadPoolExecutor(max_workers=4) as executor:
             count = 0
             for x in executor.map(self.downld_one,

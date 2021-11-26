@@ -1,11 +1,45 @@
+import asyncio
 import base64
+from io import BytesIO
+from logging import NOTSET
 import os
 import re
 from abc import ABCMeta, abstractmethod
 from typing import Iterable
-import asyncio
+
 from aiohttp import ClientSession
+from PIL import Image
 from selenium import webdriver
+
+try:
+    import winreg
+
+    def get_windwos_proxy():
+        sub_key = "SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings"
+        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER,
+                             sub_key, 0, winreg.KEY_QUERY_VALUE)
+        if winreg.QueryValueEx(key, "ProxyEnable")[0] != 0:
+            return winreg.QueryValueEx(key, "ProxyServer")[0]
+except:
+    def get_windwos_proxy():
+        return ""
+
+
+class RqProxy(object):
+    __proxies = None
+
+    @classmethod
+    def set_proxy(cls, http_proxy: str, https_proxy: str):
+        cls.__proxies = {}
+        if http_proxy:
+            cls.__proxies["http"] = "http://{}".format(http_proxy)
+        if https_proxy:
+            cls.__proxies["https"] = "http://{}".format(https_proxy)
+
+    @classmethod
+    def get_proxy(cls) -> dict:
+        return cls.__proxies.copy() if cls.__proxies else None
+
 
 _site_reader = {
     # "domain": ["reader", RegExp, param1, param2, ...]
@@ -26,7 +60,7 @@ _site_reader = {
     "comic-zenon.com":                  ["comic_action", "episode/([\w-]*)", 0],
     "comicborder.com":                  ["comic_action", "episode/([\w-]*)", 0],
     "comicbushi-web.com":               ["comic_action", "episode/([\w-]*)", 1],
-    "kuragebunch.com":                  ["comic_action", "episode/([\w-]*)", 0],
+    "kuragebunch.com":                  ["comic_action", "episode/([\w-]*)", 1],
     "magcomi.com":                      ["comic_action", "episode/([\w-]*)", 0],
     "pocket.shonenmagazine.com":        ["comic_action", "episode/([\w-]*)", 1],
     "shonenjumpplus.com":               ["comic_action", "episode/([\w-]*)", 1],
@@ -37,13 +71,13 @@ _site_reader = {
 
     "comic-walker.com":                 ["comic_walker", 'cid=([\w-]*)'],
 
-    # "viewer.ganganonline.com":          ["ganganonline", None],
+    "www.ganganonline.com":          ["ganganonline", None],
 
     # "www.manga-doa.com":                ["manga_doa", None],
 
     # "www.sukima.me":                    ["sukima", None],
 
-    # "www.sunday-webry.com":             ["sunday_webry", None],
+    "www.sunday-webry.com":             ["sunday_webry", None],
 
     "urasunday.com":                    ["urasunday", None],
 
@@ -163,6 +197,9 @@ class ProgressBar(object):
         self._total = total
         self._cset = 0
 
+    def reset(self):
+        self._cset = 0
+
     def show(self, current_set: int = None):
         self._cset += 1
         current_set = current_set if current_set else self._cset
@@ -196,13 +233,13 @@ def draw_image(img_source, img_target, src_x, src_y, swidth, sheight, x, y, widt
         (x, y))
 
 
-def cc_mkdir(fpath, model=0):
+def cc_mkdir(fpath, model=0) -> int:
     r"""
     :param model: model = 0, include two subfolders of source and target; model = 1, not include.
     """
     if model == 1:
         if os.path.exists(fpath):
-            print('\n當前一話的文件夾{}存在，繼續運行數據將被覆蓋！'.format(fpath))
+            print('\n當前一話的文件夾 "{}" 存在，繼續運行數據將被覆蓋！'.format(fpath))
             print('是否繼續運行？（y/n）')
             yn = input()
             return 0 if yn == 'y' or yn == 'yes' or yn == 'Y' else -1
@@ -212,7 +249,7 @@ def cc_mkdir(fpath, model=0):
             print('創建文件夾: ' + fpath)
             return 0
     if os.path.exists(fpath+'/source') and os.path.exists(fpath+'/target'):
-        print('\n當前一話的文件夾{}存在，繼續運行數據將被覆蓋，'.format(fpath))
+        print('\n當前一話的文件夾 "{}" 存在，繼續運行數據將被覆蓋，'.format(fpath))
         print('是否繼續運行？（y/n）')
         yn = input()
         return 0 if yn == 'y' or yn == 'yes' or yn == 'Y' else -1
@@ -247,7 +284,7 @@ def get_blob_content(driver: webdriver.Chrome, uri):
 
 
 def win_char_replace(s: str):
-    s = re.sub("[\|\*\<\>\"\\\/\:]", "_", s).replace('?', '？')
+    s = re.sub("[\|\*\<\>\"\\\/\:]", "_", s).replace('?', '？').replace(" ", "")
     return s
 
 
@@ -303,3 +340,30 @@ def downld_url(url: list, headers=None, cookies=None, bar=None):
     for i in range(len(url)):
         result.append(r_dict.get(i))
     return result
+
+
+def write2file(file_path: str, img, page_num, file_ext: str, file_ext_dst: str = None, bar: ProgressBar = None):
+    '''
+    :param img: bytes or []bytes
+    :param page_num: total page if isinstance(img, list)t else current
+    :param file_ext: jpg | png | webp ...
+    '''
+    if isinstance(img, bytes):
+        p = os.path.join(file_path, str(page_num) + '.' + file_ext)
+        with open(p, 'wb') as fp:
+            fp.write(img)
+        return 0
+    elif isinstance(img, list):
+        pnum = 1
+        for img_ in img:
+            p = os.path.join(file_path, str(pnum) + '.')
+            if file_ext_dst:
+                Image.open(BytesIO(img_)).save(p+file_ext_dst)
+            else:
+                with open(p+file_ext, 'wb') as fp:
+                    fp.write(img_)
+            bar.show(pnum)
+            pnum += 1
+        return 0
+    else:
+        return -1

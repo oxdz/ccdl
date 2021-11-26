@@ -14,7 +14,7 @@ from ccdl.utils import ProgressBar, cc_mkdir, draw_image
 #     from utils import (ComicLinkInfo, ComicReader, RqHeaders, SiteReaderLoader,
 #                        downld_url, url_join)
 # else:
-from .utils import (ComicLinkInfo, ComicReader, RqHeaders,
+from .utils import (ComicLinkInfo, ComicReader, RqHeaders, RqProxy,
                     SiteReaderLoader, downld_url, url_join)
 
 logger = logging.getLogger(__name__)
@@ -29,6 +29,8 @@ class Binb3(ComicReader):
         http_adapter = HTTPAdapter(max_retries=5)
         self.rq.mount(prefix='https://', adapter=http_adapter)
         self.rq.mount(prefix='http://', adapter=http_adapter)
+        if RqProxy.get_proxy() != None and len(RqProxy.get_proxy()) > 0:
+            self.rq.proxies=RqProxy.get_proxy()
         self._headers = {"referer": self._link_info.url}
 
     def image_coords(self, ptinfo):

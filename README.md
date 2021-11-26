@@ -1,5 +1,13 @@
 # ccdl
 
+```
+此项目计划于 2021.11.28 起停止维护！
+
+ccdl 使用 Unlicense License 进行许可。
+
+最后，感谢您一直以来的支持～
+```
+
 This is a package for downloading online comics.
 
 Supported sites:  
@@ -36,13 +44,19 @@ Supported sites:
 + comic_walker:  
   + **`comic-walker.com`**  
 
++ ganganonline:
+  + **`www.ganganonline.com`**
+
 + ganma:
   + **`ganma.jp`**  
+
++ sunday-webry **`*`**:
+  + **`sunday-webry.com`**
 
 + urasunday:  
   + **`urasunday.com`**  
 
-+ yanmaga:
++ yanmaga **`*`**:
   + **`yanmaga.jp`**  
 
 ## Install

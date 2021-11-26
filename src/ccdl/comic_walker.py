@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import requests
 
-from .utils import ComicLinkInfo, ComicReader, ProgressBar, RqHeaders, SiteReaderLoader, cc_mkdir
+from .utils import ComicLinkInfo, ComicReader, ProgressBar, RqHeaders, RqProxy, SiteReaderLoader, cc_mkdir
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +33,7 @@ def write2jpg(img_, fpath):
         for x in img_:
             fp.write((x).to_bytes(length=1, byteorder='big'))
 
+
 @SiteReaderLoader.register('comic_walker')
 class ComicWalker(ComicReader):
     def __init__(self, link_info: ComicLinkInfo, driver=None):
@@ -43,7 +44,7 @@ class ComicWalker(ComicReader):
     @staticmethod
     def downld_one(item, fpath):
         url = item['meta']['source_url']
-        rr = requests.get(url, headers=RqHeaders())
+        rr = requests.get(url, headers=RqHeaders(), proxies=RqProxy.get_proxy())
         if rr.status_code != 200:
             raise ValueError(item['meta']['source_url'])
         write2jpg(xor_img(
@@ -53,7 +54,7 @@ class ComicWalker(ComicReader):
         comic_cid = self._link_info.param[0][0]
         comic_info_url = 'https://comicwalker-api.nicomanga.jp/api/v1/comicwalker/episodes/' + \
             comic_cid
-        rq = requests.get(comic_info_url, headers=RqHeaders())
+        rq = requests.get(comic_info_url, headers=RqHeaders(), proxies=RqProxy.get_proxy())
         if rq.status_code != 200:
             raise ValueError(comic_info_url)
         comic_info = rq.json()
@@ -64,13 +65,14 @@ class ComicWalker(ComicReader):
         # https://ssl.seiga.nicovideo.jp/api/v1/comicwalker/episodes/
         url_json_comic = 'https://comicwalker-api.nicomanga.jp/api/v1/comicwalker/episodes/' + \
             comic_cid+'/frames'
-        r = requests.get(url=url_json_comic, headers=RqHeaders())
+        r = requests.get(url=url_json_comic, headers=RqHeaders(), proxies=RqProxy.get_proxy())
         r_json = r.json()
         if cc_mkdir(base_fpath, model=1) != 0:
             return -1
         show_bar = ProgressBar(len(r_json['data']['result']))
         items = [x for x in r_json['data']['result']]
-        fpth_l = [base_fpath+"/"+str(x)+".jpg" for x in range(1, len(r_json['data']['result'])+1)]
+        fpth_l = [
+            base_fpath+"/"+str(x)+".jpg" for x in range(1, len(r_json['data']['result'])+1)]
         with ThreadPoolExecutor(max_workers=4) as executor:
             count = 0
             for x in executor.map(self.downld_one, items, fpth_l):
