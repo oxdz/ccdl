@@ -179,7 +179,7 @@ class ComicEarthstar(ComicReader):
             return -1
         configuration = requests.get(
             headers=RqHeaders(), url=comic_info['url'] + 'configuration_pack.json')
-        show_bar = ProgressBar(len(configuration.json()['configuration']['contents']), proxies=RqProxy.get_proxy())
+        show_bar = ProgressBar(len(configuration.json()['configuration']['contents']))
         downldGen = DownldGen(configuration.json()['configuration']['contents'], base_file_path, comic_info['url'])
         with ThreadPoolExecutor(max_workers=4) as executor:
             count = 0
