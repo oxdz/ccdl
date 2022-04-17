@@ -66,6 +66,7 @@ _site_reader = {
     "shonenjumpplus.com":               ["comic_action", "episode/([\w-]*)", 1],
     "tonarinoyj.jp":                    ["comic_action", "episode/([\w-]*)", 0],
     "viewer.heros-web.com":             ["comic_action", "episode/([\w-]*)", 0],
+    "to-corona-ex.com":                 ["comic_action", "episodes/([\w-]*)", 0],
 
     "viewer.comic-earthstar.jp":        ["comic_earthstar", "cid=([\w-]*)"],
 

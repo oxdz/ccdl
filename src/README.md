@@ -29,6 +29,7 @@ Supported sites:
   + **`shonenjumpplus.com *`**  
   + **`tonarinoyj.jp`**  
   + **`viewer.heros-web.com`**  
+  + **`to-corona-ex.com`**
 
 + comic_earthstar:  
   + **`viewer.comic-earthstar.jp`**  

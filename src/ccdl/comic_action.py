@@ -1,9 +1,11 @@
+import base64
 import copy
 import json
 import logging
 import math
 from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
+import string
 from time import sleep, time
 
 import requests
@@ -45,6 +47,36 @@ class proc_img_co:
         return img_copy
 
 
+class proc_img_co_corona:
+    def __init__(self, width, height, token: string):
+        self.s = width
+        self.c = height
+        r = []
+        token = base64.b64decode(token).decode()
+        for x in token:
+            r.append(ord(x))
+        
+        self.a = r[2:]
+        self.i = r[0]
+        o = r[1]
+        self.u = self.i * o
+        self.l = math.floor((self.s - self.s % 8) / self.i)
+        self.f = math.floor((self.c - self.c % 8) / o)
+
+    def n21(self, img0) -> Image.Image:
+        img_copy = copy.deepcopy(img0)
+        for n in range(self.u):
+            h = self.a[n]
+            p = h % self.i
+            m = math.floor(h/self.i)
+            g = n % self.i
+            v = math.floor(n/self.i)
+
+            draw_image(img0, img_copy, p*self.l, m * self.f, self.l,
+                       self.f, g * self.l, v * self.f)
+        return img_copy
+
+
 @SiteReaderLoader.register('comic_action')
 class ComicAction(ComicReader):
     def __init__(self, linkinfo: ComicLinkInfo, driver: webdriver.Chrome):
@@ -53,7 +85,7 @@ class ComicAction(ComicReader):
         self._driver = driver
 
     @staticmethod
-    def get_comic_json(linkinfo: ComicLinkInfo, driver:WebDriver = None):
+    def get_comic_json(linkinfo: ComicLinkInfo, driver: WebDriver = None):
         r"""
         """
         comic_json = {
@@ -74,17 +106,38 @@ class ComicAction(ComicReader):
                 logger.error(elem)
                 raise e
         elif linkinfo.param[1] == 0:
-            rq = requests.get(linkinfo.url+".json", headers = RqHeaders(), proxies=RqProxy.get_proxy())
+            json_url = linkinfo.url+".json"
+            if linkinfo.site_name == "to-corona-ex.com":
+                json_url = "https://api.to-corona-ex.com/episodes/{0}/begin_reading".format(
+                    linkinfo.param[0][0])
+            rq = requests.get(json_url, headers=RqHeaders(),
+                              proxies=RqProxy.get_proxy())
             if rq.status_code != 200:
-                raise ValueError(linkinfo.url+".json")
+                raise ValueError(json_url)
             json_dataValue = rq.json()
         else:
-            raise ValueError("linkinfo.param[1] not 1 or 0, or without driver:"+linkinfo.site_name)
-        comic_json["subtitle"] = json_dataValue["readableProduct"]["title"].replace("?", "？")
-        comic_json["title"] = json_dataValue["readableProduct"]["series"]["title"].replace("?", "？")
-        for page in json_dataValue["readableProduct"]["pageStructure"]["pages"]:
-            if "src" in page:
-                comic_json["pages"].append(page)
+            raise ValueError(
+                "linkinfo.param[1] not 1 or 0, or without driver:"+linkinfo.site_name)
+
+        if linkinfo.site_name == "to-corona-ex.com":
+            ...
+            comic_json["subtitle"] = json_dataValue["episode_title"]
+            comic_json["title"] = json_dataValue["comic_title"]
+            for page in json_dataValue["pages"]:
+                if "page_image_url" in page:
+                    comic_json["pages"].append({
+                        "src": page["page_image_url"],
+                        "drm_hash": page["drm_hash"]
+                    })
+        else:
+            comic_json["subtitle"] = json_dataValue["readableProduct"]["title"].replace(
+                "?", "？")
+            comic_json["title"] = json_dataValue["readableProduct"]["series"]["title"].replace(
+                "?", "？")
+            for page in json_dataValue["readableProduct"]["pageStructure"]["pages"]:
+                if "src" in page:
+                    comic_json["pages"].append(page)
+
         return comic_json
 
     @staticmethod
@@ -93,20 +146,36 @@ class ComicAction(ComicReader):
             yield x["src"]
 
     @staticmethod
+    def gen_token(comic_json: dict):
+        for page in comic_json["pages"]:
+            if "drm_hash" in page:
+                yield page["drm_hash"]
+            else:
+                yield ""
+    
+    @staticmethod
+    def gen_sitename(comic_json, sitename):
+        for _ in comic_json["pages"]:
+            yield sitename
+
+
+    @staticmethod
     def gen_fpth(comic_json: dict):
         bpth = "./漫畫/" + \
-            "/".join((win_char_replace(comic_json["title"]), win_char_replace(comic_json["subtitle"])))
+            "/".join((win_char_replace(comic_json["title"]),
+                      win_char_replace(comic_json["subtitle"])))
         count = 0
         for x in range(len(comic_json["pages"])):
             count += 1
             yield [bpth, "{}.png".format(count)]
 
     @staticmethod
-    def downld_one(url, fpth, cookies=None):
+    def downld_one(url, fpth, site_name, token, cookies=None):
         r"""
         :fpth: [basepath, fname]
         """
-        rq = requests.get(url, headers=RqHeaders(), proxies=RqProxy.get_proxy())
+        rq = requests.get(url, headers=RqHeaders(),
+                          proxies=RqProxy.get_proxy())
         if rq.status_code != 200:
             raise ValueError(url)
         content = rq.content
@@ -116,22 +185,29 @@ class ComicAction(ComicReader):
         img0.save(fpth[0] + "/source/" + fpth[1])
 
         # 复原
-        proc = proc_img_co(img0.width, img0.height)
-        proc.n21(img0=img0).save(fpth[0] + "/target/" + fpth[1])
+        if site_name == "to-corona-ex.com":
+            proc = proc_img_co_corona(img0.width, img0.height, token)
+            proc.n21(img0=img0).save(fpth[0] + "/target/" + fpth[1])
+        else:
+            proc = proc_img_co(img0.width, img0.height)
+            proc.n21(img0=img0).save(fpth[0] + "/target/" + fpth[1])
 
     def downloader(self):
         # https://<domain: comic-action.com ...>/episode/13933686331648942300
         comic_json = self.get_comic_json(self._linkinfo, self._driver)
         comic_json["title"]
         total_pages = len(comic_json["pages"])
-        cc_mkdir("./漫畫/" + \
-            "/".join((win_char_replace(comic_json["title"]), win_char_replace(comic_json["subtitle"]))))
+        cc_mkdir("./漫畫/" +
+                 "/".join((win_char_replace(comic_json["title"]), win_char_replace(comic_json["subtitle"]))))
         show_bar = ProgressBar(total_pages)
         with ThreadPoolExecutor(max_workers=4) as executor:
             count = 0
             for x in executor.map(self.downld_one,
                                   self.gen_url(comic_json),
-                                  self.gen_fpth(comic_json)):
+                                  self.gen_fpth(comic_json),
+                                  self.gen_sitename(comic_json, self._linkinfo.site_name),
+                                  self.gen_token(comic_json)
+                                  ):
                 count += 1
                 show_bar.show(count)
 
