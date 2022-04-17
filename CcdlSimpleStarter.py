@@ -53,7 +53,7 @@ if __name__ == "__main__":
             logger.error(traceback.format_exc())
             print("Chrome啟動失敗! 請檢查Chrome與chromedriver版本\n" +
                   traceback.format_exc())
-            print("您可於 http://npm.taobao.org/mirrors/chromedriver/ 下載\n")
+            print("您可於 http://npm.taobao.org/mirrors/chromedriver/ or https://chromedriver.chromium.org/downloads 下載\n")
 
             driver = None
             if input("Do you want to continue? （y/n）") in ('y', 'Y', 'YES'):
@@ -66,7 +66,7 @@ if __name__ == "__main__":
                 sys.exit()
     else:
         print("\n由於未在程式所在目錄發現chromedriver，部分基於selenium採集的站點將無法進行。")
-        print("您可於 http://npm.taobao.org/mirrors/chromedriver/ 下載\n")
+        print("您可於 http://npm.taobao.org/mirrors/chromedriver/ or https://chromedriver.chromium.org/downloads 下載\n")
 
     print("\n>>>>>>>>輸入exit退出<<<<<<<<\n")
 

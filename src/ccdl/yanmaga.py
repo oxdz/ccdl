@@ -86,7 +86,7 @@ class Yanmaga(ComicReader):
         scrambles = []
         sizes = []
         for x in result:
-            urls.append('https:' + x.get('imageUrl'))
+            urls.append(x.get('imageUrl'))
             scrambles.append(json.loads(x.get('scramble')))
             sizes.append((x.get('width'), x.get('height')))
         return urls, scrambles, sizes
