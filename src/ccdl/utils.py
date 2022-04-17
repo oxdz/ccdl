@@ -57,6 +57,7 @@ _site_reader = {
     "comic-action.com":                 ["comic_action", "episode/([\w-]*)", 0],
     "comic-days.com":                   ["comic_action", "episode/([\w-]*)", 1],
     "comic-gardo.com":                  ["comic_action", "episode/([\w-]*)", 1],
+    "comic-trail.com":                 ["comic_action", "episodes/([\w-]*)", 1],
     "comic-zenon.com":                  ["comic_action", "episode/([\w-]*)", 0],
     "comicborder.com":                  ["comic_action", "episode/([\w-]*)", 0],
     "comicbushi-web.com":               ["comic_action", "episode/([\w-]*)", 1],
@@ -65,8 +66,9 @@ _site_reader = {
     "pocket.shonenmagazine.com":        ["comic_action", "episode/([\w-]*)", 1],
     "shonenjumpplus.com":               ["comic_action", "episode/([\w-]*)", 1],
     "tonarinoyj.jp":                    ["comic_action", "episode/([\w-]*)", 0],
-    "viewer.heros-web.com":             ["comic_action", "episode/([\w-]*)", 0],
     "to-corona-ex.com":                 ["comic_action", "episodes/([\w-]*)", 0],
+    "viewer.heros-web.com":             ["comic_action", "episode/([\w-]*)", 0],
+
 
     "viewer.comic-earthstar.jp":        ["comic_earthstar", "cid=([\w-]*)"],
 

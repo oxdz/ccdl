@@ -28,6 +28,7 @@ Supported sites:
   + **`comic-days.com *`**  
   + **`comic-gardo.com *`**  
   + **`comic-zenon.com`**  
+  + **`comic-trail.com`**
   + **`comicborder.com`**  
   + **`comicbushi-web.com`**
   + **`kuragebunch.com`**  
@@ -35,8 +36,8 @@ Supported sites:
   + **`pocket.shonenmagazine.com *`**  
   + **`shonenjumpplus.com *`**  
   + **`tonarinoyj.jp`**  
-  + **`viewer.heros-web.com`**  
   + **`to-corona-ex.com`**
+  + **`viewer.heros-web.com`**  
 
 + comic_earthstar:  
   + **`viewer.comic-earthstar.jp`**  
