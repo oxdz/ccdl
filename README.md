@@ -32,6 +32,7 @@ Supported sites:
   + **`comicborder.com`**  
   + **`comicbushi-web.com`**
   + **`kuragebunch.com`**  
+  + **`ichijin-plus.com`**
   + **`magcomi.com`**  
   + **`pocket.shonenmagazine.com *`**  
   + **`shonenjumpplus.com *`**  

@@ -107,9 +107,9 @@ class ComicAction(ComicReader):
                 raise e
         elif linkinfo.param[1] == 0:
             json_url = linkinfo.url+".json"
-            if linkinfo.site_name == "to-corona-ex.com":
-                json_url = "https://api.to-corona-ex.com/episodes/{0}/begin_reading".format(
-                    linkinfo.param[0][0])
+            if linkinfo.site_name in {"to-corona-ex.com", "ichijin-plus.com"}:
+                json_url = "https://api.{0}/episodes/{1}/begin_reading".format(
+                    linkinfo.site_name, linkinfo.param[0][0])
             rq = requests.get(json_url, headers=RqHeaders(),
                               proxies=RqProxy.get_proxy())
             if rq.status_code != 200:
@@ -119,7 +119,7 @@ class ComicAction(ComicReader):
             raise ValueError(
                 "linkinfo.param[1] not 1 or 0, or without driver:"+linkinfo.site_name)
 
-        if linkinfo.site_name == "to-corona-ex.com":
+        if linkinfo.site_name in {"to-corona-ex.com", "ichijin-plus.com"}:
             ...
             comic_json["subtitle"] = json_dataValue["episode_title"]
             comic_json["title"] = json_dataValue["comic_title"]
@@ -185,7 +185,7 @@ class ComicAction(ComicReader):
         img0.save(fpth[0] + "/source/" + fpth[1])
 
         # 复原
-        if site_name == "to-corona-ex.com":
+        if site_name in {"to-corona-ex.com", "ichijin-plus.com"}:
             proc = proc_img_co_corona(img0.width, img0.height, token)
             proc.n21(img0=img0).save(fpth[0] + "/target/" + fpth[1])
         else:
