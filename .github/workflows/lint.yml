@@ -42,13 +42,13 @@ jobs:
           pip install .[dev]
       - name: Lint with black
         run: |
-          black --check --diff .
+          black --check --diff ccdl
       - name: Lint with isort
         run: |
-          isort --check-only --diff .
+          isort --check-only --diff ccdl
       - name: Lint with flake8
         run: |
-          flake8 --exit-zero .
+          flake8 --exit-zero ccdl
       - name: Lint with mypy
         run: |
-          mypy
+          mypy ccdl
