@@ -1,72 +1,85 @@
-# ccdl
+# ccdl - online **C**omi**C** **D**own**L**oader
 
-此项目 ~~计划于 2021.11.28 起停止维护！~~ 维护延期至 2022.5.16
-
-
-```
-ccdl 使用 Unlicense License 进行许可。
-```
+*This project scheduled to be closed for maintenance from 2022.5.16.*
+*ccdl is available under Unlicense License*
 
 This is a package for downloading online comics.
 
-Supported sites:
+Supported Viewers and Sites:
 
-+ binb **`*`** :
-  + **`r.binb.jp`**
-  + **`www.cmoa.jp`**
-  + **`booklive.jp`**
-  + **`takeshobo.co.jp`**
-  + **`www.comic-valkyrie.com`**
-  + **`futabanet.jp`**
-  + **`comic-polaris.jp`**
-  + **`www.shonengahosha.co.jp`**
-  + **`r-cbs.mangafactory.jp`**
-  + **`comic-meteor.jp`**
+- [BinB] (by [VOYAGER]):
+  - `r.binb.jp`
+  - `www.cmoa.jp`
+  - `booklive.jp`
+  - `takeshobo.co.jp`
+  - `www.comic-valkyrie.com`
+  - `futabanet.jp`
+  - `comic-polaris.jp`
+  - `www.shonengahosha.co.jp`
+  - `r-cbs.mangafactory.jp`
+  - `comic-meteor.jp`
 
-+ comic_action:
-  + **`comic-action.com`**
-  + **`comic-days.com *`**
-  + **`comic-gardo.com *`**
-  + **`comic-zenon.com`**
-  + **`comic-trail.com`**
-  + **`comicborder.com`**
-  + **`comicbushi-web.com`**
-  + **`kuragebunch.com`**
-  + **`ichijin-plus.com`**
-  + **`magcomi.com`**
-  + **`pocket.shonenmagazine.com *`**
-  + **`shonenjumpplus.com *`**
-  + **`tonarinoyj.jp`**
-  + **`to-corona-ex.com`**
-  + **`viewer.heros-web.com`**
+[BinB]: https://www.voyager.co.jp/products/binb/
+[VOYAGER]: https://www.voyager.co.jp/
 
-+ comic_earthstar:
-  + **`viewer.comic-earthstar.jp`**
+- [Giga Viewer] (by [Hatena]):
+  - `comic-action.com`
+  - `comic-days.com`
+  - `comic-gardo.com`
+  - `comic-zenon.com`
+  - `comic-trail.com`
+  - `comicborder.com`
+  - `comicbushi-web.com`
+  - `kuragebunch.com`
+  - `ichijin-plus.com`
+  - `magcomi.com`
+  - `pocket.shonenmagazine.com`
+  - `shonenjumpplus.com`
+  - `tonarinoyj.jp`
+  - `to-corona-ex.com`
+  - `viewer.heros-web.com`
+  - `sunday-webry.com`
 
-+ comic_walker:
-  + **`comic-walker.com`**
+[Giga Viewer]: https://hatenacorp.jp/press/release/search?q=GigaViewer
+[Hatena]: https://www.hatena.ne.jp/
 
-+ ganganonline:
-  + **`www.ganganonline.com`**
+- Comic Earth Star Viewer (by [EARTH STAR Entertainment]):
+  - `viewer.comic-earthstar.jp`
 
-+ ganma:
-  + **`ganma.jp`**
+[EARTH STAR Entertainment]: https://www.earthstar.jp/
 
-+ sunday-webry **`*`**:
-  + **`sunday-webry.com`**
+- ComicWalker Viewer (by [KADOKAWA]):
+  - `comic-walker.com`
 
-+ urasunday:
-  + **`urasunday.com`**
+[KADOKAWA]: https://group.kadokawa.co.jp/
 
-+ yanmaga **`*`**:
-  + **`yanmaga.jp`**
+- [PUBLUS Reader] (by [ACCESS]):
+  - `www.ganganonline.com`
+
+[PUBLUS Reader]: https://publus.jp/
+[ACCESS]: https://www.access-company.com/
+
+- Ganma! Viewer (by [COMICSMART]):
+  - `ganma.jp`
+
+[COMICSMART]: https://www.comicsmart.co.jp/
+
+- ZAO Viewer (Unconfirmed, by Unknown):
+  - `urasunday.com`
+  - (`mangaplus.shueisha.co.jp`)
+
+- [Magazine Viewer] (by [COMICI]):
+  - `yanmaga.jp`
+
+[Magazine Viewer]: https://prtimes.jp/main/html/rd/p/000000016.000041778.html
+[COMICI]: https://comici.jp/
 
 ## Install
 
 For some sites, you'll need a version of [chromedriver](http://npm.taobao.org/mirrors/chromedriver/) that matches the version of Chrome you've installed.
 
 ```shellsession
-$ pip install git+https://github.com:oxdz/ccdl
+$ pip install git+https://github.com/oxdz/ccdl
 
 # Download the chromedriver
 $ wget https://cdn.npm.taobao.org/dist/chromedriver/86.0.4240.22/chromedriver_linux64.zip
@@ -103,10 +116,12 @@ reader.downloader()
 
 ### Use CcdlSimpleStarter to download comics
 
-> Windows users can download the executable and double-click to run it.
-> The search path for chromedriver is the directory where the application resides.
+Windows users can download the executable and double-click to run it.
+The search path for chromedriver is the directory where the application resides.
 
-If chromedriver exists: For sites with \*, if necessary, login in the browser that opens automatically before you enter the URL.You also need to load (you can do this in any TAB) the URL in this browser.
+If chromedriver exists:
+For sites with \*, if necessary, login in the browser that opens automatically before you enter the URL.
+You also need to load (you can do this in any TAB) the URL in this browser.
 
 ```shellsession
 $ ccdl
@@ -128,7 +143,7 @@ url:
 
 If you want to build the smallest executable file, please use the virtual environment to build
 
-```sh
+```shellsession
 # create venv
 $ python -m venv ./venv
 
