@@ -23,7 +23,6 @@ try:
         if winreg.QueryValueEx(key, "ProxyEnable")[0] != 0:
             return winreg.QueryValueEx(key, "ProxyServer")[0]
 
-
 except Exception:
 
     def get_windwos_proxy():

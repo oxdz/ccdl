@@ -27,6 +27,6 @@ repos:
     rev: v0.942
     hooks:
       - id: mypy
-        additional_dependencies: [types-setuptools,lxml-stubs,types-Pillow,types-urllib3,types-requests,types-selenium]
+        additional_dependencies: [types-setuptools,lxml-stubs,types-Pillow,types-urllib3,types-requests,types-selenium, aiohttp, numpy]
         files: ^ccdl/
         args: []
