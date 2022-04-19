@@ -10,4 +10,6 @@ log/
 venv/*
 *.spec
 venv/bin/easy_install-3.7
-*.egg-info
+*.egg-info/
+.mypy_cache/
+.pytest_cache/
