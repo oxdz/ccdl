@@ -5,7 +5,7 @@ import re
 
 import requests
 from requests.adapters import HTTPAdapter
-from selenium import webdriver  # type: ignore[import]
+from selenium import webdriver
 
 from .utils import (
     ComicLinkInfo,

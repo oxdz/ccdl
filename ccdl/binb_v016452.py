@@ -10,7 +10,7 @@ from io import BytesIO
 
 import requests
 from PIL import Image
-from selenium import webdriver  # type: ignore[import]
+from selenium import webdriver
 
 from .utils import (
     ComicLinkInfo,

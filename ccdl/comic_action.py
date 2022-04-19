@@ -10,9 +10,9 @@ from io import BytesIO
 
 import requests
 from PIL import Image
-from selenium import webdriver  # type: ignore[import]
-from selenium.webdriver.chrome.webdriver import WebDriver  # type: ignore[import]
-from selenium.webdriver.support.wait import WebDriverWait  # type: ignore[import]
+from selenium import webdriver
+from selenium.webdriver.chrome.webdriver import WebDriver
+from selenium.webdriver.support.wait import WebDriverWait
 
 from .utils import (
     ComicLinkInfo,

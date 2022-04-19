@@ -6,11 +6,11 @@ from io import BytesIO
 
 import numpy as np
 from PIL import Image
-from selenium import webdriver  # type: ignore[import]
-from selenium.common.exceptions import TimeoutException  # type: ignore[import]
-from selenium.webdriver import ActionChains  # type: ignore[import]
-from selenium.webdriver.common.keys import Keys  # type: ignore[import]
-from selenium.webdriver.support.wait import WebDriverWait  # type: ignore[import]
+from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver import ActionChains
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.wait import WebDriverWait
 
 from .utils import (
     ComicLinkInfo,

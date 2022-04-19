@@ -6,9 +6,8 @@ import time
 import traceback
 
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 
-from . import Binb2, ComicAction, ComicEarthstar, ComicLinkInfo, ComicWalker, Ganma
+from . import ComicLinkInfo
 from .utils import RqProxy, SiteReaderLoader, get_windwos_proxy
 
 if not os.path.exists("log"):
@@ -52,7 +51,7 @@ def main():
             driver = webdriver.Chrome(
                 options=chrome_options, executable_path=executable_path
             )
-        except Exception as e:
+        except Exception:
             logger.error(traceback.format_exc())
             print("Chrome啟動失敗! 請檢查Chrome與chromedriver版本\n" + traceback.format_exc())
             print(
@@ -97,7 +96,7 @@ def main():
         if reader is not None:
             try:
                 reader.downloader()
-            except Exception as e:
+            except Exception:
                 logger.error(traceback.format_exc())
                 print("下載失敗! \n" + traceback.format_exc())
         else:

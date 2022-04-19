@@ -36,7 +36,7 @@ class Binb3(ComicReader):
         http_adapter = HTTPAdapter(max_retries=5)
         self.rq.mount(prefix="https://", adapter=http_adapter)
         self.rq.mount(prefix="http://", adapter=http_adapter)
-        if RqProxy.get_proxy() != None and len(RqProxy.get_proxy()) > 0:
+        if RqProxy.get_proxy() is not None and len(RqProxy.get_proxy()) > 0:
             self.rq.proxies = RqProxy.get_proxy()
         self._headers = {"referer": self._link_info.url}
 
@@ -168,7 +168,6 @@ class Binb3(ComicReader):
 if __name__ == "__main__":
     with open("m.json", "r", encoding="utf-8") as fp:
         ptinfo = json.load(fp)
-    from pprint import pprint as print
 
     lf = ComicLinkInfo("https://comic-meteor.jp/ptdata/nina/0017/")
     reader = Binb3(lf)

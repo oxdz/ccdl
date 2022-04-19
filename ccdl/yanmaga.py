@@ -8,8 +8,8 @@ from io import BytesIO
 import requests
 from aiohttp.client import ClientSession
 from PIL import Image
-from selenium import webdriver  # type: ignore[import]
-from selenium.webdriver.support.wait import WebDriverWait  # type: ignore[import]
+from selenium import webdriver
+from selenium.webdriver.support.wait import WebDriverWait
 
 from .utils import (
     ComicLinkInfo,
@@ -26,7 +26,10 @@ API_URL_ComicInfo = "https://api2-yanmaga.comici.jp/book/Info?comici-viewer-id={
 API_URL_EpisodeInfo = (
     "https://api2-yanmaga.comici.jp/book/episodeInfo?comici-viewer-id={}"
 )
-API_URL_ContentsInfo = "https://api2-yanmaga.comici.jp/book/contentsInfo?user-id={}&comici-viewer-id={}&page-from={}&page-to={}"
+API_URL_ContentsInfo = (
+    "https://api2-yanmaga.comici.jp/book/contentsInfo?user-id={}"
+    "&comici-viewer-id={}&page-from={}&page-to={}"
+)
 
 logger = logging.getLogger(__name__)
 headers = RqHeaders()
@@ -191,7 +194,7 @@ class Yanmaga(ComicReader):
 
 # if __name__ == '__main__':
 #     # comici_vid = '4633af6ae1c0d82c123222a20748426b'
-#     # url = 'https://yanmaga.jp/comics/%E6%81%A5%E3%81%98%E3%82%89%E3%81%86%E5%90%9B%E3%81%8C%E8%A6%8B%E3%81%9F%E3%81%84%E3%82%93%E3%81%A0/0cf017ab837eb5f26f8cceef45f7c2c1'
+#     # url = 'https://yanmaga.jp/comics/恥じらう君が見たいんだ/0cf017ab837eb5f26f8cceef45f7c2c1'
 #     # linkinfo = ComicLinkInfo(url)
 #     # Yanmaga(linkinfo).downloader()
 #     # 找不到当前漫画信息则请求手动输入
