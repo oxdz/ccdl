@@ -1,12 +1,14 @@
+from __future__ import annotations
+
 import base64
 import copy
 import json
 import logging
 import math
-import string
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
+from typing import Any
 
 import requests
 from PIL import Image
@@ -66,7 +68,7 @@ class proc_img_co:
 
 
 class proc_img_co_corona:
-    def __init__(self, width, height, token: string):
+    def __init__(self, width, height, token: str):
         self.s = width
         self.c = height
         r = []
@@ -113,7 +115,7 @@ class ComicAction(ComicReader):
     @staticmethod
     def get_comic_json(linkinfo: ComicLinkInfo, driver: WebDriver = None):
         r""" """
-        comic_json = {
+        comic_json: dict[str, Any] = {
             "title": None,
             "subtitle": None,
             "pages": [],
@@ -202,7 +204,7 @@ class ComicAction(ComicReader):
             yield [bpth, "{}.png".format(count)]
 
     @staticmethod
-    def downld_one(url, fpth, site_name, token, cookies=None):
+    def downld_one(url, fpth, site_name, token, cookies=None) -> None:
         r"""
         :fpth: [basepath, fname]
         """
@@ -223,7 +225,7 @@ class ComicAction(ComicReader):
             proc = proc_img_co(img0.width, img0.height)
             proc.n21(img0=img0).save(fpth[0] + "/target/" + fpth[1])
 
-    def downloader(self):
+    def downloader(self) -> None:
         # https://<domain: comic-action.com ...>/episode/13933686331648942300
         comic_json = self.get_comic_json(self._linkinfo, self._driver)
         comic_json["title"]

@@ -44,7 +44,7 @@ class Binb3(ComicReader):
         def _str2int(l):
             return [int(x) for x in l]
 
-        pattern = "i:([\d]+),([\d]+)\+([\d]+),([\d]+)>([\d]+),([\d]+)"
+        pattern = "i:([\\d]+),([\\d]+)\\+([\\d]+),([\\d]+)>([\\d]+),([\\d]+)"
         size = []
         for i in range(len(ptinfo)):
             if isinstance(ptinfo[i], (bytes, str)):
@@ -123,7 +123,7 @@ class Binb3(ComicReader):
     def downloader(self):
         resp = self.rq.get(url=self._link_info.url, headers=RqHeaders())
         # if resp.status_code == 200:
-        pg = re.findall('data-ptimg="data/([\d]{4}).ptimg.json"', resp.text)
+        pg = re.findall(r'data-ptimg="data/([\d]{4}).ptimg.json"', resp.text)
         ptinfo = [url_join(self._link_info.url, "data/", x + ".ptimg.json") for x in pg]
         ptimgs = [url_join(self._link_info.url, "data/", x + ".jpg") for x in pg]
 

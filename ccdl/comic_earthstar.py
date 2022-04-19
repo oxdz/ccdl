@@ -150,7 +150,7 @@ class DownldGen(object):
         for x in self._contents:
             yield [
                 self._base_fpath,
-                re.search("item/xhtml/([\w-]+).xhtml", x["file"]).group(1) + ".png",
+                re.search(r"item/xhtml/([\w-]+).xhtml", x["file"]).group(1) + ".png",
             ]
 
     @property

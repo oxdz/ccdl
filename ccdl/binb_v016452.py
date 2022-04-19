@@ -572,10 +572,11 @@ class Binb2(ComicReader):
         if rq.status_code != 200:
             return -1
         html_manga = rq.json()["ttx"]
-        manga_info = re.findall('<t-img.*?id="L[\d]+".*?>', html_manga)
+        manga_info = re.findall(r'<t-img.*?id="L[\d]+".*?>', html_manga)
         manga_info_list = [
             re.search(
-                'src="(.*?)".*orgwidth="([\d]+)".*orgheight="([\d]+)".*id="(L[\d]+)"', x
+                r'src="(.*?)".*orgwidth="([\d]+)".*orgheight="([\d]+)".*id="(L[\d]+)"',
+                x,
             ).groups()
             for x in manga_info
         ]

@@ -40,7 +40,7 @@ class Urasunday(ComicReader):
         else:
             manga_title = str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"))
 
-        img_url_l_str = re.search("const pages = ([\S\s]+?);", html_text)
+        img_url_l_str = re.search(r"const pages = ([\S\s]+?);", html_text)
         if not img_url_l_str:
             raise ValueError("Pages not found")
         img_url_l_str = img_url_l_str.groups()[0]

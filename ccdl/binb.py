@@ -163,7 +163,7 @@ def gen_file_path(link_info: ComicLinkInfo, driver: webdriver.Chrome):
         except TimeoutException as e:
             logger.error('Find element by xpath("/html/head/title"): ' + str(e))
             raise e
-        match = re.search("[\w]+_[\w]+_([\w]+)", link_info.param[0][0])
+        match = re.search(r"[\w]+_[\w]+_([\w]+)", link_info.param[0][0])
         if match:
             return elem.get_attribute("innerText") + "/" + match.groups()[0]
         else:

@@ -51,7 +51,7 @@ class Yanmaga(ComicReader):
         :param: url
         :returns: user_id, view_id
         """
-        if not re.match("https://yanmaga.jp/comics/(.+?)/[\w]+", url):
+        if not re.match(r"https://yanmaga.jp/comics/(.+?)/[\w]+", url):
             raise ValueError("unsupported url: {}".format(url))
         self._driver.get(url)
         elem = WebDriverWait(self._driver, WAIT_TIME, 0.5).until(

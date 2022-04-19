@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import base64
 import os
@@ -14,7 +16,7 @@ try:
     import winreg
 
     def get_windwos_proxy():
-        sub_key = "SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings"
+        sub_key = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings"
         key = winreg.OpenKey(
             winreg.HKEY_CURRENT_USER, sub_key, 0, winreg.KEY_QUERY_VALUE
         )
@@ -29,7 +31,7 @@ except Exception:
 
 
 class RqProxy(object):
-    __proxies = None
+    __proxies: dict[str, str] | None = None
 
     @classmethod
     def set_proxy(cls, http_proxy: str, https_proxy: str):
@@ -40,61 +42,61 @@ class RqProxy(object):
             cls.__proxies["https"] = "http://{}".format(https_proxy)
 
     @classmethod
-    def get_proxy(cls) -> dict:
-        return cls.__proxies.copy() if cls.__proxies else None
+    def get_proxy(cls) -> dict[str, str] | None:
+        return None if cls.__proxies is None else cls.__proxies.copy()
 
 
 _site_reader = {
     # "domain": ["reader", RegExp, param1, param2, ...]
-    "r.binb.jp": ["binb2", "r.binb.jp/epm/([\w-]+)/", 1],
+    "r.binb.jp": ["binb2", r"r.binb.jp/epm/([\w-]+)/", 1],
     "www.cmoa.jp": [
         "binb2",
-        "www.cmoa.jp/bib/speedreader/speed.html\?cid=([\w-]+)&u0=(\d)&u1=(\d)",
+        r"www.cmoa.jp/bib/speedreader/speed.html\?cid=([\w-]+)&u0=(\d)&u1=(\d)",
         1,
     ],
-    "booklive.jp": ["binb", "booklive.jp/bviewer/s/\?cid=([\w-]*)&", 1],
+    "booklive.jp": ["binb", r"booklive.jp/bviewer/s/\?cid=([\w-]*)&", 1],
     "takeshobo.co.jp": [
         "binb",
-        "[\w-]+.takeshobo.co.jp/manga/([\w-]+)/_files[\w-]*/([\w-]+)/",
+        r"[\w-]+.takeshobo.co.jp/manga/([\w-]+)/_files[\w-]*/([\w-]+)/",
         0,
     ],
     "www.comic-valkyrie.com": [
         "binb",
-        "www.comic-valkyrie.com/samplebook/([\w-]*)/",
+        r"www.comic-valkyrie.com/samplebook/([\w-]*)/",
         0,
     ],
-    "futabanet.jp": ["binb", "futabanet.jp/common/dld/zip/([\w-]*)/", 0],
-    "comic-polaris.jp": ["binb", "comic-polaris.jp/ptdata/([\w-]*)/([\w-]*)/", 0],
+    "futabanet.jp": ["binb", r"futabanet.jp/common/dld/zip/([\w-]*)/", 0],
+    "comic-polaris.jp": ["binb", r"comic-polaris.jp/ptdata/([\w-]*)/([\w-]*)/", 0],
     "www.shonengahosha.co.jp": [
         "binb",
-        "www.shonengahosha.co.jp/([\w-]*)/([\w-]*)/",
+        r"www.shonengahosha.co.jp/([\w-]*)/([\w-]*)/",
         0,
     ],
     "r-cbs.mangafactory.jp": ["binb", "", 1],
     "comic-meteor.jp": ["binb3", "", 0],
-    "comic-action.com": ["comic_action", "episode/([\w-]*)", 0],
-    "comic-days.com": ["comic_action", "episode/([\w-]*)", 1],
-    "comic-gardo.com": ["comic_action", "episode/([\w-]*)", 1],
-    "comic-trail.com": ["comic_action", "episodes/([\w-]*)", 1],
-    "comic-zenon.com": ["comic_action", "episode/([\w-]*)", 0],
-    "comicborder.com": ["comic_action", "episode/([\w-]*)", 0],
-    "comicbushi-web.com": ["comic_action", "episode/([\w-]*)", 1],
-    "ichijin-plus.com": ["comic_action", "episodes/([\w-]*)", 0],
-    "kuragebunch.com": ["comic_action", "episode/([\w-]*)", 1],
-    "magcomi.com": ["comic_action", "episode/([\w-]*)", 0],
-    "pocket.shonenmagazine.com": ["comic_action", "episode/([\w-]*)", 1],
-    "shonenjumpplus.com": ["comic_action", "episode/([\w-]*)", 1],
-    "tonarinoyj.jp": ["comic_action", "episode/([\w-]*)", 0],
-    "to-corona-ex.com": ["comic_action", "episodes/([\w-]*)", 0],
-    "viewer.heros-web.com": ["comic_action", "episode/([\w-]*)", 0],
-    "viewer.comic-earthstar.jp": ["comic_earthstar", "cid=([\w-]*)"],
-    "comic-walker.com": ["comic_walker", "cid=([\w-]*)"],
+    "comic-action.com": ["comic_action", r"episode/([\w-]*)", 0],
+    "comic-days.com": ["comic_action", r"episode/([\w-]*)", 1],
+    "comic-gardo.com": ["comic_action", r"episode/([\w-]*)", 1],
+    "comic-trail.com": ["comic_action", r"episodes/([\w-]*)", 1],
+    "comic-zenon.com": ["comic_action", r"episode/([\w-]*)", 0],
+    "comicborder.com": ["comic_action", r"episode/([\w-]*)", 0],
+    "comicbushi-web.com": ["comic_action", r"episode/([\w-]*)", 1],
+    "ichijin-plus.com": ["comic_action", r"episodes/([\w-]*)", 0],
+    "kuragebunch.com": ["comic_action", r"episode/([\w-]*)", 1],
+    "magcomi.com": ["comic_action", r"episode/([\w-]*)", 0],
+    "pocket.shonenmagazine.com": ["comic_action", r"episode/([\w-]*)", 1],
+    "shonenjumpplus.com": ["comic_action", r"episode/([\w-]*)", 1],
+    "tonarinoyj.jp": ["comic_action", r"episode/([\w-]*)", 0],
+    "to-corona-ex.com": ["comic_action", r"episodes/([\w-]*)", 0],
+    "viewer.heros-web.com": ["comic_action", r"episode/([\w-]*)", 0],
+    "viewer.comic-earthstar.jp": ["comic_earthstar", r"cid=([\w-]*)"],
+    "comic-walker.com": ["comic_walker", r"cid=([\w-]*)"],
     "www.ganganonline.com": ["ganganonline", None],
     # "www.manga-doa.com":                ["manga_doa", None],
     # "www.sukima.me":                    ["sukima", None],
     "www.sunday-webry.com": ["sunday_webry", None],
     "urasunday.com": ["urasunday", None],
-    "ganma.jp": ["ganma", "ganma.jp/(?:([\w-]*)/([\w-]*)|([\w-]*))"],
+    "ganma.jp": ["ganma", r"ganma.jp/(?:([\w-]*)/([\w-]*)|([\w-]*))"],
     "yanmaga.jp": ["yanmaga", None],
 }
 
@@ -152,7 +154,6 @@ class ComicLinkInfo(object):
 
 
 class SiteReaderLoader(object):
-
     global _site_reader
     __reader_reg = {}
 
@@ -324,8 +325,8 @@ def get_blob_content(driver: webdriver.Chrome, uri):
 
 
 def win_char_replace(s: str):
-    s = re.sub('[\|\*\<\>"\\\/\:]', "_", s).replace("?", "？").replace(" ", "")
-    return s
+    table = str.maketrans(r"|*<>\/:?", "_______？", " ")
+    return s.translate(table)
 
 
 def url_join(*args):

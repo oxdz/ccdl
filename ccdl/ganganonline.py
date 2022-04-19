@@ -38,7 +38,7 @@ class Ganganonline(ComicReader):
         http_adapter = HTTPAdapter(max_retries=5)
         self.rq.mount(prefix="https://", adapter=http_adapter)
         self.rq.mount(prefix="http://", adapter=http_adapter)
-        self.rq.headers = RqHeaders()
+        self.rq.headers = RqHeaders()  # type: ignore[assignment]
         if RqProxy.get_proxy():
             self.rq.proxies = RqProxy.get_proxy()
 
