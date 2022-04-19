@@ -53,6 +53,8 @@ class Yanmaga(ComicReader):
         """
         if not re.match(r"https://yanmaga.jp/comics/(.+?)/[\w]+", url):
             raise ValueError("unsupported url: {}".format(url))
+        if self._driver is None:
+            raise ValueError("driver is not specified!")
         self._driver.get(url)
         elem = WebDriverWait(self._driver, WAIT_TIME, 0.5).until(
             lambda x: x.find_element_by_id("comici-viewer"),
@@ -161,10 +163,10 @@ class Yanmaga(ComicReader):
                     result.append(r.result())
             except Exception:
                 pass
-        result = dict(result)
+        result_d = dict(result)
         rt = {}
         for u in url:
-            rt[u] = result.get(u)
+            rt[u] = result_d.get(u)
         return rt
 
     def downloader(self):

@@ -138,7 +138,7 @@ def pattern(strs):
     return u % 4 + 1
 
 
-class DownldGen(object):
+class DownldGen:
     def __init__(self, contents, base_fpath, base_url):
         super().__init__()
         self._contents = contents

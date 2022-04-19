@@ -6,7 +6,7 @@ import os
 import re
 from abc import ABCMeta, abstractmethod
 from io import BytesIO
-from typing import Iterable
+from typing import Any, Iterable
 
 from aiohttp import ClientSession
 from PIL import Image
@@ -30,7 +30,7 @@ except Exception:
         return ""
 
 
-class RqProxy(object):
+class RqProxy:
     __proxies: dict[str, str] | None = None
 
     @classmethod
@@ -107,7 +107,7 @@ class ComicReader(metaclass=ABCMeta):
         ...
 
 
-class ComicLinkInfo(object):
+class ComicLinkInfo:
     def __init__(self, url):
         super().__init__()
         self._url = url
@@ -153,11 +153,13 @@ class ComicLinkInfo(object):
         return param
 
 
-class SiteReaderLoader(object):
+class SiteReaderLoader:
     global _site_reader
-    __reader_reg = {}
+    __reader_reg: dict[str, Any] = {}
 
-    def __new__(cls, linkinfo, driver=None) -> ComicReader:
+    # This method raises mypy error:
+    # error: "__new__" must return a class instance (got "Optional[ComicReader]")
+    def __new__(cls, linkinfo, driver=None) -> ComicReader | None:  # type: ignore[misc]
         reader = cls.__reader_reg.get(linkinfo.reader_name)
         if reader is None:
             return None
@@ -199,7 +201,7 @@ class SiteReaderLoader(object):
             return None
 
 
-class ProgressBar(object):
+class ProgressBar:
     """Progress bar for terminal display"""
 
     def __init__(self, total: int):
@@ -419,7 +421,8 @@ def write2file(
             else:
                 with open(p + file_ext, "wb") as fp:
                     fp.write(img_)
-            bar.show(pnum)
+            if bar is not None:
+                bar.show(pnum)
             pnum += 1
         return 0
     else:

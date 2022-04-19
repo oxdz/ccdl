@@ -219,11 +219,13 @@ class ComicAction(ComicReader):
 
         # 复原
         if site_name in {"to-corona-ex.com", "ichijin-plus.com"}:
-            proc = proc_img_co_corona(img0.width, img0.height, token)
-            proc.n21(img0=img0).save(fpth[0] + "/target/" + fpth[1])
+            proc_img_co_corona(img0.width, img0.height, token).n21(img0=img0).save(
+                fpth[0] + "/target/" + fpth[1]
+            )
         else:
-            proc = proc_img_co(img0.width, img0.height)
-            proc.n21(img0=img0).save(fpth[0] + "/target/" + fpth[1])
+            proc_img_co(img0.width, img0.height).n21(img0=img0).save(
+                fpth[0] + "/target/" + fpth[1]
+            )
 
     def downloader(self) -> None:
         # https://<domain: comic-action.com ...>/episode/13933686331648942300

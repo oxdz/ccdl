@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 WAIT_TIME = 90
 
 
-class N21(object):
+class N21:
     """
     docstring
     """

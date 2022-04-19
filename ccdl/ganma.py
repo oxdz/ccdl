@@ -16,7 +16,7 @@ from .utils import (
 logger = logging.getLogger(__name__)
 
 
-class DownldGen(object):
+class DownldGen:
     def __init__(self, item):
         self._item = item
 

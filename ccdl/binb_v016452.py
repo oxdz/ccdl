@@ -56,7 +56,7 @@ def get_cookies_thr_browser(url, driver: webdriver.Chrome):
     return None
 
 
-class DownldGenBinb2(object):
+class DownldGenBinb2:
     def __init__(
         self,
         manga_info,

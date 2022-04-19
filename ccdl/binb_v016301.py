@@ -1,3 +1,4 @@
+from __future__ import annotations
 import json
 import logging
 import re
@@ -36,8 +37,9 @@ class Binb3(ComicReader):
         http_adapter = HTTPAdapter(max_retries=5)
         self.rq.mount(prefix="https://", adapter=http_adapter)
         self.rq.mount(prefix="http://", adapter=http_adapter)
-        if RqProxy.get_proxy() is not None and len(RqProxy.get_proxy()) > 0:
-            self.rq.proxies = RqProxy.get_proxy()
+        proxy = RqProxy.get_proxy()
+        if proxy is not None and len(proxy) > 0:
+            self.rq.proxies = proxy
         self._headers = {"referer": self._link_info.url}
 
     def image_coords(self, ptinfo):
@@ -63,7 +65,7 @@ class Binb3(ComicReader):
 
     def find(
         self, url: str, headers=None, cookies=None, func=lambda x: str(x).zfill(4)
-    ) -> tuple:
+    ) -> tuple | None:
         NUM_COROUTINES = 5
         MULTI = 100
         r01 = downld_url(
