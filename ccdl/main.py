@@ -8,9 +8,8 @@ import traceback
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 
-from ccdl import (Binb2, ComicAction, ComicEarthstar, ComicLinkInfo,
-                  ComicWalker, Ganma)
-from ccdl.utils import RqProxy, SiteReaderLoader, get_windwos_proxy
+from . import Binb2, ComicAction, ComicEarthstar, ComicLinkInfo, ComicWalker, Ganma
+from .utils import RqProxy, SiteReaderLoader, get_windwos_proxy
 
 if not os.path.exists("log"):
     os.makedirs("log")
@@ -20,13 +19,14 @@ fh = logging.FileHandler(filename=log_file_path, encoding="UTF-8")
 logging.basicConfig(
     level=logging.INFO,
     handlers=[fh],
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
 logger = logging.getLogger("CCDL")
 
-if 'Linux' in platform.platform().split('-'):
-    executable_path = './chromedriver'
-elif 'Windows' in platform.platform().split('-'):
-    executable_path = './chromedriver.exe'
+if "Linux" in platform.platform().split("-"):
+    executable_path = "./chromedriver"
+elif "Windows" in platform.platform().split("-"):
+    executable_path = "./chromedriver.exe"
     proxy_server = get_windwos_proxy()
     if proxy_server:
         logger.info("Proxy Server Address (Enabled): {}".format(proxy_server))
@@ -34,29 +34,33 @@ elif 'Windows' in platform.platform().split('-'):
     del proxy_server
 else:
     logger.error("platform not win or linux, may failed")
-    executable_path = './chromedriver'
+    executable_path = "./chromedriver"
     # raise ValueError("os")
 chrome_options = webdriver.ChromeOptions()
-chrome_options.add_experimental_option("excludeSwitches",
-                                       ["enable-automation", "enable-logging"])
+chrome_options.add_experimental_option(
+    "excludeSwitches", ["enable-automation", "enable-logging"]
+)
 
-if __name__ == "__main__":
+
+def main():
     driver = None
     is_exist = os.path.exists(executable_path)
     print("\n源碼: https://github.com/oxdz/ccdl")
     if is_exist:
         print("\n如需登入（含*）請提前在程式啟動的瀏覽器中登入，並加載目標url（任意標籤頁）！\n")
         try:
-            driver = webdriver.Chrome(options=chrome_options,
-                                      executable_path=executable_path)
+            driver = webdriver.Chrome(
+                options=chrome_options, executable_path=executable_path
+            )
         except Exception as e:
             logger.error(traceback.format_exc())
-            print("Chrome啟動失敗! 請檢查Chrome與chromedriver版本\n" +
-                  traceback.format_exc())
-            print("您可於 http://npm.taobao.org/mirrors/chromedriver/ or https://chromedriver.chromium.org/downloads 下載\n")
+            print("Chrome啟動失敗! 請檢查Chrome與chromedriver版本\n" + traceback.format_exc())
+            print(
+                "您可於 http://npm.taobao.org/mirrors/chromedriver/ or https://chromedriver.chromium.org/downloads 下載\n"
+            )
 
             driver = None
-            if input("Do you want to continue? （y/n）") in ('y', 'Y', 'YES'):
+            if input("Do you want to continue? （y/n）") in ("y", "Y", "YES"):
                 pass
             else:
                 time.sleep(0.8)
@@ -66,15 +70,17 @@ if __name__ == "__main__":
                 sys.exit()
     else:
         print("\n由於未在程式所在目錄發現chromedriver，部分基於selenium採集的站點將無法進行。")
-        print("您可於 http://npm.taobao.org/mirrors/chromedriver/ or https://chromedriver.chromium.org/downloads 下載\n")
+        print(
+            "您可於 http://npm.taobao.org/mirrors/chromedriver/ or https://chromedriver.chromium.org/downloads 下載\n"
+        )
 
     print("\n>>>>>>>>輸入exit退出<<<<<<<<\n")
 
     while True:
         url = input("url: ")
 
-        if url == 'exit':
-            print('Bye~')
+        if url == "exit":
+            print("Bye~")
             time.sleep(0.5)
             if driver:
                 driver.quit()
@@ -97,3 +103,7 @@ if __name__ == "__main__":
         else:
             print("not supported")
             continue
+
+
+if __name__ == "__main__":
+    main()

@@ -1,26 +1,30 @@
 import asyncio
 import base64
-from io import BytesIO
-from logging import NOTSET
 import os
 import re
 from abc import ABCMeta, abstractmethod
+from io import BytesIO
+from logging import NOTSET
 from typing import Iterable
 
 from aiohttp import ClientSession
 from PIL import Image
-from selenium import webdriver
+from selenium import webdriver  # type: ignore[import]
 
 try:
     import winreg
 
     def get_windwos_proxy():
         sub_key = "SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings"
-        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER,
-                             sub_key, 0, winreg.KEY_QUERY_VALUE)
+        key = winreg.OpenKey(
+            winreg.HKEY_CURRENT_USER, sub_key, 0, winreg.KEY_QUERY_VALUE
+        )
         if winreg.QueryValueEx(key, "ProxyEnable")[0] != 0:
             return winreg.QueryValueEx(key, "ProxyServer")[0]
+
+
 except:
+
     def get_windwos_proxy():
         return ""
 
@@ -43,51 +47,56 @@ class RqProxy(object):
 
 _site_reader = {
     # "domain": ["reader", RegExp, param1, param2, ...]
-    "r.binb.jp":                        ["binb2", "r.binb.jp/epm/([\w-]+)/", 1],
-    "www.cmoa.jp":                      ["binb2", "www.cmoa.jp/bib/speedreader/speed.html\?cid=([\w-]+)&u0=(\d)&u1=(\d)", 1],
-    "booklive.jp":                      ["binb", "booklive.jp/bviewer/s/\?cid=([\w-]*)&", 1],
-    "takeshobo.co.jp":                  ["binb", "[\w-]+.takeshobo.co.jp/manga/([\w-]+)/_files[\w-]*/([\w-]+)/", 0],
-    "www.comic-valkyrie.com":           ["binb", "www.comic-valkyrie.com/samplebook/([\w-]*)/", 0],
-    "futabanet.jp":                     ["binb", "futabanet.jp/common/dld/zip/([\w-]*)/", 0],
-    "comic-polaris.jp":                 ["binb", "comic-polaris.jp/ptdata/([\w-]*)/([\w-]*)/", 0],
-    "www.shonengahosha.co.jp":          ["binb", "www.shonengahosha.co.jp/([\w-]*)/([\w-]*)/", 0],
-    "r-cbs.mangafactory.jp":            ['binb', '', 1],
-    "comic-meteor.jp":                  ['binb3', '', 0],
-
-    "comic-action.com":                 ["comic_action", "episode/([\w-]*)", 0],
-    "comic-days.com":                   ["comic_action", "episode/([\w-]*)", 1],
-    "comic-gardo.com":                  ["comic_action", "episode/([\w-]*)", 1],
-    "comic-trail.com":                  ["comic_action", "episodes/([\w-]*)", 1],
-    "comic-zenon.com":                  ["comic_action", "episode/([\w-]*)", 0],
-    "comicborder.com":                  ["comic_action", "episode/([\w-]*)", 0],
-    "comicbushi-web.com":               ["comic_action", "episode/([\w-]*)", 1],
-    "ichijin-plus.com":                 ["comic_action", "episodes/([\w-]*)", 0],
-    "kuragebunch.com":                  ["comic_action", "episode/([\w-]*)", 1],
-    "magcomi.com":                      ["comic_action", "episode/([\w-]*)", 0],
-    "pocket.shonenmagazine.com":        ["comic_action", "episode/([\w-]*)", 1],
-    "shonenjumpplus.com":               ["comic_action", "episode/([\w-]*)", 1],
-    "tonarinoyj.jp":                    ["comic_action", "episode/([\w-]*)", 0],
-    "to-corona-ex.com":                 ["comic_action", "episodes/([\w-]*)", 0],
-    "viewer.heros-web.com":             ["comic_action", "episode/([\w-]*)", 0],
-
-
-    "viewer.comic-earthstar.jp":        ["comic_earthstar", "cid=([\w-]*)"],
-
-    "comic-walker.com":                 ["comic_walker", 'cid=([\w-]*)'],
-
-    "www.ganganonline.com":          ["ganganonline", None],
-
+    "r.binb.jp": ["binb2", "r.binb.jp/epm/([\w-]+)/", 1],
+    "www.cmoa.jp": [
+        "binb2",
+        "www.cmoa.jp/bib/speedreader/speed.html\?cid=([\w-]+)&u0=(\d)&u1=(\d)",
+        1,
+    ],
+    "booklive.jp": ["binb", "booklive.jp/bviewer/s/\?cid=([\w-]*)&", 1],
+    "takeshobo.co.jp": [
+        "binb",
+        "[\w-]+.takeshobo.co.jp/manga/([\w-]+)/_files[\w-]*/([\w-]+)/",
+        0,
+    ],
+    "www.comic-valkyrie.com": [
+        "binb",
+        "www.comic-valkyrie.com/samplebook/([\w-]*)/",
+        0,
+    ],
+    "futabanet.jp": ["binb", "futabanet.jp/common/dld/zip/([\w-]*)/", 0],
+    "comic-polaris.jp": ["binb", "comic-polaris.jp/ptdata/([\w-]*)/([\w-]*)/", 0],
+    "www.shonengahosha.co.jp": [
+        "binb",
+        "www.shonengahosha.co.jp/([\w-]*)/([\w-]*)/",
+        0,
+    ],
+    "r-cbs.mangafactory.jp": ["binb", "", 1],
+    "comic-meteor.jp": ["binb3", "", 0],
+    "comic-action.com": ["comic_action", "episode/([\w-]*)", 0],
+    "comic-days.com": ["comic_action", "episode/([\w-]*)", 1],
+    "comic-gardo.com": ["comic_action", "episode/([\w-]*)", 1],
+    "comic-trail.com": ["comic_action", "episodes/([\w-]*)", 1],
+    "comic-zenon.com": ["comic_action", "episode/([\w-]*)", 0],
+    "comicborder.com": ["comic_action", "episode/([\w-]*)", 0],
+    "comicbushi-web.com": ["comic_action", "episode/([\w-]*)", 1],
+    "ichijin-plus.com": ["comic_action", "episodes/([\w-]*)", 0],
+    "kuragebunch.com": ["comic_action", "episode/([\w-]*)", 1],
+    "magcomi.com": ["comic_action", "episode/([\w-]*)", 0],
+    "pocket.shonenmagazine.com": ["comic_action", "episode/([\w-]*)", 1],
+    "shonenjumpplus.com": ["comic_action", "episode/([\w-]*)", 1],
+    "tonarinoyj.jp": ["comic_action", "episode/([\w-]*)", 0],
+    "to-corona-ex.com": ["comic_action", "episodes/([\w-]*)", 0],
+    "viewer.heros-web.com": ["comic_action", "episode/([\w-]*)", 0],
+    "viewer.comic-earthstar.jp": ["comic_earthstar", "cid=([\w-]*)"],
+    "comic-walker.com": ["comic_walker", "cid=([\w-]*)"],
+    "www.ganganonline.com": ["ganganonline", None],
     # "www.manga-doa.com":                ["manga_doa", None],
-
     # "www.sukima.me":                    ["sukima", None],
-
-    "www.sunday-webry.com":             ["sunday_webry", None],
-
-    "urasunday.com":                    ["urasunday", None],
-
-    "ganma.jp":                         ["ganma", "ganma.jp/(?:([\w-]*)/([\w-]*)|([\w-]*))"],
-
-    "yanmaga.jp":                       ['yanmaga', None]
+    "www.sunday-webry.com": ["sunday_webry", None],
+    "urasunday.com": ["urasunday", None],
+    "ganma.jp": ["ganma", "ganma.jp/(?:([\w-]*)/([\w-]*)|([\w-]*))"],
+    "yanmaga.jp": ["yanmaga", None],
 }
 
 
@@ -117,7 +126,7 @@ class ComicLinkInfo(object):
         self.param = self._param()
 
     def _site_name(self):
-        match = re.search('//(?:(.*?)/|(.*))', self._url)
+        match = re.search("//(?:(.*?)/|(.*))", self._url)
         # match = re.search('[a-zA-Z]*//(?:.*\.(.*)|(.*))\..*?/', self._url)
         if not match:
             return None
@@ -134,7 +143,7 @@ class ComicLinkInfo(object):
         """
         return [param_regexp:list, param1, param2,...]
         """
-        param = _site_reader[self.site_name][1:]    # param: [RegExp, p1, p2, ..., pn]
+        param = _site_reader[self.site_name][1:]  # param: [RegExp, p1, p2, ..., pn]
         if param and type(param) == list and param[0] and type(param[0]) == str:
             search = re.search(param[0], self._url)
             if search:
@@ -179,6 +188,7 @@ class SiteReaderLoader(object):
         def decorator(reader_cls):
             cls.__reader_reg[reader_name] = reader_cls
             return reader_cls
+
         return decorator
 
     @classmethod
@@ -190,9 +200,7 @@ class SiteReaderLoader(object):
 
 
 class ProgressBar(object):
-    """Progress bar for terminal display
-
-    """
+    """Progress bar for terminal display"""
 
     def __init__(self, total: int):
         """Inits ProgressBar with total"""
@@ -210,10 +218,15 @@ class ProgressBar(object):
         a = int((current_set / self._total) * self._space)
         b = self._space - a
         text = "\r|{}{}| {:>3s}% ({:>} of {:>})".format(
-            '#' * a, ' ' * b, str(int((current_set / self._total) * 100)), str(current_set), str(self._total))
-        print(text, end='')
+            "#" * a,
+            " " * b,
+            str(int((current_set / self._total) * 100)),
+            str(current_set),
+            str(self._total),
+        )
+        print(text, end="")
         if a == self._space:
-            print('')
+            print("")
 
 
 class RqHeaders(dict):
@@ -221,20 +234,25 @@ class RqHeaders(dict):
         mapping = mapping if isinstance(mapping, Iterable) else {}
         super().__init__(mapping)
         self.__setitem__(
-            'User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36')
+            "User-Agent",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36",
+        )
 
     def random_ua(self):
         # self.__setitem__('User-Agent', )
         pass
 
 
-def draw_image(img_source, img_target, src_x, src_y, swidth, sheight, x, y, width=None, height=None):
+def draw_image(
+    img_source, img_target, src_x, src_y, swidth, sheight, x, y, width=None, height=None
+):
     img_target.paste(
-        img_source.crop
-        (
+        img_source.crop(
             (src_x, src_y, src_x + swidth, src_y + sheight),
         ),
-        (x, y))
+        (x, y),
+    )
 
 
 def cc_mkdir(fpath, model=0) -> int:
@@ -244,26 +262,26 @@ def cc_mkdir(fpath, model=0) -> int:
     if model == 1:
         if os.path.exists(fpath):
             print('\n當前一話的文件夾 "{}" 存在，繼續運行數據將被覆蓋！'.format(fpath))
-            print('是否繼續運行？（y/n）')
+            print("是否繼續運行？（y/n）")
             yn = input()
-            return 0 if yn == 'y' or yn == 'yes' or yn == 'Y' else -1
+            return 0 if yn == "y" or yn == "yes" or yn == "Y" else -1
         else:
             if not os.path.exists(fpath):
                 os.makedirs(fpath)
-            print('創建文件夾: ' + fpath)
+            print("創建文件夾: " + fpath)
             return 0
-    if os.path.exists(fpath+'/source') and os.path.exists(fpath+'/target'):
+    if os.path.exists(fpath + "/source") and os.path.exists(fpath + "/target"):
         print('\n當前一話的文件夾 "{}" 存在，繼續運行數據將被覆蓋，'.format(fpath))
-        print('是否繼續運行？（y/n）')
+        print("是否繼續運行？（y/n）")
         yn = input()
-        return 0 if yn == 'y' or yn == 'yes' or yn == 'Y' else -1
+        return 0 if yn == "y" or yn == "yes" or yn == "Y" else -1
     else:
-        if not os.path.exists(fpath + '/source'):
-            os.makedirs(fpath + '/source')
-        if not os.path.exists(fpath + '/target'):
-            os.makedirs(fpath + '/target')
+        if not os.path.exists(fpath + "/source"):
+            os.makedirs(fpath + "/source")
+        if not os.path.exists(fpath + "/target"):
+            os.makedirs(fpath + "/target")
 
-        print('創建文件夾: ' + fpath)
+        print("創建文件夾: " + fpath)
         return 0
 
 
@@ -271,7 +289,8 @@ def get_blob_content(driver: webdriver.Chrome, uri):
     """
     获取浏览器中的blob对象的数据
     """
-    result = driver.execute_async_script("""
+    result = driver.execute_async_script(
+        """
         var uri = arguments[0];
         var callback = arguments[1];
         var toBase64 = function(buffer){for(var r,n=new Uint8Array(buffer),t=n.length,a=new Uint8Array(4*Math.ceil(t/3)),i=new Uint8Array(64),o=0,c=0;64>c;++c)i[c]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".charCodeAt(c);for(c=0;t-t%3>c;c+=3,o+=4)r=n[c]<<16|n[c+1]<<8|n[c+2],a[o]=i[r>>18],a[o+1]=i[r>>12&63],a[o+2]=i[r>>6&63],a[o+3]=i[63&r];return t%3===1?(r=n[t-1],a[o]=i[r>>2],a[o+1]=i[r<<4&63],a[o+2]=61,a[o+3]=61):t%3===2&&(r=(n[t-2]<<8)+n[t-1],a[o]=i[r>>10],a[o+1]=i[r>>4&63],a[o+2]=i[r<<2&63],a[o+3]=61),new TextDecoder("ascii").decode(a)};
@@ -281,14 +300,16 @@ def get_blob_content(driver: webdriver.Chrome, uri):
         xhr.onerror = function(){ callback(xhr.status) };
         xhr.open('GET', uri);
         xhr.send();
-        """, uri)
+        """,
+        uri,
+    )
     if type(result) == int:
         raise Exception("Request failed with status %s" % result)
     return base64.b64decode(result)
 
 
 def win_char_replace(s: str):
-    s = re.sub("[\|\*\<\>\"\\\/\:]", "_", s).replace('?', '？').replace(" ", "")
+    s = re.sub('[\|\*\<\>"\\\/\:]', "_", s).replace("?", "？").replace(" ", "")
     return s
 
 
@@ -296,8 +317,8 @@ def url_join(*args):
     args = list(args)
     l = len(args)
     for i in range(l):
-        args[i] = args[i][1:] if args[i][0] == '/' else args[i]
-        args[i] = args[i] + '/' if args[i][-1] != '/' and i != l-1 else args[i]
+        args[i] = args[i][1:] if args[i][0] == "/" else args[i]
+        args[i] = args[i] + "/" if args[i][-1] != "/" and i != l - 1 else args[i]
     return "".join(args)
 
 
@@ -306,9 +327,10 @@ def downld_url(url: list, headers=None, cookies=None, bar=None):
     :param url: url list
     :param headers:  (list, tuple) for each || dict for all
     :param cookies:  (list, tuple) for each || dict for all
-    :param bar: ProgressBar object 
+    :param bar: ProgressBar object
     :returns: [bstr if success else None, ...]
     """
+
     async def _dld(index, url, *, max_retries=3, headers=None, cookies=None):
         nonlocal bar
         async with ClientSession(headers=headers, cookies=cookies) as session:
@@ -325,12 +347,20 @@ def downld_url(url: list, headers=None, cookies=None, bar=None):
 
     fs = []
     for x in range(len(url)):
-        fs.append(asyncio.ensure_future(
-            _dld(x, url[x],
-                 headers=headers[x] if isinstance(
-                     headers, (list, tuple)) else headers,
-                 cookies=cookies[x] if isinstance(
-                     cookies, (list, tuple)) else cookies)))
+        fs.append(
+            asyncio.ensure_future(
+                _dld(
+                    x,
+                    url[x],
+                    headers=headers[x]
+                    if isinstance(headers, (list, tuple))
+                    else headers,
+                    cookies=cookies[x]
+                    if isinstance(cookies, (list, tuple))
+                    else cookies,
+                )
+            )
+        )
 
     loop = asyncio.get_event_loop()
     done, pedding = loop.run_until_complete(asyncio.wait(fs))
@@ -346,25 +376,32 @@ def downld_url(url: list, headers=None, cookies=None, bar=None):
     return result
 
 
-def write2file(file_path: str, img, page_num, file_ext: str, file_ext_dst: str = None, bar: ProgressBar = None):
-    '''
+def write2file(
+    file_path: str,
+    img,
+    page_num,
+    file_ext: str,
+    file_ext_dst: str = None,
+    bar: ProgressBar = None,
+):
+    """
     :param img: bytes or []bytes
     :param page_num: total page if isinstance(img, list)t else current
     :param file_ext: jpg | png | webp ...
-    '''
+    """
     if isinstance(img, bytes):
-        p = os.path.join(file_path, str(page_num) + '.' + file_ext)
-        with open(p, 'wb') as fp:
+        p = os.path.join(file_path, str(page_num) + "." + file_ext)
+        with open(p, "wb") as fp:
             fp.write(img)
         return 0
     elif isinstance(img, list):
         pnum = 1
         for img_ in img:
-            p = os.path.join(file_path, str(pnum) + '.')
+            p = os.path.join(file_path, str(pnum) + ".")
             if file_ext_dst:
-                Image.open(BytesIO(img_)).save(p+file_ext_dst)
+                Image.open(BytesIO(img_)).save(p + file_ext_dst)
             else:
-                with open(p+file_ext, 'wb') as fp:
+                with open(p + file_ext, "wb") as fp:
                     fp.write(img_)
             bar.show(pnum)
             pnum += 1

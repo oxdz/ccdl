@@ -9,13 +9,20 @@ from copy import deepcopy
 from io import BytesIO
 
 import requests
-from lxml.html import etree
 from PIL import Image
-from selenium import webdriver
+from selenium import webdriver  # type: ignore[import]
 
-
-from .utils import (ComicLinkInfo, ComicReader, ProgressBar, RqHeaders, RqProxy, SiteReaderLoader,
-                    cc_mkdir, draw_image, win_char_replace)
+from .utils import (
+    ComicLinkInfo,
+    ComicReader,
+    ProgressBar,
+    RqHeaders,
+    RqProxy,
+    SiteReaderLoader,
+    cc_mkdir,
+    draw_image,
+    win_char_replace,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +57,20 @@ def get_cookies_thr_browser(url, driver: webdriver.Chrome):
 
 
 class DownldGenBinb2(object):
-    def __init__(self, manga_info, link_info, base_path, cnt_p, cid, cntserver, ctbl, ptbl, content_data, u0, u1):
+    def __init__(
+        self,
+        manga_info,
+        link_info,
+        base_path,
+        cnt_p,
+        cid,
+        cntserver,
+        ctbl,
+        ptbl,
+        content_data,
+        u0,
+        u1,
+    ):
         self._manga_info = manga_info
         self._base_path = base_path
         self._link_info = link_info
@@ -67,9 +87,9 @@ class DownldGenBinb2(object):
     def file_path_g(self):
         for x in self._manga_info:
             if self._link_info.site_name == "www.cmoa.jp":
-                yield self._base_path + "/{}.png".format(int(x["id"][1:])+1)
+                yield self._base_path + "/{}.png".format(int(x["id"][1:]) + 1)
             elif self._link_info.site_name == "r.binb.jp":
-                yield self._base_path + "/{}.png".format(int(x["id"][1:])+1)
+                yield self._base_path + "/{}.png".format(int(x["id"][1:]) + 1)
             else:
                 raise ValueError("")
 
@@ -77,11 +97,22 @@ class DownldGenBinb2(object):
     def img_url_g(self):
         for x in self._manga_info:
             if self._link_info.site_name == "www.cmoa.jp":
-                yield self._contents_server + "/sbcGetImg.php?cid={}&src={}&p={}&q=1&vm=1&dmytime={}&u0={}&u1={}".format(
-                    self._cid, x["src"].replace("/", "%2F"), self._cnt_p, self._content_data, self._u0, self._u1)
+                yield "{}/sbcGetImg.php?cid={}&src={}&p={}&q=1&vm=1&dmytime={}&u0={}&u1={}".format(
+                    self._contents_server,
+                    self._cid,
+                    x["src"].replace("/", "%2F"),
+                    self._cnt_p,
+                    self._content_data,
+                    self._u0,
+                    self._u1,
+                )
             elif self._link_info.site_name == "r.binb.jp":
                 yield "{}{}sbcGetImg.php?cid={}&src={}&p={}&q=1".format(
-                    self._link_info._url, self._contents_server, self._cid, x["src"], self._cnt_p
+                    self._link_info._url,
+                    self._contents_server,
+                    self._cid,
+                    x["src"],
+                    self._cnt_p,
                 )
             else:
                 raise ValueError("")
@@ -95,7 +126,7 @@ class DownldGenBinb2(object):
 class ImageDescrambleCoords(dict):
     def __init__(self, width, height, h, s):
         r"""
-        :param width: image width 
+        :param width: image width
         :param height: image height
         :param h: ctbl
         :param s: ptbl
@@ -103,14 +134,18 @@ class ImageDescrambleCoords(dict):
         if "=" == h[0] and "=" == s[0]:
             self.lt_f(h, s)
         e = self.lt_dt({"width": width, "height": height})
-        super().__init__({
-            "width": e["width"],
-            "height": e["height"],
-            "transfers": [{
-                "index": 0,
-                "coords": self.lt_bt({"width": width, "height": height})
-            }],
-        })
+        super().__init__(
+            {
+                "width": e["width"],
+                "height": e["height"],
+                "transfers": [
+                    {
+                        "index": 0,
+                        "coords": self.lt_bt({"width": width, "height": height}),
+                    }
+                ],
+            }
+        )
 
     @staticmethod
     def ctbl_ptbl(t, ctbl_d, ptbl_d):
@@ -120,11 +155,11 @@ class ImageDescrambleCoords(dict):
         :param ptbl_d: ptbl(decoded), list
         """
         i = [0, 0]
-        if(t):
-            n = t.index('/') + 1
+        if t:
+            n = t.index("/") + 1
             r = len(t) - n
             for e in range(r):
-                i[e % 2] += ord(t[e+n])
+                i[e % 2] += ord(t[e + n])
             i[0] %= 8
             i[1] %= 8
         h = ctbl_d[i[1]]
@@ -133,19 +168,17 @@ class ImageDescrambleCoords(dict):
 
     def lt_f(self, t, i):
         r"""
-        :param t: ctbl,str 
+        :param t: ctbl,str
         :param i: ptbl,str
         """
         # "^=([0-9]+)-([0-9]+)([-+])([0-9]+)-([-_0-9A-Za-z]+)$/"
-        n = re.match(
-            "=([0-9]+)-([0-9]+)([-+])([0-9]+)-([-_0-9A-Za-z]+)", t).groups()
-        r = re.match(
-            "=([0-9]+)-([0-9]+)([-+])([0-9]+)-([-_0-9A-Za-z]+)", i).groups()
+        n = re.match("=([0-9]+)-([0-9]+)([-+])([0-9]+)-([-_0-9A-Za-z]+)", t).groups()
+        r = re.match("=([0-9]+)-([0-9]+)([-+])([0-9]+)-([-_0-9A-Za-z]+)", i).groups()
         self._lt_T = int(n[0], 10)
         self._lt_j = int(n[1], 10)
         self._lt_xt = int(n[3], 10)
         e = self._lt_T + self._lt_j + self._lt_T * self._lt_j
-        if(len(n[4]) == e and len(r[4]) == e):
+        if len(n[4]) == e and len(r[4]) == e:
             s = self.lt_St(n[4])
             h = self.lt_St(r[4])
             self._lt_Ct = s["n"]
@@ -170,24 +203,25 @@ class ImageDescrambleCoords(dict):
         for o in range(self._lt_T * self._lt_j):
             a = o % self._lt_T
             f = math.floor(o / self._lt_T)
-            c = self._lt_xt + a * (r + 2 * self._lt_xt) + \
-                (e - r if self._lt_Tt[f] < a else 0)
-            l = self._lt_xt + f * (s + 2 * self._lt_xt) + \
-                (h - s if self._lt_Pt[a] < f else 0)
+            c = (
+                self._lt_xt
+                + a * (r + 2 * self._lt_xt)
+                + (e - r if self._lt_Tt[f] < a else 0)
+            )
+            l = (
+                self._lt_xt
+                + f * (s + 2 * self._lt_xt)
+                + (h - s if self._lt_Pt[a] < f else 0)
+            )
             v = self._lt_It[o] % self._lt_T
             d = math.floor(self._lt_It[o] / self._lt_T)
             b = v * r + (e - r if self._lt_Ct[d] < v else 0)
             g = d * s + (h - s if self._lt_At[v] < d else 0)
             p = e if self._lt_Tt[f] == a else r
             m = h if self._lt_Pt[a] == f else s
-            0 < i and 0 < n and u.append({
-                "xsrc": c,
-                "ysrc": l,
-                "width": p,
-                "height": m,
-                "xdest": b,
-                "ydest": g
-            })
+            0 < i and 0 < n and u.append(
+                {"xsrc": c, "ysrc": l, "width": p, "height": m, "xdest": b, "ydest": g}
+            )
         return u
 
     def lt_dt(self, t):
@@ -196,17 +230,149 @@ class ImageDescrambleCoords(dict):
         """
         i = 2 * self._lt_T * self._lt_xt
         n = 2 * self._lt_j * self._lt_xt
-        if t["width"] >= 64 + i and t["height"] >= 64 + n and t["width"] * t["height"] >= (320 + i) * (320 + n):
+        if (
+            t["width"] >= 64 + i
+            and t["height"] >= 64 + n
+            and t["width"] * t["height"] >= (320 + i) * (320 + n)
+        ):
             return {
                 "width": t["width"] - 2 * self._lt_T * self._lt_xt,
-                "height": t["height"] - 2 * self._lt_j * self._lt_xt
+                "height": t["height"] - 2 * self._lt_j * self._lt_xt,
             }
         else:
             return t
 
     def lt_St(self, t):
-        kt = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -
-              1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, 63, -1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1]
+        kt = [
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            62,
+            -1,
+            -1,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            -1,
+            -1,
+            -1,
+            -1,
+            63,
+            -1,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+        ]
         n = []
         r = []
         e = []
@@ -223,7 +389,7 @@ class ImageDescrambleCoords(dict):
         return {"t": n, "n": r, "p": e}
 
 
-@SiteReaderLoader.register('binb2')
+@SiteReaderLoader.register("binb2")
 class Binb2(ComicReader):
     def __init__(self, link_info: ComicLinkInfo, driver: webdriver.Chrome):
         super().__init__()
@@ -235,25 +401,44 @@ class Binb2(ComicReader):
     def gen_cntntInfo_url(self, **kwargs):
         if self._link_info.site_name == "www.cmoa.jp":
             return "https://www.cmoa.jp/bib/sws/bibGetCntntInfo.php?cid={}&dmytime={}&k={}&u0={}&u1={}".format(
-                self._cid, int(time.time()*1000), self._rq_k, self._u0, self._u1)
+                self._cid, int(time.time() * 1000), self._rq_k, self._u0, self._u1
+            )
         elif self._link_info.site_name == "r.binb.jp":
             return "{}swsapi/bibGetCntntInfo?cid={}&dmytime={}&k={}".format(
-                self._link_info.url, self._cid, int(time.time()*1000), self._rq_k)
+                self._link_info.url, self._cid, int(time.time() * 1000), self._rq_k
+            )
 
     def gen_GetCntnt_url(self, **kwargs):
         if self._link_info.site_name == "www.cmoa.jp":
             # print("https://binb-cmoa.sslcs.cdngc.net/sbc/sbcGetCntnt.php?cid={}&p={}&vm=1&dmytime={}&u0=0&u1=0".format(
             #     self._cid, self._cnt_p, self._content_date))
             return "{}/sbcGetCntnt.php?cid={}&p={}&vm=1&dmytime={}&u0={}&u1={}".format(
-                self._contents_server, self._cid, self._cnt_p, self._content_date, self._u0, self._u1)
+                self._contents_server,
+                self._cid,
+                self._cnt_p,
+                self._content_date,
+                self._u0,
+                self._u1,
+            )
         elif self._link_info.site_name == "r.binb.jp":
-            return self._link_info.url + "{}sbcGetCntnt.php?cid={}&p={}&dmytime={}".format(
-                self._contents_server, self._cid, self._cnt_p, int(time.time()*1000))
+            return (
+                self._link_info.url
+                + "{}sbcGetCntnt.php?cid={}&p={}&dmytime={}".format(
+                    self._contents_server,
+                    self._cid,
+                    self._cnt_p,
+                    int(time.time() * 1000),
+                )
+            )
 
     def gen_image_url(self, img_src, **kwargs):
         if self._link_info.site_name == "www.cmoa.jp":
-            return self._contents_server + "/sbcGetImg.php?cid={}&src={}&p={}&q=1&dmytime={}".format(
-                self._cid, img_src, self._cnt_p, self._content_date)
+            return (
+                self._contents_server
+                + "/sbcGetImg.php?cid={}&src={}&p={}&q=1&dmytime={}".format(
+                    self._cid, img_src, self._cnt_p, self._content_date
+                )
+            )
         elif self._link_info.site_name == "r.binb.jp":
             return "{}{}sbcGetImg.php?cid={}&src={}&p={}&q=1".format(
                 self._url, self._contents_server, self._cid, img_src, self._cnt_p
@@ -274,7 +459,10 @@ class Binb2(ComicReader):
             h ^= ord(r[i])
             u ^= ord(e[i])
             k.append(
-                n[i] + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"[s+h+u & 63]
+                n[i]
+                + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"[
+                    s + h + u & 63
+                ]
             )
         self._rq_k = "".join(k)
         return self._rq_k
@@ -296,14 +484,14 @@ class Binb2(ComicReader):
         u = e
         for s in range(len(n)):
             if u < 0:
-                u = u & 0xffffffff >> 1 ^ 1210056708 & -(1 & u)
+                u = u & 0xFFFFFFFF >> 1 ^ 1210056708 & -(1 & u)
             else:
                 u = u >> 1 ^ 1210056708 & -(1 & u)
             o = (ord(n[s]) - 32 + u) % 94 + 32
             h += chr(o)
         try:
             return json.loads(h)
-        except Exception as e:
+        except Exception:
             return None
 
     # step 1
@@ -315,22 +503,20 @@ class Binb2(ComicReader):
         self._u0 = None
         self._u1 = None
         if rq.status_code != 200:
-            e_str = "status_code:{} url:{}".format(
-                rq.status_code, self._link_info.url)
+            e_str = "status_code:{} url:{}".format(rq.status_code, self._link_info.url)
             logging.error(e_str)
             raise ValueError(e_str)
 
         self._cookies = rq.cookies
 
         if self._link_info.site_name == "r.binb.jp":
-            cid = re.search("data-ptbinb-cid=\"(.*?)\"", rq.text).groups()[0]
+            cid = re.search('data-ptbinb-cid="(.*?)"', rq.text).groups()[0]
         elif self._link_info.site_name == "www.cmoa.jp":
             cid = self._link_info.param[0][0]
             self._u0 = self._link_info.param[0][1]
             self._u1 = self._link_info.param[0][2]
             if self._u0 == "0":
-                self._cookies = get_cookies_thr_browser(
-                    self._url, self._webdriver)
+                self._cookies = get_cookies_thr_browser(self._url, self._webdriver)
 
         else:
             logger.error("cid not found, url:{}".format(self._link_info.url))
@@ -341,10 +527,10 @@ class Binb2(ComicReader):
 
     # step 2_1
     def bibGetCntntInfo(self):
-        r"""
-
-        """
-        rq = requests.get(self.gen_cntntInfo_url(), cookies=self._cookies, proxies=RqProxy.get_proxy())
+        r""" """
+        rq = requests.get(
+            self.gen_cntntInfo_url(), cookies=self._cookies, proxies=RqProxy.get_proxy()
+        )
         if rq.status_code != 200:
             return -1
         cntntinfo = rq.json()
@@ -377,23 +563,34 @@ class Binb2(ComicReader):
         self._ctbl = self.CntntInfoDecode(self._cid, self._rq_k, self._ctbl)
 
     # step 2_2
-    def sbcGetCntnt(self,):
-        rq = requests.get(self.gen_GetCntnt_url(), cookies=self._cookies, proxies=RqProxy.get_proxy())
+    def sbcGetCntnt(
+        self,
+    ):
+        rq = requests.get(
+            self.gen_GetCntnt_url(), cookies=self._cookies, proxies=RqProxy.get_proxy()
+        )
         if rq.status_code != 200:
             return -1
         html_manga = rq.json()["ttx"]
         manga_info = re.findall('<t-img.*?id="L[\d]+".*?>', html_manga)
-        page = etree.HTML(html_manga)
-        manga_info_list = [re.search(
-            'src="(.*?)".*orgwidth="([\d]+)".*orgheight="([\d]+)".*id="(L[\d]+)"', x).groups() for x in manga_info]
+        manga_info_list = [
+            re.search(
+                'src="(.*?)".*orgwidth="([\d]+)".*orgheight="([\d]+)".*id="(L[\d]+)"', x
+            ).groups()
+            for x in manga_info
+        ]
         self._manga_info = [
-            {"id": x[3], "src":x[0], "orgwidth":x[1], "orgheight":x[2]} for x in manga_info_list]
+            {"id": x[3], "src": x[0], "orgwidth": x[1], "orgheight": x[2]}
+            for x in manga_info_list
+        ]
         return self._manga_info
 
     # step_3
     @staticmethod
     def downld_one(url, fpath, hs, cookies):
-        rq = requests.get(url=url, cookies=cookies, headers=RqHeaders(), proxies=RqProxy.get_proxy())
+        rq = requests.get(
+            url=url, cookies=cookies, headers=RqHeaders(), proxies=RqProxy.get_proxy()
+        )
         if rq.status_code != 200:
             raise ValueError("error:down_one:" + url)
         img = Image.open(BytesIO(rq.content))
@@ -401,8 +598,16 @@ class Binb2(ComicReader):
         img_target = deepcopy(img)
         img_target = Image.new(img.mode, (coords["width"], coords["height"]))
         for y in coords["transfers"][0]["coords"]:
-            draw_image(img, img_target, y["xsrc"], y["ysrc"],
-                       y["width"], y["height"], y["xdest"], y["ydest"])
+            draw_image(
+                img,
+                img_target,
+                y["xsrc"],
+                y["ysrc"],
+                y["width"],
+                y["height"],
+                y["xdest"],
+                y["ydest"],
+            )
         img_target.save(fpath)
         return 0
 
@@ -411,19 +616,39 @@ class Binb2(ComicReader):
         self.bibGetCntntInfo()
         self.sbcGetCntnt()
         if self._manga_title and self._manga_subtitle:
-            base_path = "./漫畫/" + \
-                "/".join((self._manga_title, self._manga_subtitle))
+            base_path = "./漫畫/" + "/".join((self._manga_title, self._manga_subtitle))
         else:
-            base_path = "./漫畫/" + self._manga_title if self._manga_title else self._manga_subtitle
+            base_path = (
+                "./漫畫/" + self._manga_title
+                if self._manga_title
+                else self._manga_subtitle
+            )
 
         if cc_mkdir(base_path, model=1) != 0:
             return -1
         progressBar = ProgressBar(len(self._manga_info))
-        downGen = DownldGenBinb2(self._manga_info, self._link_info, base_path, self._cnt_p,
-                                 self._cid, self._contents_server, self._ctbl, self._ptbl, self._content_date, self._u0, self._u1)
+        downGen = DownldGenBinb2(
+            self._manga_info,
+            self._link_info,
+            base_path,
+            self._cnt_p,
+            self._cid,
+            self._contents_server,
+            self._ctbl,
+            self._ptbl,
+            self._content_date,
+            self._u0,
+            self._u1,
+        )
         count = 0
         progressBar.show(count)
         with ThreadPoolExecutor(max_workers=4) as executor:
-            for x in executor.map(self.downld_one, downGen.img_url_g, downGen.file_path_g, downGen.coords, [self._cookies for x in range(len(self._manga_info))]):
+            for x in executor.map(
+                self.downld_one,
+                downGen.img_url_g,
+                downGen.file_path_g,
+                downGen.coords,
+                [self._cookies for x in range(len(self._manga_info))],
+            ):
                 count += 1
                 progressBar.show(count)

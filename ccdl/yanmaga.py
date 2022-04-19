@@ -8,26 +8,37 @@ from io import BytesIO
 import requests
 from aiohttp.client import ClientSession
 from PIL import Image
-from requests.api import request
-from selenium import webdriver
-from selenium.webdriver.support.wait import WebDriverWait
+from selenium import webdriver  # type: ignore[import]
+from selenium.webdriver.support.wait import WebDriverWait  # type: ignore[import]
 
-from .utils import (ComicLinkInfo, ComicReader, ProgressBar, RqHeaders,
-                    RqProxy, SiteReaderLoader, cc_mkdir, draw_image)
+from .utils import (
+    ComicLinkInfo,
+    ComicReader,
+    ProgressBar,
+    RqHeaders,
+    RqProxy,
+    SiteReaderLoader,
+    cc_mkdir,
+    draw_image,
+)
 
-API_URL_ComicInfo = 'https://api2-yanmaga.comici.jp/book/Info?comici-viewer-id={}'
-API_URL_EpisodeInfo = 'https://api2-yanmaga.comici.jp/book/episodeInfo?comici-viewer-id={}'
-API_URL_ContentsInfo = 'https://api2-yanmaga.comici.jp/book/contentsInfo?user-id={}&comici-viewer-id={}&page-from={}&page-to={}'
+API_URL_ComicInfo = "https://api2-yanmaga.comici.jp/book/Info?comici-viewer-id={}"
+API_URL_EpisodeInfo = (
+    "https://api2-yanmaga.comici.jp/book/episodeInfo?comici-viewer-id={}"
+)
+API_URL_ContentsInfo = "https://api2-yanmaga.comici.jp/book/contentsInfo?user-id={}&comici-viewer-id={}&page-from={}&page-to={}"
 
 logger = logging.getLogger(__name__)
 headers = RqHeaders()
-headers['referer'] = 'https://yanmaga.jp/'
+headers["referer"] = "https://yanmaga.jp/"
 WAIT_TIME = 60
 
 
-@SiteReaderLoader.register('yanmaga')
+@SiteReaderLoader.register("yanmaga")
 class Yanmaga(ComicReader):
-    def __init__(self, link_info: ComicLinkInfo, driver: webdriver.Chrome = None) -> None:
+    def __init__(
+        self, link_info: ComicLinkInfo, driver: webdriver.Chrome = None
+    ) -> None:
         super().__init__()
         self._link_info = link_info
         self._driver = driver
@@ -37,12 +48,13 @@ class Yanmaga(ComicReader):
         :param: url
         :returns: user_id, view_id
         """
-        if not re.match('https://yanmaga.jp/comics/(.+?)/[\w]+', url):
+        if not re.match("https://yanmaga.jp/comics/(.+?)/[\w]+", url):
             raise ValueError("unsupported url: {}".format(url))
         self._driver.get(url)
         elem = WebDriverWait(self._driver, WAIT_TIME, 0.5).until(
             lambda x: x.find_element_by_id("comici-viewer"),
-            message="無法定位元素 comici-viewer" + ", 獲取comici-viewer失敗")
+            message="無法定位元素 comici-viewer" + ", 獲取comici-viewer失敗",
+        )
         view_id = elem.get_attribute("comici-viewer-id")
         user_id = elem.get_attribute("data-member-jwt")
         return user_id, view_id
@@ -52,9 +64,12 @@ class Yanmaga(ComicReader):
         :param view_id:
         :returns: title
         """
-        rq = requests.get(url=API_URL_ComicInfo.format(
-            view_id), headers=headers, proxies=RqProxy.get_proxy())
-        return rq.json().get('result').get('title')
+        rq = requests.get(
+            url=API_URL_ComicInfo.format(view_id),
+            headers=headers,
+            proxies=RqProxy.get_proxy(),
+        )
+        return rq.json().get("result").get("title")
 
     def get_episode_info(self, view_id):
         """
@@ -66,29 +81,35 @@ class Yanmaga(ComicReader):
             }
         }
         """
-        rq = requests.get(url=API_URL_EpisodeInfo.format(
-            view_id), headers=headers, proxies=RqProxy.get_proxy())
-        result = rq.json().get('result')
+        rq = requests.get(
+            url=API_URL_EpisodeInfo.format(view_id),
+            headers=headers,
+            proxies=RqProxy.get_proxy(),
+        )
+        result = rq.json().get("result")
         epinfo = {}
         for r in result:
-            epinfo[r.get('id')] = {
-                'page_count': int(r.get('page_count')),
-                'name': r.get('name')
+            epinfo[r.get("id")] = {
+                "page_count": int(r.get("page_count")),
+                "name": r.get("name"),
             }
         return epinfo
 
     def get_content_info(self, user_id, view_id, page_to: int, page_from=0):
-        rq = requests.get(API_URL_ContentsInfo.format(
-            user_id, view_id, page_from, page_to), headers=headers, proxies=RqProxy.get_proxy())
-        result = rq.json().get('result')
+        rq = requests.get(
+            API_URL_ContentsInfo.format(user_id, view_id, page_from, page_to),
+            headers=headers,
+            proxies=RqProxy.get_proxy(),
+        )
+        result = rq.json().get("result")
 
         urls = []
         scrambles = []
         sizes = []
         for x in result:
-            urls.append(x.get('imageUrl'))
-            scrambles.append(json.loads(x.get('scramble')))
-            sizes.append((x.get('width'), x.get('height')))
+            urls.append(x.get("imageUrl"))
+            scrambles.append(json.loads(x.get("scramble")))
+            sizes.append((x.get("width"), x.get("height")))
         return urls, scrambles, sizes
 
     def decode_image(self, img: Image.Image, scramble: list):
@@ -114,6 +135,7 @@ class Yanmaga(ComicReader):
         :param cookies:  (list, tuple) for each || dict for all
         :returns: {url: bstr if success else None}
         """
+
         async def dl_img(url, headers=None, cookies=None):
             nonlocal bar
             async with ClientSession(headers=headers, cookies=cookies) as session:
@@ -121,12 +143,12 @@ class Yanmaga(ComicReader):
                     r = (url, await response.content.read())
                     bar.show() if bar else None
                     return r
+
         fs = []
         for x in range(len(url)):
             h = headers[x] if isinstance(headers, (list, tuple)) else headers
             c = cookies[x] if isinstance(cookies, (list, tuple)) else cookies
-            fs.append(asyncio.ensure_future(
-                dl_img(url[x], headers=h, cookies=c)))
+            fs.append(asyncio.ensure_future(dl_img(url[x], headers=h, cookies=c)))
         loop = asyncio.get_event_loop()
         done, pedding = loop.run_until_complete(asyncio.wait(fs))
         result = []
@@ -134,7 +156,7 @@ class Yanmaga(ComicReader):
             try:
                 if isinstance(r.result(), tuple):
                     result.append(r.result())
-            except Exception as e:
+            except Exception:
                 pass
         result = dict(result)
         rt = {}
@@ -143,28 +165,29 @@ class Yanmaga(ComicReader):
         return rt
 
     def downloader(self):
-        user_id, view_id = self.get_comic_user_and_viewer_id(
-            self._link_info.url)
+        user_id, view_id = self.get_comic_user_and_viewer_id(self._link_info.url)
         title = self.get_comic_title(view_id)
         episode_info = self.get_episode_info(view_id).get(view_id)
-        sub_title = episode_info.get('name')
-        page_count = episode_info.get('page_count')
-        bpath = os.path.join('./漫畫/', title, sub_title)
+        sub_title = episode_info.get("name")
+        page_count = episode_info.get("page_count")
+        bpath = os.path.join("./漫畫/", title, sub_title)
         if cc_mkdir(bpath, 1) != 0:
             return -1
         urls, scrambles, sizes = self.get_content_info(
-            user_id, view_id, page_to=page_count-1)
+            user_id, view_id, page_to=page_count - 1
+        )
         bar = ProgressBar(page_count)
         print("Downloading：")
         imgs = self.downld_images(urls, headers=headers, bar=bar)
-        print('Decoding:')
+        print("Decoding:")
         bar = ProgressBar(page_count)
         for x in range(len(urls)):
             img = Image.open(BytesIO(imgs[urls[x]]))
-            path = os.path.join(bpath, str(x+1).zfill(3)+'.png')
+            path = os.path.join(bpath, str(x + 1).zfill(3) + ".png")
             self.decode_image(img, scrambles[x]).save(path)
             bar.show()
-        print('Finished!')
+        print("Finished!")
+
 
 # if __name__ == '__main__':
 #     # comici_vid = '4633af6ae1c0d82c123222a20748426b'

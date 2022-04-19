@@ -1,4 +1,4 @@
-name: ccdl 
+name: ccdl
 
 on:
   push:
@@ -9,25 +9,22 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - name: Checkout 
+      - name: Checkout
         uses: actions/checkout@v2
-      
+
       - name: Set up Python 3.7
         uses: actions/setup-python@v2
         with:
           python-version: 3.7
-      
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install setuptools wheel --upgrade
-          pip install -r requirements.txt
-          pip install pyinstaller
-      
+          pip install .[dev]
+
       - name: Build executable
         run: |
-          python ./setup.py install
-          pyinstaller -F ./CcdlSimpleStarter.py 
+          pyinstaller -F ./src/ccdl/main.py
           cd ./dist
 
       - name: Create Release

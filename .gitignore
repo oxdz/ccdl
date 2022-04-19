@@ -10,3 +10,4 @@ log/
 venv/*
 *.spec
 venv/bin/easy_install-3.7
+*.egg-info

@@ -6,14 +6,20 @@ from io import BytesIO
 
 import numpy as np
 from PIL import Image
-from selenium import webdriver
-from selenium.common.exceptions import TimeoutException
-from selenium.webdriver import ActionChains
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.wait import WebDriverWait
+from selenium import webdriver  # type: ignore[import]
+from selenium.common.exceptions import TimeoutException  # type: ignore[import]
+from selenium.webdriver import ActionChains  # type: ignore[import]
+from selenium.webdriver.common.keys import Keys  # type: ignore[import]
+from selenium.webdriver.support.wait import WebDriverWait  # type: ignore[import]
 
-from .utils import (ComicLinkInfo, ComicReader, ProgressBar, SiteReaderLoader,
-                    cc_mkdir, get_blob_content, win_char_replace)
+from .utils import (
+    ComicLinkInfo,
+    ComicReader,
+    ProgressBar,
+    SiteReaderLoader,
+    cc_mkdir,
+    get_blob_content,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -28,12 +34,12 @@ class N21(object):
 
     def __init__(self, dirpath) -> None:
         super().__init__()
-        if dirpath[:-1] in ('\\', '/'):
+        if dirpath[:-1] in ("\\", "/"):
             self._dirpath = dirpath
         else:
-            self._dirpath = dirpath + '/'
+            self._dirpath = dirpath + "/"
         try:
-            os.makedirs(self._dirpath + 'target/')
+            os.makedirs(self._dirpath + "target/")
         except Exception:
             pass
 
@@ -65,6 +71,7 @@ class N21(object):
         :return: (offset_1, offset_2)
         :rtype: tuple
         """
+
         def calculate_similarity(a, b):
             count = 0
             img_xor = np.logical_xor(a, b)
@@ -81,19 +88,30 @@ class N21(object):
             for x in range(2):
                 img_ = []
                 for offset in range(3, 18):
-                    img_.append(np.array(page[x].crop(
-                        (0, page[x].height - offset, page[x].width, page[x].height - offset + 3)).convert('1')))
-                b = np.array(
-                    page[x+1].crop((0, 0, page[1].width, 3)).convert('1'))
-                score = [(i+3, calculate_similarity(img_[i], b))
-                         for i in range(len(img_))]
+                    img_.append(
+                        np.array(
+                            page[x]
+                            .crop(
+                                (
+                                    0,
+                                    page[x].height - offset,
+                                    page[x].width,
+                                    page[x].height - offset + 3,
+                                )
+                            )
+                            .convert("1")
+                        )
+                    )
+                b = np.array(page[x + 1].crop((0, 0, page[1].width, 3)).convert("1"))
+                score = [
+                    (i + 3, calculate_similarity(img_[i], b)) for i in range(len(img_))
+                ]
                 score.sort(key=lambda x: x[1], reverse=True)
                 ij[x].append(score[0][0])
 
         offset = [None, None]
         for i in range(2):
             max_count = 0
-            offset_1 = None
             for x in list(set(ij[i])):
                 if max_count < ij[i].count(x):
                     max_count = ij[i].count(x)
@@ -107,21 +125,32 @@ class N21(object):
         :returns: An ~PIL.Image.Image object.
         """
 
-        img_new = Image.new('RGB', (img_chunks[0].width, (
-            img_chunks[0].height + img_chunks[1].height + img_chunks[2].height - i - j)))
+        img_new = Image.new(
+            "RGB",
+            (
+                img_chunks[0].width,
+                (
+                    img_chunks[0].height
+                    + img_chunks[1].height
+                    + img_chunks[2].height
+                    - i
+                    - j
+                ),
+            ),
+        )
         img_new.paste(img_chunks[0], (0, 0))
         img_new.paste(img_chunks[1], (0, img_chunks[0].height - i))
         img_new.paste(
-            img_chunks[2], (0, img_chunks[0].height - i + img_chunks[1].height - j))
+            img_chunks[2], (0, img_chunks[0].height - i + img_chunks[1].height - j)
+        )
         return img_new
         # img_new.save(file_path+'/target/{}.png'.format(count))
         # print("完成!")
 
     def run(self, imgs, index):
         # imgs_dict = self.load_imgs(self._dirpath + "source/")
-        img_new = self.crop_paste(
-            imgs, *self.edge_connection_offset([imgs]))
-        img_new.save(self._dirpath + 'target/{}.png'.format(index))
+        img_new = self.crop_paste(imgs, *self.edge_connection_offset([imgs]))
+        img_new.save(self._dirpath + "target/{}.png".format(index))
 
 
 def gen_file_path(link_info: ComicLinkInfo, driver: webdriver.Chrome):
@@ -129,45 +158,44 @@ def gen_file_path(link_info: ComicLinkInfo, driver: webdriver.Chrome):
         try:
             elem = WebDriverWait(driver, WAIT_TIME, 0.5).until(
                 lambda x: x.find_element_by_xpath("/html/head/title"),
-                message="無法定位元素 " + "/html/head/title")
+                message="無法定位元素 " + "/html/head/title",
+            )
         except TimeoutException as e:
-            logger.error(
-                "Find element by xpath(\"/html/head/title\"): " + str(e))
+            logger.error('Find element by xpath("/html/head/title"): ' + str(e))
             raise e
         match = re.search("[\w]+_[\w]+_([\w]+)", link_info.param[0][0])
         if match:
-            return elem.get_attribute("innerText") + '/' + match.groups()[0]
+            return elem.get_attribute("innerText") + "/" + match.groups()[0]
         else:
-            logger.error("url:{}\ncid: {}".format(link_info.url,
-                                                  link_info.param[0][0]))
+            logger.error("url:{}\ncid: {}".format(link_info.url, link_info.param[0][0]))
             raise ValueError("Unusual cid!")
 
     elif link_info.site_name == "r.binb.jp":
-        return 'binb/{}'.format(int(time.time()*1000))
+        return "binb/{}".format(int(time.time() * 1000))
 
     elif link_info.site_name == "booklive.jp":
-        return 'booklive/{}'.format(int(time.time()*1000))
+        return "booklive/{}".format(int(time.time() * 1000))
 
     elif link_info.site_name == "takeshobo.co.jp":
-        return 'takeshobo/{}'.format(int(time.time()*1000))
+        return "takeshobo/{}".format(int(time.time() * 1000))
 
     elif link_info.site_name == "www.comic-valkyrie.com":
-        return 'comic-valkyrie/{}'.format(int(time.time()*1000))
+        return "comic-valkyrie/{}".format(int(time.time() * 1000))
 
     elif link_info.site_name == "futabanet.jp":
-        return 'futabanet/{}'.format(int(time.time()*1000))
+        return "futabanet/{}".format(int(time.time() * 1000))
 
     elif link_info.site_name == "comic-polaris.jp":
-        return 'comic-polaris/{}'.format(int(time.time()*1000))
+        return "comic-polaris/{}".format(int(time.time() * 1000))
 
     elif link_info.site_name == "www.shonengahosha.co.jp":
-        return 'shonengahosha/{}'.format(int(time.time()*1000))
+        return "shonengahosha/{}".format(int(time.time() * 1000))
 
     elif link_info.site_name == "r-cbs.mangafactory.jp":
-        return 'mangafactory/{}'.format(int(time.time()*1000))
+        return "mangafactory/{}".format(int(time.time() * 1000))
 
     elif link_info.site_name == "comic-meteor.jp":
-        return 'comic-meteor/{}'.format(int(time.time()*1000))
+        return "comic-meteor/{}".format(int(time.time() * 1000))
 
     # elif domain == "":
     #     pass
@@ -184,7 +212,7 @@ class Binb(ComicReader):
         """
         return [current_page_numb:int, total_numb:int]
         """
-        page_elem_id = 'menu_slidercaption'
+        page_elem_id = "menu_slidercaption"
         pageNum = []
         count = 180
         while len(pageNum) != 2:
@@ -196,14 +224,14 @@ class Binb(ComicReader):
             try:
                 elemt = WebDriverWait(self._driver, WAIT_TIME, 0.5).until(
                     lambda x: x.find_element_by_id(page_elem_id),
-                    message="無法定位元素 " + page_elem_id
+                    message="無法定位元素 " + page_elem_id,
                 )
             except TimeoutException as e:
                 logger.error(str(e))
                 raise e
-            pageNum = elemt.get_attribute('innerText').split('/')
+            pageNum = elemt.get_attribute("innerText").split("/")
         pageNum[1] = int(pageNum[1])
-        if (pageNum[0] != '-'):
+        if pageNum[0] != "-":
             pageNum[0] = int(pageNum[0])
         else:
             pageNum[0] = pageNum[1]
@@ -213,38 +241,41 @@ class Binb(ComicReader):
         # self._driver.get(self._link_info.url)
         self._driver.get(self._link_info.url)
         WebDriverWait(self._driver, WAIT_TIME, 0.5).until(
-            lambda x: x.find_element_by_id('content'),
-            message="漫画加载超时"
+            lambda x: x.find_element_by_id("content"), message="漫画加载超时"
         )
         file_path = "./漫畫/" + gen_file_path(self._link_info, self._driver)
         if cc_mkdir(file_path) != 0:
             return -1
         n21 = N21(file_path)
-        while(self.page_number()[0] > 1):
+        while self.page_number()[0] > 1:
             ActionChains(self._driver).send_keys(Keys.RIGHT).perform()
         progress_bar = ProgressBar(self.page_number()[1])
         start_page = 0
         reader_flag = self._link_info.param[1]
-        while(start_page < self.page_number()[1]):
+        while start_page < self.page_number()[1]:
             for i in range(self.page_number()[0], start_page, -1):
                 imgs = []
                 for j in range(1, 4):
                     try:
                         blob_url = WebDriverWait(self._driver, WAIT_TIME, 0.5).until(
                             lambda x: x.find_element_by_xpath(
-                                '//*[@id="content-p{}"]/div/div[{}]/img'.format(i-(1-reader_flag), j)),
-                            message="p" + str(i) + "part" + str(j) + "無法定位"
+                                '//*[@id="content-p{}"]/div/div[{}]/img'.format(
+                                    i - (1 - reader_flag), j
+                                )
+                            ),
+                            message="p" + str(i) + "part" + str(j) + "無法定位",
                         )
                     except TimeoutException as e:
                         logger.error(
-                            "Find element by id(\"/html/head/title\"): " + str(e))
+                            'Find element by id("/html/head/title"): ' + str(e)
+                        )
                         raise e
-                    blob_uri = blob_url.get_attribute('src')
+                    blob_uri = blob_url.get_attribute("src")
                     try:
                         img = Image.open(
-                            BytesIO(get_blob_content(self._driver, blob_uri)))
-                        img.save(
-                            file_path+'/source/{}-{}.png'.format(i, j))
+                            BytesIO(get_blob_content(self._driver, blob_uri))
+                        )
+                        img.save(file_path + "/source/{}-{}.png".format(i, j))
                         imgs.append(img)
                     except Exception as e:
                         logger.error(str(e))

@@ -3,19 +3,28 @@ import copy
 import json
 import logging
 import math
+import string
+import traceback
 from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
-import string
-from time import sleep, time
 
 import requests
 from PIL import Image
-import traceback
-from selenium import webdriver
-from selenium.webdriver.chrome.webdriver import WebDriver
-from selenium.webdriver.support.wait import WebDriverWait
+from selenium import webdriver  # type: ignore[import]
+from selenium.webdriver.chrome.webdriver import WebDriver  # type: ignore[import]
+from selenium.webdriver.support.wait import WebDriverWait  # type: ignore[import]
 
-from .utils import ComicLinkInfo, ComicReader, ProgressBar, RqHeaders, RqProxy, SiteReaderLoader, cc_mkdir, draw_image, win_char_replace
+from .utils import (
+    ComicLinkInfo,
+    ComicReader,
+    ProgressBar,
+    RqHeaders,
+    RqProxy,
+    SiteReaderLoader,
+    cc_mkdir,
+    draw_image,
+    win_char_replace,
+)
 
 logger = logging.getLogger("comic-action")
 
@@ -28,22 +37,31 @@ class proc_img_co:
         self.MULTIPLE = 8
         self.width = width
         self.height = height
-        self.cell_width = math.floor(
-            self.width / (self.DIVIDE_NUM * self.MULTIPLE)) * self.MULTIPLE
-        self.cell_height = math.floor(
-            self.height / (self.DIVIDE_NUM * self.MULTIPLE)) * self.MULTIPLE
+        self.cell_width = (
+            math.floor(self.width / (self.DIVIDE_NUM * self.MULTIPLE)) * self.MULTIPLE
+        )
+        self.cell_height = (
+            math.floor(self.height / (self.DIVIDE_NUM * self.MULTIPLE)) * self.MULTIPLE
+        )
 
     def n21(self, img0) -> Image.Image:
         img_copy = copy.deepcopy(img0)
         for n in range(self.DIVIDE_NUM * self.DIVIDE_NUM):
             src_x = n % self.DIVIDE_NUM * self.cell_width
             src_y = math.floor(n / self.DIVIDE_NUM) * self.cell_height
-            i = n % self.DIVIDE_NUM * self.DIVIDE_NUM + \
-                math.floor(n / self.DIVIDE_NUM)
+            i = n % self.DIVIDE_NUM * self.DIVIDE_NUM + math.floor(n / self.DIVIDE_NUM)
             t_x = i % self.DIVIDE_NUM * self.cell_width
             t_y = math.floor(i / self.DIVIDE_NUM) * self.cell_height
-            draw_image(img0, img_copy, src_x, src_y, self.cell_width,
-                       self.cell_height, t_x, t_y)
+            draw_image(
+                img0,
+                img_copy,
+                src_x,
+                src_y,
+                self.cell_width,
+                self.cell_height,
+                t_x,
+                t_y,
+            )
         return img_copy
 
 
@@ -55,7 +73,7 @@ class proc_img_co_corona:
         token = base64.b64decode(token).decode()
         for x in token:
             r.append(ord(x))
-        
+
         self.a = r[2:]
         self.i = r[0]
         o = r[1]
@@ -68,16 +86,24 @@ class proc_img_co_corona:
         for n in range(self.u):
             h = self.a[n]
             p = h % self.i
-            m = math.floor(h/self.i)
+            m = math.floor(h / self.i)
             g = n % self.i
-            v = math.floor(n/self.i)
+            v = math.floor(n / self.i)
 
-            draw_image(img0, img_copy, p*self.l, m * self.f, self.l,
-                       self.f, g * self.l, v * self.f)
+            draw_image(
+                img0,
+                img_copy,
+                p * self.l,
+                m * self.f,
+                self.l,
+                self.f,
+                g * self.l,
+                v * self.f,
+            )
         return img_copy
 
 
-@SiteReaderLoader.register('comic_action')
+@SiteReaderLoader.register("comic_action")
 class ComicAction(ComicReader):
     def __init__(self, linkinfo: ComicLinkInfo, driver: webdriver.Chrome):
         super().__init__()
@@ -86,8 +112,7 @@ class ComicAction(ComicReader):
 
     @staticmethod
     def get_comic_json(linkinfo: ComicLinkInfo, driver: WebDriver = None):
-        r"""
-        """
+        r""" """
         comic_json = {
             "title": None,
             "subtitle": None,
@@ -97,7 +122,8 @@ class ComicAction(ComicReader):
             driver.get(linkinfo.url)
             elem = WebDriverWait(driver, WAIT_TIME, 0.5).until(
                 lambda x: x.find_element_by_id("episode-json"),
-                message="無法定位元素 episode-json" + ", 獲取json對象數據失敗")
+                message="無法定位元素 episode-json" + ", 獲取json對象數據失敗",
+            )
             try:
                 json_dataValue = elem.get_attribute("data-value")
                 json_dataValue = json.loads(json_dataValue)
@@ -106,18 +132,21 @@ class ComicAction(ComicReader):
                 logger.error(elem)
                 raise e
         elif linkinfo.param[1] == 0:
-            json_url = linkinfo.url+".json"
+            json_url = linkinfo.url + ".json"
             if linkinfo.site_name in {"to-corona-ex.com", "ichijin-plus.com"}:
                 json_url = "https://api.{0}/episodes/{1}/begin_reading".format(
-                    linkinfo.site_name, linkinfo.param[0][0])
-            rq = requests.get(json_url, headers=RqHeaders(),
-                              proxies=RqProxy.get_proxy())
+                    linkinfo.site_name, linkinfo.param[0][0]
+                )
+            rq = requests.get(
+                json_url, headers=RqHeaders(), proxies=RqProxy.get_proxy()
+            )
             if rq.status_code != 200:
                 raise ValueError(json_url)
             json_dataValue = rq.json()
         else:
             raise ValueError(
-                "linkinfo.param[1] not 1 or 0, or without driver:"+linkinfo.site_name)
+                "linkinfo.param[1] not 1 or 0, or without driver:" + linkinfo.site_name
+            )
 
         if linkinfo.site_name in {"to-corona-ex.com", "ichijin-plus.com"}:
             ...
@@ -125,15 +154,16 @@ class ComicAction(ComicReader):
             comic_json["title"] = json_dataValue["comic_title"]
             for page in json_dataValue["pages"]:
                 if "page_image_url" in page:
-                    comic_json["pages"].append({
-                        "src": page["page_image_url"],
-                        "drm_hash": page["drm_hash"]
-                    })
+                    comic_json["pages"].append(
+                        {"src": page["page_image_url"], "drm_hash": page["drm_hash"]}
+                    )
         else:
             comic_json["subtitle"] = json_dataValue["readableProduct"]["title"].replace(
-                "?", "？")
-            comic_json["title"] = json_dataValue["readableProduct"]["series"]["title"].replace(
-                "?", "？")
+                "?", "？"
+            )
+            comic_json["title"] = json_dataValue["readableProduct"]["series"][
+                "title"
+            ].replace("?", "？")
             for page in json_dataValue["readableProduct"]["pageStructure"]["pages"]:
                 if "src" in page:
                     comic_json["pages"].append(page)
@@ -152,18 +182,20 @@ class ComicAction(ComicReader):
                 yield page["drm_hash"]
             else:
                 yield ""
-    
+
     @staticmethod
     def gen_sitename(comic_json, sitename):
         for _ in comic_json["pages"]:
             yield sitename
 
-
     @staticmethod
     def gen_fpth(comic_json: dict):
-        bpth = "./漫畫/" + \
-            "/".join((win_char_replace(comic_json["title"]),
-                      win_char_replace(comic_json["subtitle"])))
+        bpth = "./漫畫/" + "/".join(
+            (
+                win_char_replace(comic_json["title"]),
+                win_char_replace(comic_json["subtitle"]),
+            )
+        )
         count = 0
         for x in range(len(comic_json["pages"])):
             count += 1
@@ -174,8 +206,7 @@ class ComicAction(ComicReader):
         r"""
         :fpth: [basepath, fname]
         """
-        rq = requests.get(url, headers=RqHeaders(),
-                          proxies=RqProxy.get_proxy())
+        rq = requests.get(url, headers=RqHeaders(), proxies=RqProxy.get_proxy())
         if rq.status_code != 200:
             raise ValueError(url)
         content = rq.content
@@ -197,17 +228,25 @@ class ComicAction(ComicReader):
         comic_json = self.get_comic_json(self._linkinfo, self._driver)
         comic_json["title"]
         total_pages = len(comic_json["pages"])
-        cc_mkdir("./漫畫/" +
-                 "/".join((win_char_replace(comic_json["title"]), win_char_replace(comic_json["subtitle"]))))
+        cc_mkdir(
+            "./漫畫/"
+            + "/".join(
+                (
+                    win_char_replace(comic_json["title"]),
+                    win_char_replace(comic_json["subtitle"]),
+                )
+            )
+        )
         show_bar = ProgressBar(total_pages)
         with ThreadPoolExecutor(max_workers=4) as executor:
             count = 0
-            for x in executor.map(self.downld_one,
-                                  self.gen_url(comic_json),
-                                  self.gen_fpth(comic_json),
-                                  self.gen_sitename(comic_json, self._linkinfo.site_name),
-                                  self.gen_token(comic_json)
-                                  ):
+            for x in executor.map(
+                self.downld_one,
+                self.gen_url(comic_json),
+                self.gen_fpth(comic_json),
+                self.gen_sitename(comic_json, self._linkinfo.site_name),
+                self.gen_token(comic_json),
+            ):
                 count += 1
                 show_bar.show(count)
 
