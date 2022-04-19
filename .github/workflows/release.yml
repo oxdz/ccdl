@@ -4,9 +4,26 @@ on:
   push:
     tags:
       - "v*"
+env:
+  python-version: "3.8"
 
 jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up Python ${{ env.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.python-version }}
+
+      - name: Run pre-commit
+        uses: pre-commit/action@v2.0.3
+
   release:
+    needs: pre-commit
     runs-on: ubuntu-latest
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
@@ -36,10 +53,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Set up Python 3.8
+      - name: Set up Python ${{ env.python-version }}
         uses: actions/setup-python@v2
         with:
-          python-version: "3.8"
+          python-version: ${{ env.python-version }}
 
       - name: Install dependencies
         run: |
