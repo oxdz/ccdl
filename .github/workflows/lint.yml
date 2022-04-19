@@ -42,7 +42,7 @@ jobs:
           pip install .[dev]
       - name: Lint with black
         run: |
-          black --check --diff
+          black --check --diff .
       - name: Lint with isort
         run: |
           isort --check-only --diff .
