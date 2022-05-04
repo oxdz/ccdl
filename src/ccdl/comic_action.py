@@ -55,7 +55,7 @@ class proc_img_co_corona:
         token = base64.b64decode(token).decode()
         for x in token:
             r.append(ord(x))
-        
+
         self.a = r[2:]
         self.i = r[0]
         o = r[1]
@@ -132,8 +132,11 @@ class ComicAction(ComicReader):
         else:
             comic_json["subtitle"] = json_dataValue["readableProduct"]["title"].replace(
                 "?", "？")
-            comic_json["title"] = json_dataValue["readableProduct"]["series"]["title"].replace(
-                "?", "？")
+            if json_dataValue["readableProduct"]["series"] != None:
+                comic_json["title"] = json_dataValue["readableProduct"]["series"]["title"].replace(
+                    "?", "？")
+            else:
+                comic_json["title"] = ""
             for page in json_dataValue["readableProduct"]["pageStructure"]["pages"]:
                 if "src" in page:
                     comic_json["pages"].append(page)
@@ -152,18 +155,19 @@ class ComicAction(ComicReader):
                 yield page["drm_hash"]
             else:
                 yield ""
-    
+
     @staticmethod
     def gen_sitename(comic_json, sitename):
         for _ in comic_json["pages"]:
             yield sitename
 
-
     @staticmethod
     def gen_fpth(comic_json: dict):
         bpth = "./漫畫/" + \
-            "/".join((win_char_replace(comic_json["title"]),
-                      win_char_replace(comic_json["subtitle"])))
+            ("/".join((win_char_replace(comic_json["title"]),
+                      win_char_replace(comic_json["subtitle"]))) \
+            if comic_json["title"] != "" else win_char_replace(comic_json["subtitle"]))
+
         count = 0
         for x in range(len(comic_json["pages"])):
             count += 1
@@ -197,15 +201,20 @@ class ComicAction(ComicReader):
         comic_json = self.get_comic_json(self._linkinfo, self._driver)
         comic_json["title"]
         total_pages = len(comic_json["pages"])
-        cc_mkdir("./漫畫/" +
-                 "/".join((win_char_replace(comic_json["title"]), win_char_replace(comic_json["subtitle"]))))
+        
+        cc_mkdir("./漫畫/" + \
+            ("/".join((win_char_replace(comic_json["title"]),
+                      win_char_replace(comic_json["subtitle"]))) \
+            if comic_json["title"] != "" else win_char_replace(comic_json["subtitle"])))
+        
         show_bar = ProgressBar(total_pages)
         with ThreadPoolExecutor(max_workers=4) as executor:
             count = 0
             for x in executor.map(self.downld_one,
                                   self.gen_url(comic_json),
                                   self.gen_fpth(comic_json),
-                                  self.gen_sitename(comic_json, self._linkinfo.site_name),
+                                  self.gen_sitename(
+                                      comic_json, self._linkinfo.site_name),
                                   self.gen_token(comic_json)
                                   ):
                 count += 1
