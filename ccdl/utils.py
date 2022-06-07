@@ -47,6 +47,7 @@ class RqProxy:
 
 _site_reader = {
     # "domain": ["reader", RegExp, param1, param2, ...]
+<<<<<<< HEAD:ccdl/utils.py
     "r.binb.jp": ["binb2", r"r.binb.jp/epm/([\w-]+)/", 1],
     "www.cmoa.jp": [
         "binb2",
@@ -91,6 +92,42 @@ _site_reader = {
     "viewer.comic-earthstar.jp": ["comic_earthstar", r"cid=([\w-]*)"],
     "comic-walker.com": ["comic_walker", r"cid=([\w-]*)"],
     "www.ganganonline.com": ["ganganonline", None],
+=======
+    "r.binb.jp":                        ["binb2", "r.binb.jp/epm/([\w-]+)/", 1],
+    "www.cmoa.jp":                      ["binb2", "www.cmoa.jp/bib/speedreader/speed.html\?cid=([\w-]+)&u0=(\d)&u1=(\d)", 1],
+    "booklive.jp":                      ["binb", "booklive.jp/bviewer/s/\?cid=([\w-]*)&", 1],
+    "takeshobo.co.jp":                  ["binb", "[\w-]+.takeshobo.co.jp/manga/([\w-]+)/_files[\w-]*/([\w-]+)/", 0],
+    "www.comic-valkyrie.com":           ["binb", "www.comic-valkyrie.com/samplebook/([\w-]*)/", 0],
+    "futabanet.jp":                     ["binb", "futabanet.jp/common/dld/zip/([\w-]*)/", 0],
+    "comic-polaris.jp":                 ["binb", "comic-polaris.jp/ptdata/([\w-]*)/([\w-]*)/", 0],
+    "www.shonengahosha.co.jp":          ["binb", "www.shonengahosha.co.jp/([\w-]*)/([\w-]*)/", 0],
+    "r-cbs.mangafactory.jp":            ['binb', '', 1],
+    "comic-meteor.jp":                  ['binb3', '', 0],
+
+    "comic-action.com":                 ["comic_action", "episode/([\w-]*)", 0],
+    "comic-days.com":                   ["comic_action", "episode/([\w-]*)", 1],
+    "comic-gardo.com":                  ["comic_action", "episode/([\w-]*)", 1],
+    "comic-trail.com":                  ["comic_action", "episodes/([\w-]*)", 1],
+    "comic-zenon.com":                  ["comic_action", "episode/([\w-]*)", 0],
+    "comicborder.com":                  ["comic_action", "episode/([\w-]*)", 0],
+    "comicbushi-web.com":               ["comic_action", "episode/([\w-]*)", 1],
+    "ichijin-plus.com":                 ["comic_action", "episodes/([\w-]*)", 0],
+    "kuragebunch.com":                  ["comic_action", "episode/([\w-]*)", 1],
+    "magcomi.com":                      ["comic_action", "episode/([\w-]*)", 0],
+    "pocket.shonenmagazine.com":        ["comic_action", "episode/([\w-]*)", 1],
+    "shonenjumpplus.com":               ["comic_action", "(?:episode|magazine)/([\w-]*)", 1],
+    "tonarinoyj.jp":                    ["comic_action", "episode/([\w-]*)", 0],
+    "to-corona-ex.com":                 ["comic_action", "episodes/([\w-]*)", 0],
+    "viewer.heros-web.com":             ["comic_action", "episode/([\w-]*)", 0],
+
+
+    "viewer.comic-earthstar.jp":        ["comic_earthstar", "cid=([\w-]*)"],
+
+    "comic-walker.com":                 ["comic_walker", 'cid=([\w-]*)'],
+
+    "www.ganganonline.com":          ["ganganonline", None],
+
+>>>>>>> 6df7e66eafc5503b0910fca6c2b5acfef89fc933:src/ccdl/utils.py
     # "www.manga-doa.com":                ["manga_doa", None],
     # "www.sukima.me":                    ["sukima", None],
     "www.sunday-webry.com": ["sunday_webry", None],
