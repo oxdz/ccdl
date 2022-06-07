@@ -163,9 +163,12 @@ class ComicAction(ComicReader):
             comic_json["subtitle"] = json_dataValue["readableProduct"]["title"].replace(
                 "?", "？"
             )
-            comic_json["title"] = json_dataValue["readableProduct"]["series"][
-                "title"
-            ].replace("?", "？")
+            if json_dataValue["readableProduct"]["series"] is not None:
+                comic_json["title"] = json_dataValue["readableProduct"]["series"][
+                    "title"
+                ].replace("?", "？")
+            else:
+                comic_json["title"] = ""
             for page in json_dataValue["readableProduct"]["pageStructure"]["pages"]:
                 if "src" in page:
                     comic_json["pages"].append(page)
@@ -192,14 +195,18 @@ class ComicAction(ComicReader):
 
     @staticmethod
     def gen_fpth(comic_json: dict):
-        bpth = "./漫畫/" + "/".join(
-            (
-                win_char_replace(comic_json["title"]),
-                win_char_replace(comic_json["subtitle"]),
+        bpth = "./漫畫/" + (
+            "/".join(
+                (
+                    win_char_replace(comic_json["title"]),
+                    win_char_replace(comic_json["subtitle"]),
+                )
             )
+            if comic_json["title"] != ""
+            else win_char_replace(comic_json["subtitle"])
         )
         count = 0
-        for x in range(len(comic_json["pages"])):
+        for _ in range(len(comic_json["pages"])):
             count += 1
             yield [bpth, "{}.png".format(count)]
 
@@ -234,11 +241,15 @@ class ComicAction(ComicReader):
         total_pages = len(comic_json["pages"])
         cc_mkdir(
             "./漫畫/"
-            + "/".join(
-                (
-                    win_char_replace(comic_json["title"]),
-                    win_char_replace(comic_json["subtitle"]),
+            + (
+                "/".join(
+                    (
+                        win_char_replace(comic_json["title"]),
+                        win_char_replace(comic_json["subtitle"]),
+                    )
                 )
+                if comic_json["title"] != ""
+                else win_char_replace(comic_json["subtitle"])
             )
         )
         show_bar = ProgressBar(total_pages)

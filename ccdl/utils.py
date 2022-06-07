@@ -84,7 +84,7 @@ _site_reader = {
     "kuragebunch.com": ["comic_action", r"episode/([\w-]*)", 1],
     "magcomi.com": ["comic_action", r"episode/([\w-]*)", 0],
     "pocket.shonenmagazine.com": ["comic_action", r"episode/([\w-]*)", 1],
-    "shonenjumpplus.com": ["comic_action", r"episode/([\w-]*)", 1],
+    "shonenjumpplus.com": ["comic_action", r"(?:episode|magazine)/([\w-]*)", 1],
     "tonarinoyj.jp": ["comic_action", r"episode/([\w-]*)", 0],
     "to-corona-ex.com": ["comic_action", r"episodes/([\w-]*)", 0],
     "viewer.heros-web.com": ["comic_action", r"episode/([\w-]*)", 0],
