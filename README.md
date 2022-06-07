@@ -1,6 +1,8 @@
 # ccdl - online **C**omi**C** **D**own**L**oader
 
-*This project scheduled to be closed for maintenance from 2022.5.16.*
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/eggplants/ccdl/master.svg)](https://results.pre-commit.ci/latest/github/eggplants/ccdl/master)
+
+*[Original project](https://github.com/oxdz/ccdl) ended up maintenance from 2022.5.16.*
 *ccdl is available under Unlicense License*
 
 This is a package for downloading online comics.
