@@ -136,7 +136,7 @@ class ComicAction(ComicReader):
         elif linkinfo.param[1] == 0:
             json_url = linkinfo.url + ".json"
             if linkinfo.site_name in {"to-corona-ex.com", "ichijin-plus.com"}:
-                json_url = "https://api.{0}/episodes/{1}/begin_reading".format(
+                json_url = "https://api.{}/episodes/{}/begin_reading".format(
                     linkinfo.site_name, linkinfo.param[0][0]
                 )
             rq = requests.get(
