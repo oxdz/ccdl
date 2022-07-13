@@ -44,7 +44,7 @@ class RqProxy(object):
 _site_reader = {
     # "domain": ["reader", RegExp, param1, param2, ...]
     "r.binb.jp":                        ["binb2", "r.binb.jp/epm/([\w-]+)/", 1],
-    "www.cmoa.jp":                      ["binb2", "www.cmoa.jp/bib/speedreader/speed.html\?cid=([\w-]+)&u0=(\d)&u1=(\d)", 1],
+    "www.cmoa.jp":                      ["binb2", "www.cmoa.jp/bib/speedreader/\?cid=([\w-]+)&u0=(\d)&u1=(\d)", 1],
     "booklive.jp":                      ["binb", "booklive.jp/bviewer/s/\?cid=([\w-]*)&", 1],
     "takeshobo.co.jp":                  ["binb", "[\w-]+.takeshobo.co.jp/manga/([\w-]+)/_files[\w-]*/([\w-]+)/", 0],
     "www.comic-valkyrie.com":           ["binb", "www.comic-valkyrie.com/samplebook/([\w-]*)/", 0],
