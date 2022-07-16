@@ -1,12 +1,6 @@
 # ccdl
 
-~~计划于 2021.11.28 起停止维护！~~ ~~维护延期至 2022.5.16~~
-
-**此项目已停止支持，欢迎提交 PR 或 Fork 自行维护** 
-
-```
-ccdl 使用 Unlicense License 进行许可。
-```
+**欢迎提交 PR** 
 
 This is a package for downloading online comics.
 
