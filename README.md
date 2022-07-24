@@ -31,6 +31,7 @@ Supported sites:
   + **`magcomi.com`**  
   + **`pocket.shonenmagazine.com *`**  
   + **`shonenjumpplus.com *`**  
+  + **`sunday-webry.com`**
   + **`tonarinoyj.jp`**  
   + **`to-corona-ex.com`**
   + **`viewer.heros-web.com`**  
@@ -46,9 +47,6 @@ Supported sites:
 
 + ganma:
   + **`ganma.jp`**  
-
-+ sunday-webry **`*`**:
-  + **`sunday-webry.com`**
 
 + urasunday:  
   + **`urasunday.com`**  
