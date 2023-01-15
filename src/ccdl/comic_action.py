@@ -110,7 +110,10 @@ class ComicAction(ComicReader):
             if linkinfo.site_name in {"to-corona-ex.com", "ichijin-plus.com"}:
                 json_url = "https://api.{0}/episodes/{1}/begin_reading".format(
                     linkinfo.site_name, linkinfo.param[0][0])
-            rq = requests.get(json_url, headers=RqHeaders(),
+            h = RqHeaders()
+            h.setitem("User-Agent", 
+                "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1")
+            rq = requests.get(json_url, headers=h,
                               proxies=RqProxy.get_proxy())
             if rq.status_code != 200:
                 raise ValueError(json_url)
@@ -171,30 +174,32 @@ class ComicAction(ComicReader):
         count = 0
         for x in range(len(comic_json["pages"])):
             count += 1
-            yield [bpth, "{}.png".format(count)]
+            yield [bpth, "{}".format(count)]
 
     @staticmethod
-    def downld_one(url, fpth, site_name, token, cookies=None):
+    def downld_one(url, fpth, site_name, token, cookies=None, headers=RqHeaders()):
         r"""
         :fpth: [basepath, fname]
         """
-        rq = requests.get(url, headers=RqHeaders(),
+        headers.setitem("User-Agent", 
+                "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1")
+        rq = requests.get(url, headers=headers,
                           proxies=RqProxy.get_proxy())
         if rq.status_code != 200:
             raise ValueError(url)
-        content = rq.content
-        img0 = Image.open(BytesIO(content))
 
-        # 源图像
-        img0.save(fpth[0] + "/source/" + fpth[1])
+        with open(fpth[0] + "/source/" + fpth[1]+ ".jpeg", "wb") as fp:
+            fp.write(rq.content)
+        
+        img0 = Image.open(BytesIO(rq.content))
 
         # 复原
         if site_name in {"to-corona-ex.com", "ichijin-plus.com"}:
             proc = proc_img_co_corona(img0.width, img0.height, token)
-            proc.n21(img0=img0).save(fpth[0] + "/target/" + fpth[1])
+            proc.n21(img0=img0).save(fpth[0] + "/target/" + fpth[1] + ".png")
         else:
             proc = proc_img_co(img0.width, img0.height)
-            proc.n21(img0=img0).save(fpth[0] + "/target/" + fpth[1])
+            proc.n21(img0=img0).save(fpth[0] + "/target/" + fpth[1] + ".png")
 
     def downloader(self):
         # https://<domain: comic-action.com ...>/episode/13933686331648942300
