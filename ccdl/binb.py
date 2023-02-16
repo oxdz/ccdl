@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import os
 import re
@@ -43,28 +45,6 @@ class N21:
         except Exception:
             pass
 
-    def load_imgs(self, dirpath) -> dict:
-        """
-        :returns: i
-        """
-        ...
-        # fl = os.listdir(dirpath)
-        # fl = [x for x in fl if not os.path.isdir(dirpath + x)]
-        # if len(fl) < 1:
-        #     raise ValueError('No image found :{}'.format(dirpath))
-        # fmt = fl[0].split('.')[-1]
-        # img_dict = {}
-        # for fpath in fl:
-        #     f_re = [int(x)-1 for x in fpath[:-(len(fmt)+1)].split("-")]
-        #     if f_re[0] not in img_dict:
-        #         img_dict[f_re[0]] = [None for x in range(3)]
-        #     img_dict[f_re[0]][f_re[1]] = Image.open(
-        #         dirpath+fpath).convert('1')
-        # for x in iter(img_dict.keys()):
-        #     if None in img_dict[x]:
-        #         print("page{}")
-        # return img_dict
-
     def edge_connection_offset(self, imgs_split_3_pages):
         """
         :param imgs_split_3_pages: [[img0_0, img0_1, img_0_2], ...]
@@ -97,10 +77,10 @@ class N21:
                                     page[x].height - offset,
                                     page[x].width,
                                     page[x].height - offset + 3,
-                                )
+                                ),
                             )
-                            .convert("1")
-                        )
+                            .convert("1"),
+                        ),
                     )
                 b = np.array(page[x + 1].crop((0, 0, page[1].width, 3)).convert("1"))
                 score = [
@@ -141,16 +121,14 @@ class N21:
         img_new.paste(img_chunks[0], (0, 0))
         img_new.paste(img_chunks[1], (0, img_chunks[0].height - i))
         img_new.paste(
-            img_chunks[2], (0, img_chunks[0].height - i + img_chunks[1].height - j)
+            img_chunks[2],
+            (0, img_chunks[0].height - i + img_chunks[1].height - j),
         )
         return img_new
-        # img_new.save(file_path+'/target/{}.png'.format(count))
-        # print("完成!")
 
     def run(self, imgs, index):
-        # imgs_dict = self.load_imgs(self._dirpath + "source/")
         img_new = self.crop_paste(imgs, *self.edge_connection_offset([imgs]))
-        img_new.save(self._dirpath + "target/{}.png".format(index))
+        img_new.save(self._dirpath + f"target/{index}.png")
 
 
 def gen_file_path(link_info: ComicLinkInfo, driver: webdriver.Chrome):
@@ -167,43 +145,42 @@ def gen_file_path(link_info: ComicLinkInfo, driver: webdriver.Chrome):
         if match:
             return elem.get_attribute("innerText") + "/" + match.groups()[0]
         else:
-            logger.error("url:{}\ncid: {}".format(link_info.url, link_info.param[0][0]))
+            logger.error(f"url:{link_info.url}\ncid: {link_info.param[0][0]}")
             raise ValueError("Unusual cid!")
 
     elif link_info.site_name == "r.binb.jp":
-        return "binb/{}".format(int(time.time() * 1000))
+        return f"binb/{int(time.time() * 1000)}"
 
     elif link_info.site_name == "booklive.jp":
-        return "booklive/{}".format(int(time.time() * 1000))
+        return f"booklive/{int(time.time() * 1000)}"
 
     elif link_info.site_name == "takeshobo.co.jp":
-        return "takeshobo/{}".format(int(time.time() * 1000))
+        return f"takeshobo/{int(time.time() * 1000)}"
 
     elif link_info.site_name == "www.comic-valkyrie.com":
-        return "comic-valkyrie/{}".format(int(time.time() * 1000))
+        return f"comic-valkyrie/{int(time.time() * 1000)}"
 
     elif link_info.site_name == "futabanet.jp":
-        return "futabanet/{}".format(int(time.time() * 1000))
+        return f"futabanet/{int(time.time() * 1000)}"
 
     elif link_info.site_name == "comic-polaris.jp":
-        return "comic-polaris/{}".format(int(time.time() * 1000))
+        return f"comic-polaris/{int(time.time() * 1000)}"
 
     elif link_info.site_name == "www.shonengahosha.co.jp":
-        return "shonengahosha/{}".format(int(time.time() * 1000))
+        return f"shonengahosha/{int(time.time() * 1000)}"
 
     elif link_info.site_name == "r-cbs.mangafactory.jp":
-        return "mangafactory/{}".format(int(time.time() * 1000))
+        return f"mangafactory/{int(time.time() * 1000)}"
 
     elif link_info.site_name == "comic-meteor.jp":
-        return "comic-meteor/{}".format(int(time.time() * 1000))
+        return f"comic-meteor/{int(time.time() * 1000)}"
 
-    # elif domain == "":
     #     pass
 
 
 @SiteReaderLoader.register("binb")
 class Binb(ComicReader):
-    def __init__(self, link_info: ComicLinkInfo, driver: webdriver.Chrome):
+    def __init__(self, link_info: ComicLinkInfo, driver: webdriver.Chrome) -> None:
         super().__init__()
         self._link_info = link_info
         self._driver = driver
@@ -238,10 +215,10 @@ class Binb(ComicReader):
         return pageNum
 
     def downloader(self):
-        # self._driver.get(self._link_info.url)
         self._driver.get(self._link_info.url)
         WebDriverWait(self._driver, WAIT_TIME, 0.5).until(
-            lambda x: x.find_element_by_id("content"), message="漫画加载超时"
+            lambda x: x.find_element_by_id("content"),
+            message="漫画加载超时",
         )
         file_path = "./漫畫/" + gen_file_path(self._link_info, self._driver)
         if cc_mkdir(file_path) != 0:
@@ -260,22 +237,23 @@ class Binb(ComicReader):
                         blob_url = WebDriverWait(self._driver, WAIT_TIME, 0.5).until(
                             lambda x: x.find_element_by_xpath(
                                 '//*[@id="content-p{}"]/div/div[{}]/img'.format(
-                                    i - (1 - reader_flag), j
-                                )
+                                    i - (1 - reader_flag),
+                                    j,
+                                ),
                             ),
                             message="p" + str(i) + "part" + str(j) + "無法定位",
                         )
                     except TimeoutException as e:
                         logger.error(
-                            'Find element by id("/html/head/title"): ' + str(e)
+                            'Find element by id("/html/head/title"): ' + str(e),
                         )
                         raise e
                     blob_uri = blob_url.get_attribute("src")
                     try:
                         img = Image.open(
-                            BytesIO(get_blob_content(self._driver, blob_uri))
+                            BytesIO(get_blob_content(self._driver, blob_uri)),
                         )
-                        img.save(file_path + "/source/{}-{}.png".format(i, j))
+                        img.save(file_path + f"/source/{i}-{j}.png")
                         imgs.append(img)
                     except Exception as e:
                         logger.error(str(e))

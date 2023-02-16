@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import json
 import logging
@@ -40,7 +42,9 @@ WAIT_TIME = 60
 @SiteReaderLoader.register("yanmaga")
 class Yanmaga(ComicReader):
     def __init__(
-        self, link_info: ComicLinkInfo, driver: webdriver.Chrome = None
+        self,
+        link_info: ComicLinkInfo,
+        driver: webdriver.Chrome | None = None,
     ) -> None:
         super().__init__()
         self._link_info = link_info
@@ -52,7 +56,7 @@ class Yanmaga(ComicReader):
         :returns: user_id, view_id
         """
         if not re.match(r"https://yanmaga.jp/comics/(.+?)/[\w]+", url):
-            raise ValueError("unsupported url: {}".format(url))
+            raise ValueError(f"unsupported url: {url}")
         if self._driver is None:
             raise ValueError("driver is not specified!")
         self._driver.get(url)
@@ -179,10 +183,12 @@ class Yanmaga(ComicReader):
         if cc_mkdir(bpath, 1) != 0:
             return -1
         urls, scrambles, sizes = self.get_content_info(
-            user_id, view_id, page_to=page_count - 1
+            user_id,
+            view_id,
+            page_to=page_count - 1,
         )
         bar = ProgressBar(page_count)
-        print("Downloading：")
+        print("Downloading:")
         imgs = self.downld_images(urls, headers=headers, bar=bar)
         print("Decoding:")
         bar = ProgressBar(page_count)
@@ -192,14 +198,8 @@ class Yanmaga(ComicReader):
             self.decode_image(img, scrambles[x]).save(path)
             bar.show()
         print("Finished!")
+        return None
 
 
 # if __name__ == '__main__':
-#     # comici_vid = '4633af6ae1c0d82c123222a20748426b'
-#     # url = 'https://yanmaga.jp/comics/恥じらう君が見たいんだ/0cf017ab837eb5f26f8cceef45f7c2c1'
-#     # linkinfo = ComicLinkInfo(url)
-#     # Yanmaga(linkinfo).downloader()
 #     # 找不到当前漫画信息则请求手动输入
-#     url = 'https://yanmaga.jp/'
-#     linkinfo = ComicLinkInfo(url)
-#     Yanmaga(linkinfo).downloader()

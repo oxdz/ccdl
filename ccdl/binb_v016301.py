@@ -15,7 +15,6 @@ from ccdl.utils import ProgressBar, cc_mkdir, draw_image
 # if __name__ == "__main__":
 #     from utils import (ComicLinkInfo, ComicReader, RqHeaders, SiteReaderLoader,
 #                        downld_url, url_join)
-# else:
 from .utils import (
     ComicLinkInfo,
     ComicReader,
@@ -56,7 +55,7 @@ class Binb3(ComicReader):
                 continue
 
             size.append(
-                (ptinfo[i]["views"][0]["width"], ptinfo[i]["views"][0]["height"])
+                (ptinfo[i]["views"][0]["width"], ptinfo[i]["views"][0]["height"]),
             )
             ptinfo[i] = [
                 _str2int(re.match(pattern, s).groups())
@@ -65,7 +64,11 @@ class Binb3(ComicReader):
         return ptinfo, size
 
     def find(
-        self, url: str, headers=None, cookies=None, func=lambda x: str(x).zfill(4)
+        self,
+        url: str,
+        headers=None,
+        cookies=None,
+        func=lambda x: str(x).zfill(4),
     ) -> tuple | None:
         NUM_COROUTINES = 5
         MULTI = 100
@@ -137,7 +140,7 @@ class Binb3(ComicReader):
             pageinfo = self.find(url=self._link_info.url, headers=self._headers)
             if pageinfo is None:
                 logger.warning(
-                    "Unable to find resource: {}".format(self._link_info.url)
+                    f"Unable to find resource: {self._link_info.url}",
                 )
             inf_url = [
                 url_join(self._link_info.url, "data/", str(x).zfill(4) + ".ptimg.json")
@@ -169,7 +172,7 @@ class Binb3(ComicReader):
 
 
 if __name__ == "__main__":
-    with open("m.json", "r", encoding="utf-8") as fp:
+    with open("m.json", encoding="utf-8") as fp:
         ptinfo = json.load(fp)
 
     lf = ComicLinkInfo("https://comic-meteor.jp/ptdata/nina/0017/")

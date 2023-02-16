@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from concurrent.futures import ThreadPoolExecutor
 
@@ -17,13 +19,13 @@ logger = logging.getLogger(__name__)
 
 
 class DownldGen:
-    def __init__(self, item):
+    def __init__(self, item) -> None:
         self._item = item
 
     @property
     def file_path_g(self):
         base_path = "./漫畫/" + "/".join(
-            (self._item["series"]["title"], self._item["title"])
+            (self._item["series"]["title"], self._item["title"]),
         )
         for x in self._item["page"]["files"]:
             yield base_path + "/" + x
@@ -37,7 +39,7 @@ class DownldGen:
 
 
 class GanmaRqHeaders(RqHeaders):
-    def __init__(self, manga_alias=None):
+    def __init__(self, manga_alias=None) -> None:
         super().__init__()
         self._manga_alias = manga_alias
 
@@ -59,7 +61,7 @@ class GanmaRqHeaders(RqHeaders):
 
 @SiteReaderLoader.register("ganma")
 class Ganma(ComicReader):
-    def __init__(self, link_info: ComicLinkInfo, driver=None):
+    def __init__(self, link_info: ComicLinkInfo, driver=None) -> None:
         super().__init__()
         self._link_info = link_info
         self._param = self._link_info.param[0]
@@ -67,7 +69,7 @@ class Ganma(ComicReader):
             self._param[0], self._param[2] = self._param[2], self._param[0]
         elif not self._param[0] and not self._param[2]:
             raise ValueError(
-                "Unable to get comic alias from URL! URL:{}".format(self._link_info.url)
+                f"Unable to get comic alias from URL! URL:{self._link_info.url}",
             )
         self._manga_alias = self._param[0]
         self._cookies = None
@@ -88,7 +90,7 @@ class Ganma(ComicReader):
         except ValueError as e:
             logger.error(
                 "The response body does not contain valid json!\n"
-                "status:{}, text:{}".format(rq.status_code, rq.text)
+                "status:{}, text:{}".format(rq.status_code, rq.text),
             )
             raise e
         mangainfo = {}
@@ -101,9 +103,9 @@ class Ganma(ComicReader):
 
     def login(self, mail, passwd):
         if type(mail) != str or type(passwd) != str:
-            logger.error("帳號（email）或密碼非法 type：{}，{}".format(type(mail), type(passwd))),
+            logger.error(f"帳號(email)或密碼非法 type:{type(mail)},{type(passwd)}"),
             raise ValueError(
-                "帳號（email）或密碼非法 type：{}，{}".format(type(mail), type(passwd))
+                f"帳號(email)或密碼非法 type:{type(mail)},{type(passwd)}",
             )
         rq = requests.post(
             url="https://ganma.jp/api/1.0/session?mode=mail",
@@ -117,7 +119,7 @@ class Ganma(ComicReader):
         except ValueError as e:
             logger.error(
                 "The response body does not contain valid json!\n"
-                "status:{}, text:{}".format(rq.status_code, rq.text)
+                "status:{}, text:{}".format(rq.status_code, rq.text),
             )
             raise e
 
@@ -127,9 +129,9 @@ class Ganma(ComicReader):
                     self._cookies = {"PLAY_SESSION": rq.cookies["PLAY_SESSION"]}
                     return 0
             else:
-                raise ValueError("帳號（email）或密碼錯誤")
+                raise ValueError("帳號(email)或密碼錯誤")
         else:
-            logger.error("The key 'success' does not exist! text:{}".format(rq.text))
+            logger.error(f"The key 'success' does not exist! text:{rq.text}")
             raise ValueError("The key 'success' does not exist!")
 
     def logout(self):
@@ -161,7 +163,7 @@ class Ganma(ComicReader):
         if self._param[1] and self._param[1] in manga_info["index_id"]:
             indx = manga_info["index_id"].index(self._param[1])
         else:
-            raise ValueError("当前一话不存在或需要登录".format())
+            raise ValueError("当前一话不存在或需要登录")
 
         dir = (
             "./漫畫/"
@@ -177,14 +179,16 @@ class Ganma(ComicReader):
 
         with ThreadPoolExecutor(max_workers=8) as executor:
             count = 0
-            for x in executor.map(
-                self.downld_one, downld_gen.img_url_g, downld_gen.file_path_g
+            for _x in executor.map(
+                self.downld_one,
+                downld_gen.img_url_g,
+                downld_gen.file_path_g,
             ):
                 count += 1
                 progress_bar.show(count)
 
         if manga_info["items"][indx]["afterwordImage"]["url"]:
-            print("下載後記圖片！", end=" ")
+            print("下載後記圖片!", end=" ")
             rq = requests.get(
                 url=manga_info["items"][indx]["afterwordImage"]["url"],
                 headers=RqHeaders(),
@@ -193,11 +197,11 @@ class Ganma(ComicReader):
             if rq.status_code != 200:
                 logger.error(
                     "Error, afterword image: "
-                    + manga_info["items"][indx]["afterwordImage"]["url"]
+                    + manga_info["items"][indx]["afterwordImage"]["url"],
                 )
                 raise ValueError(manga_info["items"][indx]["afterwordImage"]["url"])
             with open(dir + "/afterword.jpg", "wb") as fp:
                 fp.write(rq.content)
-            print("成功！")
+            print("成功!")
         else:
             print("No afterword image found!")

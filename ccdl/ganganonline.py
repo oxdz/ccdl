@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import logging
 import os
@@ -28,7 +30,9 @@ COMINC_BASE_URL = "https://www.ganganonline.com"
 @SiteReaderLoader.register("ganganonline")
 class Ganganonline(ComicReader):
     def __init__(
-        self, linkinfo: ComicLinkInfo, driver: webdriver.Chrome = None
+        self,
+        linkinfo: ComicLinkInfo,
+        driver: webdriver.Chrome | None = None,
     ) -> None:
         super().__init__()
         self._linkinfo = linkinfo
@@ -48,8 +52,9 @@ class Ganganonline(ComicReader):
         if r.status_code != 200:
             logger.error(
                 "http code: {} ;ganganonline: {}".format(
-                    r.status_code, self._linkinfo.url
-                )
+                    r.status_code,
+                    self._linkinfo.url,
+                ),
             )
             print("failed!")
             return
@@ -77,12 +82,15 @@ class Ganganonline(ComicReader):
         bar = ProgressBar(total_page)
         print("Downloading:")
         result = downld_url(
-            url=url, bar=bar, headers=self.rq.headers, cookies=self.rq.cookies
+            url=url,
+            bar=bar,
+            headers=self.rq.headers,
+            cookies=self.rq.cookies,
         )
         print("Save to file:")
         bar.reset()
         write2file(comic_path, result, total_page, "webp", "png", bar)
-        print("下載完成！\n")
+        print("下載完成!\n")
 
 
 # https://www.ganganonline.com/title/1267/chapter/50371

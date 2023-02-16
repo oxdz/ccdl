@@ -5,8 +5,9 @@ import base64
 import os
 import re
 from abc import ABCMeta, abstractmethod
+from collections.abc import Iterable
 from io import BytesIO
-from typing import Any, Iterable
+from typing import Any
 
 from aiohttp import ClientSession
 from PIL import Image
@@ -18,7 +19,10 @@ try:
     def get_windwos_proxy():
         sub_key = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings"
         key = winreg.OpenKey(
-            winreg.HKEY_CURRENT_USER, sub_key, 0, winreg.KEY_QUERY_VALUE
+            winreg.HKEY_CURRENT_USER,
+            sub_key,
+            0,
+            winreg.KEY_QUERY_VALUE,
         )
         if winreg.QueryValueEx(key, "ProxyEnable")[0] != 0:
             return winreg.QueryValueEx(key, "ProxyServer")[0]
@@ -36,9 +40,9 @@ class RqProxy:
     def set_proxy(cls, http_proxy: str, https_proxy: str):
         cls.__proxies = {}
         if http_proxy:
-            cls.__proxies["http"] = "http://{}".format(http_proxy)
+            cls.__proxies["http"] = f"http://{http_proxy}"
         if https_proxy:
-            cls.__proxies["https"] = "http://{}".format(https_proxy)
+            cls.__proxies["https"] = f"http://{https_proxy}"
 
     @classmethod
     def get_proxy(cls) -> dict[str, str] | None:
@@ -46,11 +50,10 @@ class RqProxy:
 
 
 _site_reader = {
-    # "domain": ["reader", RegExp, param1, param2, ...]
     "r.binb.jp": ["binb2", r"r.binb.jp/epm/([\w-]+)/", 1],
     "www.cmoa.jp": [
         "binb2",
-        r"www.cmoa.jp/bib/speedreader/speed.html\?cid=([\w-]+)&u0=(\d)&u1=(\d)",
+        r"www.cmoa.jp/bib/speedreader/\?cid=([\w-]+)&u0=(\d)&u1=(\d)",
         1,
     ],
     "booklive.jp": ["binb", r"booklive.jp/bviewer/s/\?cid=([\w-]*)&", 1],
@@ -85,6 +88,7 @@ _site_reader = {
     "magcomi.com": ["comic_action", r"episode/([\w-]*)", 0],
     "pocket.shonenmagazine.com": ["comic_action", r"episode/([\w-]*)", 1],
     "shonenjumpplus.com": ["comic_action", r"(?:episode|magazine)/([\w-]*)", 1],
+    "www.sunday-webry.com": ["comic_action", r"episode/([\w-]*)", 1],
     "tonarinoyj.jp": ["comic_action", r"episode/([\w-]*)", 0],
     "to-corona-ex.com": ["comic_action", r"episodes/([\w-]*)", 0],
     "viewer.heros-web.com": ["comic_action", r"episode/([\w-]*)", 0],
@@ -93,7 +97,6 @@ _site_reader = {
     "www.ganganonline.com": ["ganganonline", None],
     # "www.manga-doa.com":                ["manga_doa", None],
     # "www.sukima.me":                    ["sukima", None],
-    "www.sunday-webry.com": ["sunday_webry", None],
     "urasunday.com": ["urasunday", None],
     "ganma.jp": ["ganma", r"ganma.jp/(?:([\w-]*)/([\w-]*)|([\w-]*))"],
     "yanmaga.jp": ["yanmaga", None],
@@ -107,7 +110,7 @@ class ComicReader(metaclass=ABCMeta):
 
 
 class ComicLinkInfo:
-    def __init__(self, url):
+    def __init__(self, url) -> None:
         super().__init__()
         self._url = url
         self.site_name = self._site_name()
@@ -127,7 +130,6 @@ class ComicLinkInfo:
 
     def _site_name(self):
         match = re.search("//(?:(.*?)/|(.*))", self._url)
-        # match = re.search('[a-zA-Z]*//(?:.*\.(.*)|(.*))\..*?/', self._url)
         if not match:
             return None
         match = match.groups()
@@ -147,8 +149,7 @@ class ComicLinkInfo:
         if param and type(param) == list and param[0] and type(param[0]) == str:
             search = re.search(param[0], self._url)
             if search:
-                param[0] = [x for x in search.groups()]
-        # param: [[p01, ...], p1, p2, ..., pn]
+                param[0] = list(search.groups())
         return param
 
 
@@ -171,7 +172,7 @@ class SiteReaderLoader:
 
     @classmethod
     def sites(cls):
-        return [x for x in _site_reader]
+        return list(_site_reader)
 
     @classmethod
     def reader_name(cls, site_name):
@@ -203,7 +204,7 @@ class SiteReaderLoader:
 class ProgressBar:
     """Progress bar for terminal display"""
 
-    def __init__(self, total: int):
+    def __init__(self, total: int) -> None:
         """Inits ProgressBar with total"""
         super().__init__()
         self._space = 50
@@ -213,7 +214,7 @@ class ProgressBar:
     def reset(self):
         self._cset = 0
 
-    def show(self, current_set: int = None):
+    def show(self, current_set: int | None = None):
         self._cset += 1
         current_set = current_set if current_set else self._cset
         a = int((current_set / self._total) * self._space)
@@ -231,7 +232,7 @@ class ProgressBar:
 
 
 class RqHeaders(dict):
-    def __init__(self, mapping=None):
+    def __init__(self, mapping=None) -> None:
         mapping = mapping if isinstance(mapping, Iterable) else {}
         super().__init__(mapping)
         self.__setitem__(
@@ -240,13 +241,24 @@ class RqHeaders(dict):
             "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36",
         )
 
+    def setitem(self, k, v):
+        self.__setitem__(k, v)
+
     def random_ua(self):
-        # self.__setitem__('User-Agent', )
         pass
 
 
 def draw_image(
-    img_source, img_target, src_x, src_y, swidth, sheight, x, y, width=None, height=None
+    img_source,
+    img_target,
+    src_x,
+    src_y,
+    swidth,
+    sheight,
+    x,
+    y,
+    width=None,
+    height=None,
 ):
     img_target.paste(
         img_source.crop(
@@ -262,8 +274,8 @@ def cc_mkdir(fpath, model=0) -> int:
     """
     if model == 1:
         if os.path.exists(fpath):
-            print('\n當前一話的文件夾 "{}" 存在，繼續運行數據將被覆蓋！'.format(fpath))
-            print("是否繼續運行？（y/n）")
+            print(f'\n當前一話的文件夾 "{fpath}" 存在,繼續運行數據將被覆蓋!')
+            print("是否繼續運行?(y/n)")
             yn = input()
             return 0 if yn == "y" or yn == "yes" or yn == "Y" else -1
         else:
@@ -272,8 +284,8 @@ def cc_mkdir(fpath, model=0) -> int:
             print("創建文件夾: " + fpath)
             return 0
     if os.path.exists(fpath + "/source") and os.path.exists(fpath + "/target"):
-        print('\n當前一話的文件夾 "{}" 存在，繼續運行數據將被覆蓋，'.format(fpath))
-        print("是否繼續運行？（y/n）")
+        print(f'\n當前一話的文件夾 "{fpath}" 存在,繼續運行數據將被覆蓋,')
+        print("是否繼續運行?(y/n)")
         yn = input()
         return 0 if yn == "y" or yn == "yes" or yn == "Y" else -1
     else:
@@ -326,7 +338,7 @@ def get_blob_content(driver: webdriver.Chrome, uri):
 
 
 def win_char_replace(s: str):
-    table = str.maketrans(r"|*<>\/:?", "_______？", " ")
+    table = str.maketrans(r"|*<>\/:?", "_______?", " ")
     return s.translate(table)
 
 
@@ -351,7 +363,7 @@ def downld_url(url: list, headers=None, cookies=None, bar=None):
     async def _dld(index, url, *, max_retries=3, headers=None, cookies=None):
         nonlocal bar
         async with ClientSession(headers=headers, cookies=cookies) as session:
-            for t in range(max_retries):
+            for _t in range(max_retries):
                 async with session.get(url=url) as response:
                     try:
                         r = (index, await response.content.read())
@@ -375,8 +387,8 @@ def downld_url(url: list, headers=None, cookies=None, bar=None):
                     cookies=cookies[x]
                     if isinstance(cookies, (list, tuple))
                     else cookies,
-                )
-            )
+                ),
+            ),
         )
 
     loop = asyncio.get_event_loop()
@@ -398,8 +410,8 @@ def write2file(
     img,
     page_num,
     file_ext: str,
-    file_ext_dst: str = None,
-    bar: ProgressBar = None,
+    file_ext_dst: str | None = None,
+    bar: ProgressBar | None = None,
 ):
     """
     :param img: bytes or []bytes

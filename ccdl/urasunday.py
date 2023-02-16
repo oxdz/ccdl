@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import logging
 import re
@@ -27,13 +29,16 @@ class Urasunday(ComicReader):
 
     def page_info(self):
         resp = requests.get(
-            url=self._linkinfo._url, headers=RqHeaders(), proxies=RqProxy.get_proxy()
+            url=self._linkinfo._url,
+            headers=RqHeaders(),
+            proxies=RqProxy.get_proxy(),
         )
         Response.raise_for_status(resp)
         html_text = resp.text
 
         manga_title = re.search(
-            '<meta property="og:title" content="(.*?)" />', html_text
+            '<meta property="og:title" content="(.*?)" />',
+            html_text,
         )
         if manga_title:
             manga_title = manga_title.groups()[0]
@@ -67,10 +72,11 @@ class Urasunday(ComicReader):
         show_bar = ProgressBar(len(pages))
         with ThreadPoolExecutor(max_workers=6) as executor:
             count = 0
-            for x in executor.map(
+            for _x in executor.map(
                 self.downld_one,
                 pages,
                 [base_file_path + str(x) + ".jpg" for x in range(len(pages))],
             ):
                 count += 1
                 show_bar.show(count)
+                return None

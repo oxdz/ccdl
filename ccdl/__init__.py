@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .binb import Binb
 from .binb_v016301 import Binb3
 from .binb_v016452 import Binb2
@@ -11,7 +13,7 @@ from .urasunday import Urasunday
 from .utils import ComicLinkInfo
 from .yanmaga import Yanmaga
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 __all__ = [
     "ComicLinkInfo",

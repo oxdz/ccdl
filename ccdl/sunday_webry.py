@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import re
 
@@ -45,7 +47,9 @@ def write2jpg(file_path, img_, pageNumber):
 @SiteReaderLoader.register("sunday_webry")
 class SundayWebry(ComicReader):
     def __init__(
-        self, linkinfo: ComicLinkInfo, driver: webdriver.Chrome = None
+        self,
+        linkinfo: ComicLinkInfo,
+        driver: webdriver.Chrome | None = None,
     ) -> None:
         super().__init__()
         self._linkinfo = linkinfo
@@ -56,7 +60,7 @@ class SundayWebry(ComicReader):
         pages = self._driver.execute_script("return pages")
 
         file_path = "./漫畫/" + win_char_replace(
-            self._driver.find_element_by_css_selector("div.header-wrapper-label").text
+            self._driver.find_element_by_css_selector("div.header-wrapper-label").text,
         )
 
         if cc_mkdir(file_path, 1) != 0:
@@ -93,8 +97,8 @@ class SundayWebry(ComicReader):
             else:
                 e_count += 1
         if e_count != 0:
-            print("Failed to get {} of {}".format(e_count, total_pages))
-        print("下載完成！\n")
+            print(f"Failed to get {e_count} of {total_pages}")
+        print("下載完成!\n")
 
 
 # if __name__ == "__main__":
