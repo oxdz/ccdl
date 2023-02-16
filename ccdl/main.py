@@ -9,8 +9,7 @@ import traceback
 
 from selenium import webdriver
 
-from . import ComicLinkInfo
-from .utils import RqProxy, SiteReaderLoader, get_windwos_proxy
+from .utils import ComicLinkInfo, RqProxy, SiteReaderLoader, get_windwos_proxy
 
 if not os.path.exists("log"):
     os.makedirs("log")

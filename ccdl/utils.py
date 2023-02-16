@@ -142,9 +142,7 @@ class ComicLinkInfo:
         return SiteReaderLoader.reader_name(self.site_name)
 
     def _param(self):
-        """
-        return [param_regexp:list, param1, param2,...]
-        """
+        """return [param_regexp:list, param1, param2,...]."""
         param = _site_reader[self.site_name][1:]  # param: [RegExp, p1, p2, ..., pn]
         if param and type(param) == list and param[0] and type(param[0]) == str:
             search = re.search(param[0], self._url)
@@ -180,9 +178,7 @@ class SiteReaderLoader:
 
     @classmethod
     def get_param(cls, site_name):
-        r"""
-        return [RegExp, param1, param2,...]
-        """
+        r"""return [RegExp, param1, param2,...]."""
         return _site_reader[site_name][1:]
 
     @classmethod
@@ -202,10 +198,10 @@ class SiteReaderLoader:
 
 
 class ProgressBar:
-    """Progress bar for terminal display"""
+    """Progress bar for terminal display."""
 
     def __init__(self, total: int) -> None:
-        """Inits ProgressBar with total"""
+        """Inits ProgressBar with total."""
         super().__init__()
         self._space = 50
         self._total = total
@@ -269,9 +265,7 @@ def draw_image(
 
 
 def cc_mkdir(fpath, model=0) -> int:
-    r"""
-    :param model: model = 0, include two subfolders of source and target; model = 1, not include.
-    """
+    r""":param model: model = 0, include two subfolders of source and target; model = 1, not include."""
     if model == 1:
         if os.path.exists(fpath):
             print(f'\n當前一話的文件夾 "{fpath}" 存在,繼續運行數據將被覆蓋!')
@@ -299,9 +293,7 @@ def cc_mkdir(fpath, model=0) -> int:
 
 
 def get_blob_content(driver: webdriver.Chrome, uri):
-    """
-    获取浏览器中的blob对象的数据
-    """
+    """获取浏览器中的blob对象的数据."""
     result = driver.execute_async_script(
         """
         var uri = arguments[0];
@@ -352,8 +344,7 @@ def url_join(*args):
 
 
 def downld_url(url: list, headers=None, cookies=None, bar=None):
-    """
-    :param url: url list
+    """:param url: url list
     :param headers:  (list, tuple) for each || dict for all
     :param cookies:  (list, tuple) for each || dict for all
     :param bar: ProgressBar object
@@ -381,12 +372,8 @@ def downld_url(url: list, headers=None, cookies=None, bar=None):
                 _dld(
                     x,
                     url[x],
-                    headers=headers[x]
-                    if isinstance(headers, (list, tuple))
-                    else headers,
-                    cookies=cookies[x]
-                    if isinstance(cookies, (list, tuple))
-                    else cookies,
+                    headers=headers[x] if isinstance(headers, (list, tuple)) else headers,
+                    cookies=cookies[x] if isinstance(cookies, (list, tuple)) else cookies,
                 ),
             ),
         )
@@ -413,8 +400,7 @@ def write2file(
     file_ext_dst: str | None = None,
     bar: ProgressBar | None = None,
 ):
-    """
-    :param img: bytes or []bytes
+    """:param img: bytes or []bytes
     :param page_num: total page if isinstance(img, list)t else current
     :param file_ext: jpg | png | webp ...
     """

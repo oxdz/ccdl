@@ -89,8 +89,7 @@ class Ganma(ComicReader):
             resp = rq.json()
         except ValueError as e:
             logger.error(
-                "The response body does not contain valid json!\n"
-                "status:{}, text:{}".format(rq.status_code, rq.text),
+                "The response body does not contain valid json!\n" "status:{}, text:{}".format(rq.status_code, rq.text),
             )
             raise e
         mangainfo = {}
@@ -118,8 +117,7 @@ class Ganma(ComicReader):
             resp = rq.json()
         except ValueError as e:
             logger.error(
-                "The response body does not contain valid json!\n"
-                "status:{}, text:{}".format(rq.status_code, rq.text),
+                "The response body does not contain valid json!\n" "status:{}, text:{}".format(rq.status_code, rq.text),
             )
             raise e
 
@@ -165,12 +163,7 @@ class Ganma(ComicReader):
         else:
             raise ValueError("当前一话不存在或需要登录")
 
-        dir = (
-            "./漫畫/"
-            + manga_info["items"][indx]["series"]["title"]
-            + "/"
-            + manga_info["items"][indx]["title"]
-        )
+        dir = "./漫畫/" + manga_info["items"][indx]["series"]["title"] + "/" + manga_info["items"][indx]["title"]
         cc_mkdir(dir, model=1)
 
         progress_bar = ProgressBar(len(manga_info["items"][indx]["page"]["files"]))
@@ -196,8 +189,7 @@ class Ganma(ComicReader):
             )
             if rq.status_code != 200:
                 logger.error(
-                    "Error, afterword image: "
-                    + manga_info["items"][indx]["afterwordImage"]["url"],
+                    "Error, afterword image: " + manga_info["items"][indx]["afterwordImage"]["url"],
                 )
                 raise ValueError(manga_info["items"][indx]["afterwordImage"]["url"])
             with open(dir + "/afterword.jpg", "wb") as fp:

@@ -25,12 +25,9 @@ from .utils import (
 )
 
 API_URL_ComicInfo = "https://api2-yanmaga.comici.jp/book/Info?comici-viewer-id={}"
-API_URL_EpisodeInfo = (
-    "https://api2-yanmaga.comici.jp/book/episodeInfo?comici-viewer-id={}"
-)
+API_URL_EpisodeInfo = "https://api2-yanmaga.comici.jp/book/episodeInfo?comici-viewer-id={}"
 API_URL_ContentsInfo = (
-    "https://api2-yanmaga.comici.jp/book/contentsInfo?user-id={}"
-    "&comici-viewer-id={}&page-from={}&page-to={}"
+    "https://api2-yanmaga.comici.jp/book/contentsInfo?user-id={}" "&comici-viewer-id={}&page-from={}&page-to={}"
 )
 
 logger = logging.getLogger(__name__)
@@ -51,8 +48,7 @@ class Yanmaga(ComicReader):
         self._driver = driver
 
     def get_comic_user_and_viewer_id(self, url: str):
-        """
-        :param: url
+        """:param: url
         :returns: user_id, view_id
         """
         if not re.match(r"https://yanmaga.jp/comics/(.+?)/[\w]+", url):
@@ -69,8 +65,7 @@ class Yanmaga(ComicReader):
         return user_id, view_id
 
     def get_comic_title(self, view_id):
-        """
-        :param view_id:
+        """:param view_id:
         :returns: title
         """
         rq = requests.get(
@@ -81,8 +76,7 @@ class Yanmaga(ComicReader):
         return rq.json().get("result").get("title")
 
     def get_episode_info(self, view_id):
-        """
-        :param view_id:
+        """:param view_id:
         :returns: {
             'id': {
                 'page_count': int,
@@ -136,8 +130,7 @@ class Yanmaga(ComicReader):
 
     @classmethod
     def downld_images(cls, url: list, headers=None, cookies=None, bar=None):
-        """
-        :param url: 所有图片的url
+        """:param url: 所有图片的url
         :param fp: 处理后的图像存储路径
         :param s_fp: 原始下载的图像的存储路径, default None
         :param headers:  (list, tuple) for each || dict for all

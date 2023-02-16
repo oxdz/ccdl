@@ -39,12 +39,8 @@ class proc_img_co:
         self.MULTIPLE = 8
         self.width = width
         self.height = height
-        self.cell_width = (
-            math.floor(self.width / (self.DIVIDE_NUM * self.MULTIPLE)) * self.MULTIPLE
-        )
-        self.cell_height = (
-            math.floor(self.height / (self.DIVIDE_NUM * self.MULTIPLE)) * self.MULTIPLE
-        )
+        self.cell_width = math.floor(self.width / (self.DIVIDE_NUM * self.MULTIPLE)) * self.MULTIPLE
+        self.cell_height = math.floor(self.height / (self.DIVIDE_NUM * self.MULTIPLE)) * self.MULTIPLE
 
     def n21(self, img0) -> Image.Image:
         img_copy = copy.deepcopy(img0)
@@ -170,9 +166,7 @@ class ComicAction(ComicReader):
                 "?",
             )
             if json_dataValue["readableProduct"]["series"] is not None:
-                comic_json["title"] = json_dataValue["readableProduct"]["series"][
-                    "title"
-                ].replace("?", "?")
+                comic_json["title"] = json_dataValue["readableProduct"]["series"]["title"].replace("?", "?")
             else:
                 comic_json["title"] = ""
             for page in json_dataValue["readableProduct"]["pageStructure"]["pages"]:
@@ -225,9 +219,7 @@ class ComicAction(ComicReader):
         cookies=None,
         headers=RqHeaders(),
     ) -> None:
-        r"""
-        :fpth: [basepath, fname]
-        """
+        r""":fpth: [basepath, fname]."""
         headers.setitem(
             "User-Agent",
             "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) "

@@ -42,8 +42,7 @@ def getRandomString(t, i=None):
 
 
 def get_cookies_thr_browser(url, driver: webdriver.Chrome):
-    r"""
-    :param url: comic url
+    r""":param url: comic url
     :param driver: webdriver.Chrome
     :return: dict or None
     """
@@ -126,8 +125,7 @@ class DownldGenBinb2:
 
 class ImageDescrambleCoords(dict):
     def __init__(self, width, height, h, s) -> None:
-        r"""
-        :param width: image width
+        r""":param width: image width
         :param height: image height
         :param h: ctbl
         :param s: ptbl
@@ -150,8 +148,7 @@ class ImageDescrambleCoords(dict):
 
     @staticmethod
     def ctbl_ptbl(t, ctbl_d, ptbl_d):
-        r"""
-        :param t: t="pages/BouPrlub.jpg"
+        r""":param t: t="pages/BouPrlub.jpg"
         :param ctbl_d: ctbl(decoded), list
         :param ptbl_d: ptbl(decoded), list
         """
@@ -168,8 +165,7 @@ class ImageDescrambleCoords(dict):
         return h, s
 
     def lt_f(self, t, i):
-        r"""
-        :param t: ctbl,str
+        r""":param t: ctbl,str
         :param i: ptbl,str
         """
         n = re.match("=([0-9]+)-([0-9]+)([-+])([0-9]+)-([-_0-9A-Za-z]+)", t).groups()
@@ -190,9 +186,7 @@ class ImageDescrambleCoords(dict):
                 self._lt_It.append(s["p"][h["p"][x]])
 
     def lt_bt(self, t):
-        r"""
-        :param t: {"width": img width, "height": img height}
-        """
+        r""":param t: {"width": img width, "height": img height}"""
         i = t["width"] - 2 * self._lt_T * self._lt_xt
         n = t["height"] - 2 * self._lt_j * self._lt_xt
         r = math.floor((i + self._lt_T - 1) / self._lt_T)
@@ -203,16 +197,8 @@ class ImageDescrambleCoords(dict):
         for o in range(self._lt_T * self._lt_j):
             a = o % self._lt_T
             f = math.floor(o / self._lt_T)
-            c = (
-                self._lt_xt
-                + a * (r + 2 * self._lt_xt)
-                + (e - r if self._lt_Tt[f] < a else 0)
-            )
-            l = (
-                self._lt_xt
-                + f * (s + 2 * self._lt_xt)
-                + (h - s if self._lt_Pt[a] < f else 0)
-            )
+            c = self._lt_xt + a * (r + 2 * self._lt_xt) + (e - r if self._lt_Tt[f] < a else 0)
+            l = self._lt_xt + f * (s + 2 * self._lt_xt) + (h - s if self._lt_Pt[a] < f else 0)
             v = self._lt_It[o] % self._lt_T
             d = math.floor(self._lt_It[o] / self._lt_T)
             b = v * r + (e - r if self._lt_Ct[d] < v else 0)
@@ -225,16 +211,10 @@ class ImageDescrambleCoords(dict):
         return u
 
     def lt_dt(self, t):
-        r"""
-        :param t: t={width: int, height: int}
-        """
+        r""":param t: t={width: int, height: int}"""
         i = 2 * self._lt_T * self._lt_xt
         n = 2 * self._lt_j * self._lt_xt
-        if (
-            t["width"] >= 64 + i
-            and t["height"] >= 64 + n
-            and t["width"] * t["height"] >= (320 + i) * (320 + n)
-        ):
+        if t["width"] >= 64 + i and t["height"] >= 64 + n and t["width"] * t["height"] >= (320 + i) * (320 + n):
             return {
                 "width": t["width"] - 2 * self._lt_T * self._lt_xt,
                 "height": t["height"] - 2 * self._lt_j * self._lt_xt,
@@ -428,26 +408,20 @@ class Binb2(ComicReader):
                 self._u1,
             )
         elif self._link_info.site_name == "r.binb.jp":
-            return (
-                self._link_info.url
-                + "{}sbcGetCntnt.php?cid={}&p={}&dmytime={}".format(
-                    self._contents_server,
-                    self._cid,
-                    self._cnt_p,
-                    int(time.time() * 1000),
-                )
+            return self._link_info.url + "{}sbcGetCntnt.php?cid={}&p={}&dmytime={}".format(
+                self._contents_server,
+                self._cid,
+                self._cnt_p,
+                int(time.time() * 1000),
             )
 
     def gen_image_url(self, img_src, **kwargs):
         if self._link_info.site_name == "www.cmoa.jp":
-            return (
-                self._contents_server
-                + "/sbcGetImg.php?cid={}&src={}&p={}&q=1&dmytime={}".format(
-                    self._cid,
-                    img_src,
-                    self._cnt_p,
-                    self._content_date,
-                )
+            return self._contents_server + "/sbcGetImg.php?cid={}&src={}&p={}&q=1&dmytime={}".format(
+                self._cid,
+                img_src,
+                self._cnt_p,
+                self._content_date,
             )
         elif self._link_info.site_name == "r.binb.jp":
             return "{}{}sbcGetImg.php?cid={}&src={}&p={}&q=1".format(
@@ -473,17 +447,13 @@ class Binb2(ComicReader):
             h ^= ord(r[i])
             u ^= ord(e[i])
             k.append(
-                n[i]
-                + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"[
-                    s + h + u & 63,
-                ],
+                n[i] + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"[s + h + u & 63],
             )
         self._rq_k = "".join(k)
         return self._rq_k
 
     def CntntInfoDecode(self, t, i, n):
-        r"""
-        :param t: cid
+        r""":param t: cid
         :param i: k
         :param n: ctbl ...
         """
@@ -497,10 +467,7 @@ class Binb2(ComicReader):
         h = ""
         u = e
         for s in range(len(n)):
-            if u < 0:
-                u = u & 0xFFFFFFFF >> 1 ^ 1210056708 & -(1 & u)
-            else:
-                u = u >> 1 ^ 1210056708 & -(1 & u)
+            u = u & 4294967295 >> 1 ^ 1210056708 & -(1 & u) if u < 0 else u >> 1 ^ 1210056708 & -(1 & u)
             o = (ord(n[s]) - 32 + u) % 94 + 32
             h += chr(o)
         try:
@@ -510,9 +477,7 @@ class Binb2(ComicReader):
 
     # step 1
     def get_access(self):
-        r"""
-        :return: cid, rq.cookies, k
-        """
+        r""":return: cid, rq.cookies, k"""
         rq = requests.get(self._link_info.url, proxies=RqProxy.get_proxy())
         self._u0 = None
         self._u1 = None
@@ -596,10 +561,7 @@ class Binb2(ComicReader):
             ).groups()
             for x in manga_info
         ]
-        self._manga_info = [
-            {"id": x[3], "src": x[0], "orgwidth": x[1], "orgheight": x[2]}
-            for x in manga_info_list
-        ]
+        self._manga_info = [{"id": x[3], "src": x[0], "orgwidth": x[1], "orgheight": x[2]} for x in manga_info_list]
         return self._manga_info
 
     # step_3
@@ -638,11 +600,7 @@ class Binb2(ComicReader):
         if self._manga_title and self._manga_subtitle:
             base_path = "./漫畫/" + "/".join((self._manga_title, self._manga_subtitle))
         else:
-            base_path = (
-                "./漫畫/" + self._manga_title
-                if self._manga_title
-                else self._manga_subtitle
-            )
+            base_path = "./漫畫/" + self._manga_title if self._manga_title else self._manga_subtitle
 
         if cc_mkdir(base_path, model=1) != 0:
             return -1

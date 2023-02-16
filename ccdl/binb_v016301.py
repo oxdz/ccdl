@@ -10,18 +10,19 @@ import requests
 from PIL import Image
 from requests.adapters import HTTPAdapter
 
-from ccdl.utils import ProgressBar, cc_mkdir, draw_image
-
 # if __name__ == "__main__":
 #     from utils import (ComicLinkInfo, ComicReader, RqHeaders, SiteReaderLoader,
 #                        downld_url, url_join)
 from .utils import (
     ComicLinkInfo,
     ComicReader,
+    ProgressBar,
     RqHeaders,
     RqProxy,
     SiteReaderLoader,
+    cc_mkdir,
     downld_url,
+    draw_image,
     url_join,
 )
 
@@ -57,10 +58,7 @@ class Binb3(ComicReader):
             size.append(
                 (ptinfo[i]["views"][0]["width"], ptinfo[i]["views"][0]["height"]),
             )
-            ptinfo[i] = [
-                _str2int(re.match(pattern, s).groups())
-                for s in ptinfo[i]["views"][0]["coords"]
-            ]
+            ptinfo[i] = [_str2int(re.match(pattern, s).groups()) for s in ptinfo[i]["views"][0]["coords"]]
         return ptinfo, size
 
     def find(
@@ -102,10 +100,7 @@ class Binb3(ComicReader):
                 step = int(step)
             end_page = s_p + NUM_COROUTINES * step
             tmp = downld_url(
-                url=[
-                    url_join(url, "data/", func(x) + ".ptimg.json")
-                    for x in range(s_p, end_page, step)
-                ],
+                url=[url_join(url, "data/", func(x) + ".ptimg.json") for x in range(s_p, end_page, step)],
                 headers=headers,
                 cookies=cookies,
             )

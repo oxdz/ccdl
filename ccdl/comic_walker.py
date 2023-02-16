@@ -59,10 +59,7 @@ class ComicWalker(ComicReader):
 
     def downloader(self):
         comic_cid = self._link_info.param[0][0]
-        comic_info_url = (
-            "https://comicwalker-api.nicomanga.jp/api/v1/comicwalker/episodes/"
-            + comic_cid
-        )
+        comic_info_url = "https://comicwalker-api.nicomanga.jp/api/v1/comicwalker/episodes/" + comic_cid
         rq = requests.get(
             comic_info_url,
             headers=RqHeaders(),
@@ -79,11 +76,7 @@ class ComicWalker(ComicReader):
         )
         # https://comicwalker-api.nicomanga.jp/api/v1/comicwalker/
         # https://ssl.seiga.nicovideo.jp/api/v1/comicwalker/episodes/
-        url_json_comic = (
-            "https://comicwalker-api.nicomanga.jp/api/v1/comicwalker/episodes/"
-            + comic_cid
-            + "/frames"
-        )
+        url_json_comic = "https://comicwalker-api.nicomanga.jp/api/v1/comicwalker/episodes/" + comic_cid + "/frames"
         r = requests.get(
             url=url_json_comic,
             headers=RqHeaders(),
@@ -94,10 +87,7 @@ class ComicWalker(ComicReader):
             return -1
         show_bar = ProgressBar(len(r_json["data"]["result"]))
         items = list(r_json["data"]["result"])
-        fpth_l = [
-            base_fpath + "/" + str(x) + ".jpg"
-            for x in range(1, len(r_json["data"]["result"]) + 1)
-        ]
+        fpth_l = [base_fpath + "/" + str(x) + ".jpg" for x in range(1, len(r_json["data"]["result"]) + 1)]
         with ThreadPoolExecutor(max_workers=4) as executor:
             count = 0
             for _x in executor.map(self.downld_one, items, fpth_l):

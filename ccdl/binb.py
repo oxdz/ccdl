@@ -30,9 +30,7 @@ WAIT_TIME = 90
 
 
 class N21:
-    """
-    docstring
-    """
+    """docstring."""
 
     def __init__(self, dirpath) -> None:
         super().__init__()
@@ -46,8 +44,7 @@ class N21:
             pass
 
     def edge_connection_offset(self, imgs_split_3_pages):
-        """
-        :param imgs_split_3_pages: [[img0_0, img0_1, img_0_2], ...]
+        """:param imgs_split_3_pages: [[img0_0, img0_1, img_0_2], ...]
         :return: (offset_1, offset_2)
         :rtype: tuple
         """
@@ -83,9 +80,7 @@ class N21:
                         ),
                     )
                 b = np.array(page[x + 1].crop((0, 0, page[1].width, 3)).convert("1"))
-                score = [
-                    (i + 3, calculate_similarity(img_[i], b)) for i in range(len(img_))
-                ]
+                score = [(i + 3, calculate_similarity(img_[i], b)) for i in range(len(img_))]
                 score.sort(key=lambda x: x[1], reverse=True)
                 ij[x].append(score[0][0])
 
@@ -100,22 +95,14 @@ class N21:
         return tuple(offset)
 
     def crop_paste(self, img_chunks, i, j):
-        """
-        :param img_chunks: [img_c0, img_c1, img0_c2],
+        """:param img_chunks: [img_c0, img_c1, img0_c2],
         :returns: An ~PIL.Image.Image object.
         """
-
         img_new = Image.new(
             "RGB",
             (
                 img_chunks[0].width,
-                (
-                    img_chunks[0].height
-                    + img_chunks[1].height
-                    + img_chunks[2].height
-                    - i
-                    - j
-                ),
+                (img_chunks[0].height + img_chunks[1].height + img_chunks[2].height - i - j),
             ),
         )
         img_new.paste(img_chunks[0], (0, 0))
@@ -186,9 +173,7 @@ class Binb(ComicReader):
         self._driver = driver
 
     def page_number(self):
-        """
-        return [current_page_numb:int, total_numb:int]
-        """
+        """return [current_page_numb:int, total_numb:int]."""
         page_elem_id = "menu_slidercaption"
         pageNum = []
         count = 180

@@ -3,49 +3,49 @@ name: Release
 on:
   push:
     tags:
-      - "v*"
+    - v*
 
 jobs:
   build:
     runs-on: windows-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+    - name: Checkout
+      uses: actions/checkout@v3
 
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v4.5.0
-        with:
-          python-version: "3.10"
-          cache: pip
-          cache-dependency-path: setup.cfg
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4.5.0
+      with:
+        python-version: '3.10'
+        cache: pip
+        cache-dependency-path: setup.cfg
 
-      - name: Run pre-commit
-        uses: pre-commit/action@v3.0.0
+    - name: Run pre-commit
+      uses: pre-commit/action@v3.0.0
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install .[dev]
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install .[dev]
 
-      - name: Build executable
-        run: |
-          python ./setup.py install
-          pyinstaller -F ./CcdlSimpleStarter.py
-          cd ./dist
+    - name: Build executable
+      run: |
+        python ./setup.py install
+        pyinstaller -F ./CcdlSimpleStarter.py
+        cd ./dist
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
 
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/CcdlSimpleStarter.exe
-          asset_name: ccdl_${{ github.ref }}.exe
-          asset_content_type: application/x-ms-dos-executable
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./dist/CcdlSimpleStarter.exe
+        asset_name: ccdl_${{ github.ref }}.exe
+        asset_content_type: application/x-ms-dos-executable
