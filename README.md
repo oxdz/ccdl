@@ -2,7 +2,7 @@
 
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/eggplants/ccdl/master.svg)](https://results.pre-commit.ci/latest/github/eggplants/ccdl/master)
 
-*[Original project](https://github.com/oxdz/ccdl) ended up maintenance from 2022.5.16.*
+*[Original project](https://github.com/oxdz/ccdl)
 *ccdl is available under Unlicense License*
 
 This is a package for downloading online comics.
@@ -37,6 +37,7 @@ Supported Viewers and Sites:
   - `magcomi.com`
   - `pocket.shonenmagazine.com`
   - `shonenjumpplus.com`
+  - `sunday-webry.com`
   - `tonarinoyj.jp`
   - `to-corona-ex.com`
   - `viewer.heros-web.com`

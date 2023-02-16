@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import re
 from concurrent.futures import ThreadPoolExecutor
@@ -139,7 +141,7 @@ def pattern(strs):
 
 
 class DownldGen:
-    def __init__(self, contents, base_fpath, base_url):
+    def __init__(self, contents, base_fpath, base_url) -> None:
         super().__init__()
         self._contents = contents
         self._base_fpath = base_fpath
@@ -161,7 +163,7 @@ class DownldGen:
 
 @SiteReaderLoader.register("comic_earthstar")
 class ComicEarthstar(ComicReader):
-    def __init__(self, link_info: ComicLinkInfo, driver=None):
+    def __init__(self, link_info: ComicLinkInfo, driver=None) -> None:
         super().__init__()
         self._link_info = link_info
         self._driver = driver
@@ -208,7 +210,8 @@ class ComicEarthstar(ComicReader):
         if cc_mkdir(base_file_path) != 0:
             return -1
         configuration = requests.get(
-            headers=RqHeaders(), url=comic_info["url"] + "configuration_pack.json"
+            headers=RqHeaders(),
+            url=comic_info["url"] + "configuration_pack.json",
         )
         show_bar = ProgressBar(len(configuration.json()["configuration"]["contents"]))
         downldGen = DownldGen(
@@ -218,9 +221,12 @@ class ComicEarthstar(ComicReader):
         )
         with ThreadPoolExecutor(max_workers=4) as executor:
             count = 0
-            for x in executor.map(
-                self.downld_one, downldGen.img_url_g, downldGen.file_path_g
+            for _x in executor.map(
+                self.downld_one,
+                downldGen.img_url_g,
+                downldGen.file_path_g,
             ):
                 count += 1
                 show_bar.show(count)
+                return None
         # https://viewer.comic-earthstar.jp/viewer.html?cid=59e0b2658e9f2e77f8d4d83f8d07ca84&cty=1&lin=0

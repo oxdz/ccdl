@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from concurrent.futures import ThreadPoolExecutor
 
@@ -42,7 +44,7 @@ def write2jpg(img_, fpath):
 
 @SiteReaderLoader.register("comic_walker")
 class ComicWalker(ComicReader):
-    def __init__(self, link_info: ComicLinkInfo, driver=None):
+    def __init__(self, link_info: ComicLinkInfo, driver=None) -> None:
         super().__init__()
         self._link_info = link_info
         self._driver = driver
@@ -62,7 +64,9 @@ class ComicWalker(ComicReader):
             + comic_cid
         )
         rq = requests.get(
-            comic_info_url, headers=RqHeaders(), proxies=RqProxy.get_proxy()
+            comic_info_url,
+            headers=RqHeaders(),
+            proxies=RqProxy.get_proxy(),
         )
         if rq.status_code != 200:
             raise ValueError(comic_info_url)
@@ -71,7 +75,7 @@ class ComicWalker(ComicReader):
             [
                 comic_info["data"]["extra"]["content"]["title"],
                 comic_info["data"]["result"]["title"],
-            ]
+            ],
         )
         # https://comicwalker-api.nicomanga.jp/api/v1/comicwalker/
         # https://ssl.seiga.nicovideo.jp/api/v1/comicwalker/episodes/
@@ -81,23 +85,25 @@ class ComicWalker(ComicReader):
             + "/frames"
         )
         r = requests.get(
-            url=url_json_comic, headers=RqHeaders(), proxies=RqProxy.get_proxy()
+            url=url_json_comic,
+            headers=RqHeaders(),
+            proxies=RqProxy.get_proxy(),
         )
         r_json = r.json()
         if cc_mkdir(base_fpath, model=1) != 0:
             return -1
         show_bar = ProgressBar(len(r_json["data"]["result"]))
-        items = [x for x in r_json["data"]["result"]]
+        items = list(r_json["data"]["result"])
         fpth_l = [
             base_fpath + "/" + str(x) + ".jpg"
             for x in range(1, len(r_json["data"]["result"]) + 1)
         ]
         with ThreadPoolExecutor(max_workers=4) as executor:
             count = 0
-            for x in executor.map(self.downld_one, items, fpth_l):
+            for _x in executor.map(self.downld_one, items, fpth_l):
                 count += 1
                 show_bar.show(count)
+                return None
 
 
 # if __name__ == "__main__":
-#     'https://comic-walker.com/viewer/?tw=2&dlcl=ja&cid=KDCW_MF00000051010034_68'

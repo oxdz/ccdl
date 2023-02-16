@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import os
 import platform
@@ -28,16 +30,16 @@ elif "Windows" in platform.platform().split("-"):
     executable_path = "./chromedriver.exe"
     proxy_server = get_windwos_proxy()
     if proxy_server:
-        logger.info("Proxy Server Address (Enabled): {}".format(proxy_server))
+        logger.info(f"Proxy Server Address (Enabled): {proxy_server}")
         RqProxy.set_proxy(proxy_server, proxy_server)
     del proxy_server
 else:
     logger.error("platform not win or linux, may failed")
     executable_path = "./chromedriver"
-    # raise ValueError("os")
 chrome_options = webdriver.ChromeOptions()
 chrome_options.add_experimental_option(
-    "excludeSwitches", ["enable-automation", "enable-logging"]
+    "excludeSwitches",
+    ["enable-automation", "enable-logging"],
 )
 
 
@@ -46,20 +48,21 @@ def main():
     is_exist = os.path.exists(executable_path)
     print("\n源碼: https://github.com/oxdz/ccdl")
     if is_exist:
-        print("\n如需登入（含*）請提前在程式啟動的瀏覽器中登入，並加載目標url（任意標籤頁）！\n")
+        print("\n如需登入(含*)請提前在程式啟動的瀏覽器中登入,並加載目標url(任意標籤頁)!\n")
         try:
             driver = webdriver.Chrome(
-                options=chrome_options, executable_path=executable_path
+                options=chrome_options,
+                executable_path=executable_path,
             )
         except Exception:
             logger.error(traceback.format_exc())
             print("Chrome啟動失敗! 請檢查Chrome與chromedriver版本\n" + traceback.format_exc())
             print(
-                "您可於 http://npm.taobao.org/mirrors/chromedriver/ or https://chromedriver.chromium.org/downloads 下載\n"
+                "您可於 http://npm.taobao.org/mirrors/chromedriver/ or https://chromedriver.chromium.org/downloads 下載\n",
             )
 
             driver = None
-            if input("Do you want to continue? （y/n）") in ("y", "Y", "YES"):
+            if input("Do you want to continue? (y/n)") in ("y", "Y", "YES"):
                 pass
             else:
                 time.sleep(0.8)
@@ -68,9 +71,9 @@ def main():
 
                 sys.exit()
     else:
-        print("\n由於未在程式所在目錄發現chromedriver，部分基於selenium採集的站點將無法進行。")
+        print("\n由於未在程式所在目錄發現chromedriver,部分基於selenium採集的站點將無法進行。")
         print(
-            "您可於 http://npm.taobao.org/mirrors/chromedriver/ or https://chromedriver.chromium.org/downloads 下載\n"
+            "您可於 http://npm.taobao.org/mirrors/chromedriver/ or https://chromedriver.chromium.org/downloads 下載\n",
         )
 
     print("\n>>>>>>>>輸入exit退出<<<<<<<<\n")
@@ -88,9 +91,9 @@ def main():
         try:
             link_info = ComicLinkInfo(url)
         except Exception as e:
-            logger.error("url: {}".format(url))
+            logger.error(f"url: {url}")
             logging.error(e)
-            print("unsupported url: '{}'".format(url))
+            print(f"unsupported url: '{url}'")
             continue
         reader = SiteReaderLoader(link_info, driver)
         if reader is not None:
