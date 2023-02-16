@@ -598,9 +598,9 @@ class Binb2(ComicReader):
         self.bibGetCntntInfo()
         self.sbcGetCntnt()
         if self._manga_title and self._manga_subtitle:
-            base_path = "./漫畫/" + "/".join((self._manga_title, self._manga_subtitle))
+            base_path = "./manga/" + "/".join((self._manga_title, self._manga_subtitle))
         else:
-            base_path = "./漫畫/" + self._manga_title if self._manga_title else self._manga_subtitle
+            base_path = "./manga/" + self._manga_title if self._manga_title else self._manga_subtitle
 
         if cc_mkdir(base_path, model=1) != 0:
             return -1

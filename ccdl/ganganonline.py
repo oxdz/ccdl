@@ -68,7 +68,7 @@ class Ganganonline(ComicReader):
             return
         comic_data = json.loads(next_data)
         comic_data = comic_data["props"]["pageProps"]["data"]
-        base_file_path = "./漫畫/"
+        base_file_path = "./manga/"
         title_name = win_char_replace(comic_data["titleName"])
         chapter_name = win_char_replace(comic_data["chapterName"])
         comic_path = os.path.join(base_file_path, title_name, chapter_name)

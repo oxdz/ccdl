@@ -195,7 +195,7 @@ class ComicAction(ComicReader):
 
     @staticmethod
     def gen_fpth(comic_json: dict):
-        bpth = "./漫畫/" + (
+        bpth = "./manga/" + (
             "/".join(
                 (
                     win_char_replace(comic_json["title"]),
@@ -249,7 +249,7 @@ class ComicAction(ComicReader):
         comic_json["title"]
         total_pages = len(comic_json["pages"])
         cc_mkdir(
-            "./漫畫/"
+            "./manga/"
             + (
                 "/".join(
                     (

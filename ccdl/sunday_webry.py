@@ -59,7 +59,7 @@ class SundayWebry(ComicReader):
         self._driver.get(self._linkinfo.url)
         pages = self._driver.execute_script("return pages")
 
-        file_path = "./漫畫/" + win_char_replace(
+        file_path = "./manga/" + win_char_replace(
             self._driver.find_element_by_css_selector("div.header-wrapper-label").text,
         )
 

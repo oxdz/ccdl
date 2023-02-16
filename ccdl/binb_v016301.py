@@ -148,7 +148,7 @@ class Binb3(ComicReader):
             ptinfo = downld_url(url=inf_url, headers=self._headers)
         ptinfo, size = self.image_coords(ptinfo)
         c_set = 0
-        fpath = url_join("./漫畫/", self._link_info.site_name, str(int(time.time())))
+        fpath = url_join("./manga/", self._link_info.site_name, str(int(time.time())))
         if cc_mkdir(fpath, model=1) == -1:
             return
         bar = ProgressBar(len(ptinfo))

@@ -172,7 +172,7 @@ class Yanmaga(ComicReader):
         episode_info = self.get_episode_info(view_id).get(view_id)
         sub_title = episode_info.get("name")
         page_count = episode_info.get("page_count")
-        bpath = os.path.join("./漫畫/", title, sub_title)
+        bpath = os.path.join("./manga/", title, sub_title)
         if cc_mkdir(bpath, 1) != 0:
             return -1
         urls, scrambles, sizes = self.get_content_info(

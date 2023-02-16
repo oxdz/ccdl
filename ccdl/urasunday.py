@@ -64,7 +64,7 @@ class Urasunday(ComicReader):
             fp.write(rq.content)
 
     def downloader(self):
-        base_file_path = "./漫畫/"
+        base_file_path = "./manga/"
         pages, manga_title = self.page_info()
         base_file_path += manga_title + "/"
         if cc_mkdir(base_file_path, 1) != 0:

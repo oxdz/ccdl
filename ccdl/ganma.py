@@ -24,7 +24,7 @@ class DownldGen:
 
     @property
     def file_path_g(self):
-        base_path = "./漫畫/" + "/".join(
+        base_path = "./manga/" + "/".join(
             (self._item["series"]["title"], self._item["title"]),
         )
         for x in self._item["page"]["files"]:
@@ -163,7 +163,7 @@ class Ganma(ComicReader):
         else:
             raise ValueError("当前一话不存在或需要登录")
 
-        dir = "./漫畫/" + manga_info["items"][indx]["series"]["title"] + "/" + manga_info["items"][indx]["title"]
+        dir = "./manga/" + manga_info["items"][indx]["series"]["title"] + "/" + manga_info["items"][indx]["title"]
         cc_mkdir(dir, model=1)
 
         progress_bar = ProgressBar(len(manga_info["items"][indx]["page"]["files"]))

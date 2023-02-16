@@ -205,7 +205,7 @@ class Binb(ComicReader):
             lambda x: x.find_element_by_id("content"),
             message="漫画加载超时",
         )
-        file_path = "./漫畫/" + gen_file_path(self._link_info, self._driver)
+        file_path = "./manga/" + gen_file_path(self._link_info, self._driver)
         if cc_mkdir(file_path) != 0:
             return -1
         n21 = N21(file_path)

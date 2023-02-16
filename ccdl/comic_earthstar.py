@@ -199,7 +199,7 @@ class ComicEarthstar(ComicReader):
             proxies=RqProxy.get_proxy(),
         ).json()
         base_file_path = (
-            "./漫畫/"
+            "./manga/"
             + re.search(
                 "https://storage.comic-earthstar.jp/data/([0-9a-zA-Z]*)/[0-9a-zA-Z_-]*/",
                 comic_info["url"],

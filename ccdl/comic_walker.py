@@ -68,7 +68,7 @@ class ComicWalker(ComicReader):
         if rq.status_code != 200:
             raise ValueError(comic_info_url)
         comic_info = rq.json()
-        base_fpath = "./漫畫/" + "/".join(
+        base_fpath = "./manga/" + "/".join(
             [
                 comic_info["data"]["extra"]["content"]["title"],
                 comic_info["data"]["result"]["title"],
