@@ -51,29 +51,13 @@ class RqProxy:
 
 _site_reader = {
     "r.binb.jp": ["binb2", r"r.binb.jp/epm/([\w-]+)/", 1],
-    "www.cmoa.jp": [
-        "binb2",
-        r"www.cmoa.jp/bib/speedreader/\?cid=([\w-]+)&u0=(\d)&u1=(\d)",
-        1,
-    ],
+    "www.cmoa.jp": ["binb2", r"www.cmoa.jp/bib/speedreader/\?cid=([\w-]+)&u0=(\d)&u1=(\d)", 1],
     "booklive.jp": ["binb", r"booklive.jp/bviewer/s/\?cid=([\w-]*)&", 1],
-    "takeshobo.co.jp": [
-        "binb",
-        r"[\w-]+.takeshobo.co.jp/manga/([\w-]+)/_files[\w-]*/([\w-]+)/",
-        0,
-    ],
-    "www.comic-valkyrie.com": [
-        "binb",
-        r"www.comic-valkyrie.com/samplebook/([\w-]*)/",
-        0,
-    ],
+    "takeshobo.co.jp": ["binb", r"[\w-]+.takeshobo.co.jp/manga/([\w-]+)/_files[\w-]*/([\w-]+)/", 0],
+    "www.comic-valkyrie.com": ["binb", r"www.comic-valkyrie.com/samplebook/([\w-]*)/", 0],
     "futabanet.jp": ["binb", r"futabanet.jp/common/dld/zip/([\w-]*)/", 0],
     "comic-polaris.jp": ["binb", r"comic-polaris.jp/ptdata/([\w-]*)/([\w-]*)/", 0],
-    "www.shonengahosha.co.jp": [
-        "binb",
-        r"www.shonengahosha.co.jp/([\w-]*)/([\w-]*)/",
-        0,
-    ],
+    "www.shonengahosha.co.jp": ["binb", r"www.shonengahosha.co.jp/([\w-]*)/([\w-]*)/", 0],
     "r-cbs.mangafactory.jp": ["binb", "", 1],
     "comic-meteor.jp": ["binb3", "", 0],
     "comic-action.com": ["comic_action", r"episode/([\w-]*)", 0],
