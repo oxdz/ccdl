@@ -4,6 +4,7 @@ import logging
 import os
 import platform
 import sys
+import textwrap
 import time
 import traceback
 
@@ -45,9 +46,19 @@ chrome_options.add_experimental_option(
 def main():
     driver = None
     is_exist = os.path.exists(executable_path)
-    print("\n源碼: https://github.com/oxdz/ccdl")
+    print(
+        textwrap.dedent(
+            """
+        Source: https://github.com/eggplants/ccdl
+        (Forked from: https://github.com/oxdz/ccdl)
+        """
+        )
+    )
     if is_exist:
-        print("\n如需登入(含*)請提前在程式啟動的瀏覽器中登入,並加載目標url(任意標籤頁)!\n")
+        print(
+            "\nIf you need to login (including *), please login in advance"
+            "in the browser where the program is launched and load the target url (any tab)!\n"
+        )
         try:
             driver = webdriver.Chrome(
                 options=chrome_options,
@@ -55,9 +66,18 @@ def main():
             )
         except Exception:
             logger.error(traceback.format_exc())
-            print("Chrome啟動失敗! 請檢查Chrome與chromedriver版本\n" + traceback.format_exc())
             print(
-                "您可於 http://npm.taobao.org/mirrors/chromedriver/ or https://chromedriver.chromium.org/downloads 下載\n",
+                textwrap.dedent(
+                    f"""
+            Chrome failed to start! Please check Chrome and chromedriver version:
+            {traceback.format_exc()}
+
+            You can download at:
+            http://npm.taobao.org/mirrors/chromedriver/
+            OR
+            https://chromedriver.chromium.org/downloads
+            """
+                )
             )
 
             driver = None
@@ -70,12 +90,21 @@ def main():
 
                 sys.exit()
     else:
-        print("\n由於未在程式所在目錄發現chromedriver,部分基於selenium採集的站點將無法進行。")
         print(
-            "您可於 http://npm.taobao.org/mirrors/chromedriver/ or https://chromedriver.chromium.org/downloads 下載\n",
+            textwrap.dedent(
+                """
+        Since chromedriver is not found in the directory where the program is located,
+        some of the sites, selenium are needed to download, will not work.
+
+        You can download at:
+        http://npm.taobao.org/mirrors/chromedriver/
+        OR
+        https://chromedriver.chromium.org/downloads
+        """
+            )
         )
 
-    print("\n>>>>>>>>輸入exit退出<<<<<<<<\n")
+    print("\n>>>>>>>>TYPE `exit` to quit<<<<<<<<\n")
 
     while True:
         url = input("url: ")
@@ -100,7 +129,7 @@ def main():
                 reader.downloader()
             except Exception:
                 logger.error(traceback.format_exc())
-                print("下載失敗! \n" + traceback.format_exc())
+                print("DOWNLOAD FAILED! \n" + traceback.format_exc())
         else:
             print("not supported")
             continue
