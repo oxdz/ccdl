@@ -1,6 +1,6 @@
 # ccdl
 
-**该项目不再维护，新的项目见 `https://github.com/oxdz/comicinfo`**
+**该项目不再维护，新的项目见 [comicinfo](https://github.com/oxdz/comicinfo)**
 
 This is a package for downloading online comics.
 
